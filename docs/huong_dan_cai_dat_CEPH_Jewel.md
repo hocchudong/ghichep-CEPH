@@ -8,6 +8,10 @@ Mục lục:
   - [2.1. Thiết lập ip, hostname cho các máy chủ CEPH1](#2.1)
   - [2.2. Thiết lập ip, hostname cho các máy chủ CEPH2](#2.2)
   - [2.3. Thiết lập ip, hostname cho các máy chủ CEPH3](#2.3)
+- [3. Cài đặt CEPH lên các máy chủ.](#3)
+  - [3.1. Cài đặt CEPH trên node `ceph1`](#3.1)
+  - [3.2. Cài đặt CEPH trên node `ceph2`](#3.2)
+  - [3.3. Cài đặt CEPH trên node `ceph2`](#3.3)
 
 ========================
 
@@ -222,7 +226,7 @@ EOF
 ```
 
 
-
+<a name="3"></a>
 ## 3. Cài đặt CEPH lên các máy chủ.
 - Các bước chính cài đặt CEPH 
 - Thực hiện cài đặt repos cho CEPH trên cả 03 node
@@ -280,17 +284,18 @@ root@ceph1:~# cat /etc/ceph/rbdmap
 root@ceph1:~#
 ```
 
+<a name="3.1"></a>
 ### 3.1. Cài đặt CEPH trên node `ceph1`
 - Các thành phần được cài trên node `ceph1` như sau:
 
 - Tạo fSID cho cụm CEPH, output của lệnh này sẽ sử dụng cho file cấu hình của CEPH `/etc/ceph/ceph.conf`
-```sh
-uuidgen
-```
+  ```sh
+  uuidgen
+  ```
 	- Kết quả của lệnh trên
-	```sh
-	071aae0e-f9c5-44e0-8c3b-445d171cc496
-	```
+    ```sh
+    071aae0e-f9c5-44e0-8c3b-445d171cc496
+    ```
 	
 - Tạo file cấu hình cho CEPH `/etc/ceph/ceph.conf`
 - Sử dụng kết quả ở lệnh `uuidgen` để đưa vào file cấu hình ở dưới (lưu ý với hệ thống của bạn thì kết quả này sẽ khác nhau)
@@ -364,8 +369,10 @@ chown -R ceph:ceph /var/lib/ceph/mon/ceph-ceph1
 service ceph restart
 ```
 
+<a name="3.2"></a>
 ### 3.2. Cài đặt CEPH trên node `ceph2`
 - Các thành phần được cài trên CEPH2
 
+<a name="3.3"></a>
 ### 3.3. Cài đặt CEPH trên node `ceph3`
 - Các thành phần được cài trên CEPH3
