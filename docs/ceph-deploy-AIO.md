@@ -1,11 +1,14 @@
 ## Hướng dẫn cài đặt CEPH sử dụng `ceph-deploy` trên 1 máy duy nhất (CEPH AIO)
 
 ## Chuẩn bị và môi trường LAB
+- Mô hình này sẽ cài tất cả các thành phần của CEPH lên một máy duy nhất.
 
 - OS
   - Ubuntu Server 14.04 - 64 bit
-  - 01 HDD: dùng để cài OS (sda)
-  - 03 HDD: dùng làm OSD (sdb, sdc, sdd)
+  - 04: HDD, trong đó:
+    - sda: sử dụng để cài OS
+    - sdb: sử dụng làm `journal` (Journal là một lớp cache khi client ghi dữ liệu, thực tế thường dùng ổ SSD để làm cache)
+    - sdc, sdd: sử dụng làm OSD (nơi chứa dữ liệu của client)
   - 02 NICs: 
     - eth0 dùng để replicate cho CEPH. 10.10.10.231/24
     - eth1 dùng để ssh và client sử dụng. 172.16.69.247/24
@@ -48,7 +51,6 @@
   sudo apt-get -y install ceph-deploy
   ```
 
-
 - Tạo user cài đặt cho CEPH, đặt mật mẩu cho user `ceph-deploy`
   ```sh
   sudo useradd -m -s /bin/bash ceph-deploy
@@ -71,7 +73,7 @@
   ssh-keygen
   ```
 
-- Copy ssh key để sử dụng, trong quá trình copy lựa chọn theo hướng dẫn và nhập mật khẩu của user `ceph-deploy`. 
+- Copy ssh key để sử dụng, trong quá trình copy lựa chọn theo hướng dẫn và nhập mật khẩu của user `ceph-deploy`. Thay `cephAIO` bằng tên hostname của máy bạn nếu có thay đổi.
   ```sh
   ssh-copy-id ceph-deploy@cephAIO
   ```
@@ -90,12 +92,12 @@
 
 - Thêm các dòng dưới vào file `ceph.conf` vừa được tạo ra ở trên
   ```sh
-  osd pool default size = 2
-  osd crush chooseleaf type = 0
+  echo "osd pool default size = 2" >> ceph.conf
+  echo "osd crush chooseleaf type = 0" >> ceph.conf
   ```
   
-- Cài đặt CEPH, thay `cephAIO` bằng tên hostname của máy bạn 
-  ````sh
+- Cài đặt CEPH, thay `cephAIO` bằng tên hostname của máy bạn nếu có thay đổi.
+  ```sh
   ceph-deploy install cephAIO
   ```
 
