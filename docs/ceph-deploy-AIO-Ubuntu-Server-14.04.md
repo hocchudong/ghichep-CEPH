@@ -11,11 +11,11 @@
 
 ## Mô hình 
 - Sử dụng mô hình dưới để cài đặt CEPH AIO, nếu chỉ dựng CEPH AIO thì chỉ cần một máy CEPH. 
-![img](./images/OpenStack_Mitaka-CEPH_Jewel_topology.png
+![img](../images/OpenStack_Mitaka-CEPH_Jewel_topology.png)
 
 ## IP Planning
 - Phân hoạch IP cho các máy chủ trong mô hình trên, nếu chỉ dựng CEPH-AIO thì chỉ cần quan tâm tới node CEPH-AIO
-![img](./images/ip_planning_openstack_ceph-AIO.png)
+![img](../images/ip_planning_openstack_ceph-AIO.png)
 
 ## Chuẩn bị và môi trường LAB
  
