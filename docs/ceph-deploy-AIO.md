@@ -6,7 +6,9 @@
   - Ubuntu Server 14.04 - 64 bit
   - 01 HDD: dùng để cài OS (sda)
   - 03 HDD: dùng làm OSD (sdb, sdc, sdd)
-  - 02 NICs: eth0 dùng để ssh và client sử dụng, eth1 dùng để replicate cho CEPH
+  - 02 NICs: 
+    - eth0 dùng để replicate cho CEPH. 10.10.10.231/24
+    - eth1 dùng để ssh và client sử dụng. 172.16.69.247/24
   
 - CEPH Jewel
 
@@ -18,12 +20,15 @@
   ```
   
 - Đặt hostname cho máy cài AIO
-```
-echo "cephAIO" > /etc/hostname
-hostname -F /etc/hostname
-
+  ```sh
+  echo "cephAIO" > /etc/hostname
+  hostname -F /etc/hostname
+  ```
 
 - Sửa file host 
+  ```sh
+  echo "172.16.69.247 cephAIO" >> /ect/hosts
+  ```
 
 - Khai báo Repo cho CEPH đối với Ubuntu Server 14.04
   ```sh
