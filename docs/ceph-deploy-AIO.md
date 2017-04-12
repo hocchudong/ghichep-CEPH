@@ -16,6 +16,12 @@
   ```sh
   su -
   ```
+  
+- Đặt hostname cho máy cài AIO
+```
+echo "cephAIO" > /etc/hostname
+hostname -F /etc/hostname
+
 
 - Sửa file host 
 
@@ -60,9 +66,9 @@
   ssh-keygen
   ```
 
-- Copy ssh key để sử dụng, trong quá trình copy lựa chọn theo hướng dẫn và nhập mật khẩu của user `ceph-deploy`. Thay `hostname_cua_may_ceph` bằng tên hostname của máy bạn 
+- Copy ssh key để sử dụng, trong quá trình copy lựa chọn theo hướng dẫn và nhập mật khẩu của user `ceph-deploy`. 
   ```sh
-  ssh-copy-id ceph-deploy@hostname_cua_may_ceph
+  ssh-copy-id ceph-deploy@cephAIO
   ```
 
 - Tạo các thư mục để công cụ `ceph-deploy` sử dụng để cài đặt CEPH
@@ -72,9 +78,9 @@
   cd my-cluster
   ```
 
-- Thiết lập các file cấu hình cho CEPH, thay `hostname_cua_may_ceph` bằng tên hostname của máy bạn 
+- Thiết lập các file cấu hình cho CEPH.
   ```sh
-  ceph-deploy new hostname_cua_may_ceph
+  ceph-deploy new cephAIO
   ```
 
 - Thêm các dòng dưới vào file `ceph.conf` vừa được tạo ra ở trên
@@ -83,9 +89,9 @@
   osd crush chooseleaf type = 0
   ```
   
-- Cài đặt CEPH, thay `hostname_cua_may_ceph` bằng tên hostname của máy bạn 
+- Cài đặt CEPH, thay `cephAIO` bằng tên hostname của máy bạn 
   ````sh
-  ceph-deploy install hostname_cua_may_ceph
+  ceph-deploy install cephAIO
   ```
 
 - Cấu hình `MON` (một thành phần của CEPH)
@@ -93,23 +99,23 @@
   ceph-deploy mon create-initial
   ```
 
-- Tạo các OSD cho CEPH, thay `hostname_cua_may_ceph` bằng tên hostname của máy bạn 
+- Tạo các OSD cho CEPH, thay `cephAIO` bằng tên hostname của máy bạn 
   ```sh
-  ceph-deploy osd prepare hostname_cua_may_ceph:sdb
-  ceph-deploy osd prepare hostname_cua_may_ceph:sdc
-  ceph-deploy osd prepare hostname_cua_may_ceph:sdd
+  ceph-deploy osd prepare cephAIO:sdb
+  ceph-deploy osd prepare cephAIO:sdc
+  ceph-deploy osd prepare cephAIO:sdd
   ```
 
 - Active các OSD vừa tạo ở trên
   ```sh
-  ceph-deploy osd activate hostname_cua_may_ceph:/dev/sdb1
-  ceph-deploy osd activate hostname_cua_may_ceph:/dev/sdc1
-  ceph-deploy osd activate hostname_cua_may_ceph:/dev/sdd1
+  ceph-deploy osd activate cephAIO:/dev/sdb1
+  ceph-deploy osd activate cephAIO:/dev/sdc1
+  ceph-deploy osd activate cephAIO:/dev/sdd1
   ```
   
 - Tạo file config và key
   ```sh
-  ceph-deploy admin hostname_cua_may_ceph
+  ceph-deploy admin cephAIO
   ```
 
 - Phân quyền cho file `/etc/ceph/ceph.client.admin.keyring`
