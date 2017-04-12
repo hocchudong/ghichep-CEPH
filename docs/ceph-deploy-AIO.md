@@ -44,7 +44,7 @@
 
 - Sửa file host 
   ```sh
-  echo "172.16.69.247 cephAIO" >> /ect/hosts
+  echo "172.16.69.247 cephAIO" >> /etc/hosts
   ```
 
 - Khai báo Repo cho CEPH đối với Ubuntu Server 14.04
@@ -65,9 +65,13 @@
   sudo apt-get -y install ceph-deploy
   ```
 
-- Tạo user cài đặt cho CEPH, đặt mật mẩu cho user `ceph-deploy`
+- Tạo user `ceph-deploy` để sử dụng cho việc cài đặt cho CEPH.
   ```sh
   sudo useradd -m -s /bin/bash ceph-deploy
+  ```
+
+- Đặt mật mẩu cho user `ceph-deploy`  
+  ```sh
   sudo passwd ceph-deploy
   ```
 
@@ -87,11 +91,27 @@
   ssh-keygen
   ```
 
-- Copy ssh key để sử dụng, trong quá trình copy lựa chọn theo hướng dẫn và nhập mật khẩu của user `ceph-deploy`. Thay `cephAIO` bằng tên hostname của máy bạn nếu có thay đổi.
+- Copy ssh key để sử dụng, thay `cephAIO` bằng tên hostname của máy bạn nếu có thay đổi.
   ```sh
   ssh-copy-id ceph-deploy@cephAIO
   ```
 
+  - Nhập `Yes` và mật khẩu của user `ceph-deploy` đã tạo ở trước, kết quả như bên dưới
+    ```sh
+    ceph-deploy@cephAIO:~$ ssh-copy-id ceph-deploy@cephAIO
+    The authenticity of host 'cephaio (172.16.69.247)' can't be established.
+    ECDSA key fingerprint is f2:38:1e:50:44:94:6f:0a:32:a3:23:63:90:7b:53:27.
+    Are you sure you want to continue connecting (yes/no)? yes
+    /usr/bin/ssh-copy-id: INFO: attempting to log in with the new key(s), to filter out any that are already installed
+    /usr/bin/ssh-copy-id: INFO: 1 key(s) remain to be installed -- if you are prompted now it is to install the new keys
+    ceph-deploy@cephaio's password:
+
+    Number of key(s) added: 1
+
+    Now try logging into the machine, with:   "ssh 'ceph-deploy@cephAIO'"
+    and check to make sure that only the key(s) you wanted were added.
+    ```
+  
 - Tạo các thư mục để công cụ `ceph-deploy` sử dụng để cài đặt CEPH
   ```sh
   cd ~
@@ -102,6 +122,18 @@
 - Thiết lập các file cấu hình cho CEPH.
   ```sh
   ceph-deploy new cephAIO
+  ```
+
+- Sau khi thực hiện lệnh trên xong, sẽ thu được 03 file ở dưới (sử dụng lệnh `ll -alh` để xem). Trong đó cần cập nhật file `ceph.conf` để cài đặt CEPH được hoàn chỉnh.
+  ```sh
+  ceph-deploy@cephAIO:~/my-cluster$ ls -alh
+  total 20K
+  drwxrwxr-x 2 ceph-deploy ceph-deploy 4.0K Apr 12 17:11 .
+  drwxr-xr-x 5 ceph-deploy ceph-deploy 4.0K Apr 12 17:11 ..
+  -rw-rw-r-- 1 ceph-deploy ceph-deploy  198 Apr 12 17:11 ceph.conf
+  -rw-rw-r-- 1 ceph-deploy ceph-deploy 3.2K Apr 12 17:11 ceph-deploy-ceph.log
+  -rw------- 1 ceph-deploy ceph-deploy   73 Apr 12 17:11 ceph.mon.keyring
+  ceph-deploy@cephAIO:~/my-cluster$
   ```
 
 - Thêm các dòng dưới vào file `ceph.conf` vừa được tạo ra ở trên
