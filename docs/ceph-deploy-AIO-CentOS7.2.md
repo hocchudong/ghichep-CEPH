@@ -11,11 +11,11 @@
 
 ## Mô hình 
 - Sử dụng mô hình dưới để cài đặt CEPH AIO, nếu chỉ dựng CEPH AIO thì chỉ cần một máy CEPH. 
-![img](../images/OPS_CEPH-AIO_CentOS7.2.png)
+![img](../images/topology_OPS_CEPH-AIO_CentOS7.2.png)
 
 ## IP Planning
 - Phân hoạch IP cho các máy chủ trong mô hình trên, nếu chỉ dựng CEPH-AIO thì chỉ cần quan tâm tới node CEPH-AIO
-![img](../images/ip-planning-openstack-ceph-CentOS7.2.png)
+![img](../images/ip-planning-OPS-CEPH-AIO-CentOS7.2.png)
 
 ## Chuẩn bị và môi trường LAB
  
