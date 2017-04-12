@@ -1,1 +1,1 @@
-# Ghi chép về CEPH
+# Lưu trữ các ghi chép về Ceph
