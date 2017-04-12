@@ -1,8 +1,21 @@
 ## Hướng dẫn cài đặt CEPH sử dụng `ceph-deploy` trên 1 máy duy nhất (CEPH AIO)
 
-## Chuẩn bị và môi trường LAB
-- Mô hình này sẽ cài tất cả các thành phần của CEPH lên một máy duy nhất.
+### Mục tiêu LAB
+- Mô hình này sẽ cài tất cả các thành phần của CEPH lên một máy duy nhất, bao gồm:
+  - ceph-deploy
+  - ceph-admin
+  - mon
+  - OSD
+- Máy CEPH AIO được cài đặt để sẵn sàng tích hợp với hệ thống OpenStack
 
+## Mô hình 
+` cập nhật mô hình`
+
+## IP Planning
+` cập nhật ip planning`
+
+## Chuẩn bị và môi trường LAB
+ 
 - OS
   - Ubuntu Server 14.04 - 64 bit
   - 04: HDD, trong đó:
@@ -94,6 +107,9 @@
   ```sh
   echo "osd pool default size = 2" >> ceph.conf
   echo "osd crush chooseleaf type = 0" >> ceph.conf
+  echo "osd journal size = 8000" >> ceph.conf
+  echo "public network = 172.16.69.0/24" >> ceph.conf
+  echo "cluster network = 10.10.10.0/24" >> ceph.conf
   ```
   
 - Cài đặt CEPH, thay `cephAIO` bằng tên hostname của máy bạn nếu có thay đổi.
@@ -108,16 +124,14 @@
 
 - Tạo các OSD cho CEPH, thay `cephAIO` bằng tên hostname của máy bạn 
   ```sh
-  ceph-deploy osd prepare cephAIO:sdb
-  ceph-deploy osd prepare cephAIO:sdc
-  ceph-deploy osd prepare cephAIO:sdd
+  ceph-deploy osd prepare cephAIO:sdc:/dev/sdb
+  ceph-deploy osd prepare cephAIO:sdd:/dev/sdb
   ```
 
 - Active các OSD vừa tạo ở trên
   ```sh
-  ceph-deploy osd activate cephAIO:/dev/sdb1
-  ceph-deploy osd activate cephAIO:/dev/sdc1
-  ceph-deploy osd activate cephAIO:/dev/sdd1
+  ceph-deploy osd activate cephAIO:/dev/sdc1:/dev/sdb1
+  ceph-deploy osd activate cephAIO:/dev/sdd1:/dev/sdb2
   ```
   
 - Tạo file config và key
