@@ -6,7 +6,8 @@
   - ceph-admin
   - mon
   - OSD
-- Máy CEPH AIO được cài đặt để sẵn sàng tích hợp với hệ thống OpenStack
+- Máy CEPH AIO được cài đặt để tích hợp với hệ thống OpenStack
+- LAB này chỉ phù hợp với việc nghiên cức các tính năng và demo thử nghiệm, không áp dụng được trong thực tế.
 
 ## Mô hình 
 ` cập nhật mô hình`
