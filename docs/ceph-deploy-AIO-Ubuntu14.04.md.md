@@ -21,14 +21,14 @@
  
 - OS
   - Ubuntu Server 14.04 - 64 bit
-  - 04: HDD, trong đó:
-    - sda: sử dụng để cài OS
-    - sdb: sử dụng làm `journal` (Journal là một lớp cache khi client ghi dữ liệu, thực tế thường dùng ổ SSD để làm cache)
-    - sdc, sdd: sử dụng làm OSD (nơi chứa dữ liệu của client)
+  - 05: HDD, trong đó:
+    - `sda`: sử dụng để cài OS
+    - `sdb`: sử dụng làm `journal` (Journal là một lớp cache khi client ghi dữ liệu, thực tế thường dùng ổ SSD để làm cache)
+    - `sdc, sdd, sde`: sử dụng làm OSD (nơi chứa dữ liệu của client)
   - 02 NICs: 
-    - eth0 dùng để replicate cho CEPH, sử dụng dải 10.10.10.0/24
-    - eth1 dùng để ssh và tải gói cài đặt cho máy chủ CEPH AIO, sử dụng dải 172.16.69.0/24
-    - eth2 dùng để client (các máy chủ trong OpenStack) sử dụng, sử dụng dải 10.10.30.0/24
+    - `eth0`: dùng để replicate cho CEPH, sử dụng dải 10.10.10.0/24
+    - `eth1`: dùng để ssh và tải gói cài đặt cho máy chủ CEPH AIO, sử dụng dải 172.16.69.0/24
+    - `eth2`: dùng để client (các máy chủ trong OpenStack) sử dụng, sử dụng dải 10.10.30.0/24
   
 - CEPH Jewel
 

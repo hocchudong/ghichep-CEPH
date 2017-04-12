@@ -21,14 +21,14 @@
  
 - OS
   - CentOS Server 7.2 64 bit
-  - 04: HDD, trong đó:
-    - sda: sử dụng để cài OS
-    - sdb: sử dụng làm `journal` (Journal là một lớp cache khi client ghi dữ liệu, thực tế thường dùng ổ SSD để làm cache)
-    - sdc, sdd, sde: sử dụng làm OSD (nơi chứa dữ liệu của client)
+  - 05: HDD, trong đó:
+    - `sda`: sử dụng để cài OS
+    - `sdb`: sử dụng làm `journal` (Journal là một lớp cache khi client ghi dữ liệu, thực tế thường dùng ổ SSD để làm cache)
+    - `sdc, sdd, sde`: sử dụng làm OSD (nơi chứa dữ liệu của client)
   - 02 NICs: 
-    - eno16777728 dùng để replicate cho CEPH, sử dụng dải 10.10.10.0/24
-    - eno33554952 dùng để ssh và tải gói cho máy chủ CEPH AIO, sử dụng dải172.16.69.0/24
-    - eno50332176 dùng client (các máy trong OpenStack) sử dụng, sử dụng dải10.10.30.0/24
+    - `eno16777728`: dùng để replicate cho CEPH, sử dụng dải 10.10.10.0/24
+    - `eno33554952`: dùng để ssh và tải gói cho máy chủ CEPH AIO, sử dụng dải172.16.69.0/24
+    - `eno50332176`: dùng client (các máy trong OpenStack) sử dụng, sử dụng dải10.10.30.0/24
   
 - CEPH Jewel
 
