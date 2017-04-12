@@ -154,6 +154,22 @@
   ```sh
   ceph-deploy mon create-initial
   ```
+- Sau khi thực hiện lệnh để cấu hình `MON` xong, sẽ sinh thêm ra 03 file : `ceph.bootstrap-mds.keyring`, `ceph.bootstrap-osd.keyring` và `ceph.bootstrap-rgw.keyring`. Quan sát bằng lệnh `ll -alh`
+
+  ```sh
+  ceph-deploy@cephAIO:~/my-cluster$ ls -alh
+  total 96K
+  drwxrwxr-x 2 ceph-deploy ceph-deploy 4.0K Apr 12 17:20 .
+  drwxr-xr-x 5 ceph-deploy ceph-deploy 4.0K Apr 12 17:11 ..
+  -rw------- 1 ceph-deploy ceph-deploy  113 Apr 12 17:20 ceph.bootstrap-mds.keyring
+  -rw------- 1 ceph-deploy ceph-deploy  113 Apr 12 17:20 ceph.bootstrap-osd.keyring
+  -rw------- 1 ceph-deploy ceph-deploy  113 Apr 12 17:20 ceph.bootstrap-rgw.keyring
+  -rw------- 1 ceph-deploy ceph-deploy  129 Apr 12 17:20 ceph.client.admin.keyring
+  -rw-rw-r-- 1 ceph-deploy ceph-deploy  342 Apr 12 17:14 ceph.conf
+  -rw-rw-r-- 1 ceph-deploy ceph-deploy  54K Apr 12 17:20 ceph-deploy-ceph.log
+  -rw------- 1 ceph-deploy ceph-deploy   73 Apr 12 17:11 ceph.mon.keyring
+  -rw-r--r-- 1 root        root        1.7K Oct 16  2015 release.asc
+  ```
 
 - Tạo các OSD cho CEPH, thay `cephAIO` bằng tên hostname của máy bạn 
   ```sh
@@ -167,6 +183,26 @@
   ceph-deploy osd activate cephAIO:/dev/sdd1:/dev/sdb2
   ```
   
+- Kiểm tra các phân vùng được tạo ra bằng lệnh `sudo lsblk` (nhớ phải có lệnh sudo vì đang dùng user `ceph-deploy`)
+```sh
+ceph-deploy@cephAIO:~/my-cluster$ sudo lsblk
+NAME                            MAJ:MIN RM   SIZE RO TYPE MOUNTPOINT
+sda                               8:0    0    50G  0 disk
+├─sda1                            8:1    0   243M  0 part /boot
+├─sda2                            8:2    0     1K  0 part
+└─sda5                            8:5    0  49.8G  0 part
+  ├─cephadmin--vg-root (dm-0)   252:0    0  45.7G  0 lvm  /
+  └─cephadmin--vg-swap_1 (dm-1) 252:1    0     4G  0 lvm
+sdb                               8:16   0    30G  0 disk
+├─sdb1                            8:17   0   7.8G  0 part
+└─sdb2                            8:18   0   7.8G  0 part
+sdc                               8:32   0    30G  0 disk
+└─sdc1                            8:33   0    30G  0 part /var/lib/ceph/osd/ceph-0
+sdd                               8:48   0    30G  0 disk
+└─sdd1                            8:49   0    30G  0 part /var/lib/ceph/osd/ceph-1
+sr0                              11:0    1   574M  0 rom
+ceph-deploy@cephAIO:~/my-cluster$
+````
 - Tạo file config và key
   ```sh
   ceph-deploy admin cephAIO
@@ -183,3 +219,18 @@
   ```
 
 - Kết quả của lệnh trên như sau: 
+  ```sh
+  ceph-deploy@cephAIO:~/my-cluster$ ceph -s
+      cluster 17321823-d3cc-4781-97c1-66228d12b007
+       health HEALTH_OK
+       monmap e1: 1 mons at {cephAIO=172.16.69.247:6789/0}
+              election epoch 3, quorum 0 cephAIO
+       osdmap e10: 2 osds: 2 up, 2 in
+              flags sortbitwise,require_jewel_osds
+        pgmap v17: 64 pgs, 1 pools, 0 bytes data, 0 objects
+              68960 kB used, 61340 MB / 61407 MB avail
+                    64 active+clean
+  ceph-deploy@cephAIO:~/my-cluster$
+  ```
+
+- Nếu có dòng `health HEALTH_OK` thì việc cài đặt đã ok.
