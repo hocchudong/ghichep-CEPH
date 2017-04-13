@@ -26,9 +26,9 @@
     - `sdb`: sử dụng làm `journal` (Journal là một lớp cache khi client ghi dữ liệu, thực tế thường dùng ổ SSD để làm cache)
     - `sdc, sdd, sde`: sử dụng làm OSD (nơi chứa dữ liệu của client)
   - 02 NICs: 
-    - `eth0`: dùng để replicate cho CEPH, sử dụng dải 10.10.10.0/24
+    - `eth0`: dùng để client (các máy chủ trong OpenStack) sử dụng, dải 10.10.10.0/24
     - `eth1`: dùng để ssh và tải gói cài đặt cho máy chủ CEPH AIO, sử dụng dải 172.16.69.0/24
-    - `eth2`: dùng để client (các máy chủ trong OpenStack) sử dụng, sử dụng dải 10.10.30.0/24
+    - `eth2`: dùng để replicate cho CEPH sử dụng, dải 10.10.30.0/24
   
 - CEPH Jewel
 
@@ -47,7 +47,7 @@
 
 - Sửa file host 
   ```sh
-  echo "172.16.69.247 cephAIO" >> /etc/hosts
+  echo "10.10.10.71 cephAIO" >> /etc/hosts
   ```
 
 - Khai báo Repo cho CEPH đối với Ubuntu Server 14.04
@@ -144,8 +144,8 @@
   echo "osd pool default size = 2" >> ceph.conf
   echo "osd crush chooseleaf type = 0" >> ceph.conf
   echo "osd journal size = 8000" >> ceph.conf
-  echo "public network = 172.16.69.0/24" >> ceph.conf
-  echo "cluster network = 10.10.10.0/24" >> ceph.conf
+  echo "public network = 10.10.10.0/24" >> ceph.conf
+  echo "cluster network = 10.10.30.0/24" >> ceph.conf
   ```
   
 - Cài đặt CEPH, thay `cephAIO` bằng tên hostname của máy bạn nếu có thay đổi.
