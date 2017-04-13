@@ -76,9 +76,9 @@
   echo "10.10.10.71 cephAIO" >> /etc/hosts
   ```
 - Tạo user `ceph-deploy`
-```sh
-sudo useradd -d /home/ceph-deploy -m ceph-deploy
-```
+  ```sh
+  sudo useradd -d /home/ceph-deploy -m ceph-deploy
+  ```
 
 - Đặt mật khẩu cho user `ceph-deploy`
   ```sh
@@ -104,36 +104,35 @@ sudo useradd -d /home/ceph-deploy -m ceph-deploy
   ```
 
 - Khai báo repos cho CEPH 
+  ```sh
+  sudo yum install -y yum-utils
+  sudo yum-config-manager --add-repo https://dl.fedoraproject.org/pub/epel/7/x86_64/ 
+  sudo yum install --nogpgcheck -y epel-release 
+  sudo rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-7 
+  sudo rm /etc/yum.repos.d/dl.fedoraproject.org*
+  ```
+   
+  ```sh
+  cat << EOF > /etc/yum.repos.d/ceph.repo
+  [Ceph-noarch]
+  name=Ceph noarch packages
+  baseurl=http://download.ceph.com/rpm-jewel/el7/noarch
+  enabled=1
+  gpgcheck=1
+  type=rpm-md
+  gpgkey=https://download.ceph.com/keys/release.asc
+  priority=1
+  ```
 
-```sh
-sudo yum install -y yum-utils
-sudo yum-config-manager --add-repo https://dl.fedoraproject.org/pub/epel/7/x86_64/ 
-sudo yum install --nogpgcheck -y epel-release 
-sudo rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-7 
-sudo rm /etc/yum.repos.d/dl.fedoraproject.org*
-```
- 
-```sh
-cat << EOF > /etc/yum.repos.d/ceph.repo
-[Ceph-noarch]
-name=Ceph noarch packages
-baseurl=http://download.ceph.com/rpm-jewel/el7/noarch
-enabled=1
-gpgcheck=1
-type=rpm-md
-gpgkey=https://download.ceph.com/keys/release.asc
-priority=1
-```
-
-- update sau khi khai báo repo
-```sh
-sudo yum -y update
-```
+- Update sau khi khai báo repo
+  ```sh
+  sudo yum -y update
+  ```
 
 - Cài đặt `ceph-deploy` 
-```sh
-sudo yum install -y ceph-deploy
-```
+  ```sh
+  sudo yum install -y ceph-deploy
+  ```
 
 - Tạo thư mục để chứa các file cần thiết cho việc cài đặt CEPH 
 ```sh
@@ -207,4 +206,17 @@ cd cluster-ceph
   ceph-deploy osd activate cephAIO:/dev/sdd1:/dev/sdb2
   ceph-deploy osd activate cephAIO:/dev/sde1:/dev/sdb3
   ```
+- Tạo file config và key
+  ```sh
+  ceph-deploy admin cephAIO
+  ```
+
+- Phân quyền cho file `/etc/ceph/ceph.client.admin.keyring`
+  ```sh
+  sudo chmod +r /etc/ceph/ceph.client.admin.keyring
+  ```
   
+- Kiểm tra trạng thái của CEPH sau khi cài
+  ```sh
+  ceph -s
+  ```  
