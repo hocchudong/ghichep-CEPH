@@ -11,23 +11,24 @@
 
 ## Mô hình 
 - Sử dụng mô hình dưới để cài đặt CEPH AIO, nếu chỉ dựng CEPH AIO thì chỉ cần một máy CEPH. 
-![img](../images/OpenStack_Mitaka-CEPH_Jewel_topology.png)
+![img](../images/topology_OPS_CEPH-AIO_CentOS7.2.png)
 
 ## IP Planning
 - Phân hoạch IP cho các máy chủ trong mô hình trên, nếu chỉ dựng CEPH-AIO thì chỉ cần quan tâm tới node CEPH-AIO
-![img](../images/ip_planning_openstack_ceph-AIO.png)
+![img](../images/ip-planning-OPS-CEPH-AIO-CentOS7.2.png)
 
 ## Chuẩn bị và môi trường LAB
  
 - OS
-  - Ubuntu Server 14.04 - 64 bit
-  - 04: HDD, trong đó:
-    - sda: sử dụng để cài OS
-    - sdb: sử dụng làm `journal` (Journal là một lớp cache khi client ghi dữ liệu, thực tế thường dùng ổ SSD để làm cache)
-    - sdc, sdd: sử dụng làm OSD (nơi chứa dữ liệu của client)
+  - CentOS Server 7.2 64 bit
+  - 05: HDD, trong đó:
+    - `sda`: sử dụng để cài OS
+    - `sdb`: sử dụng làm `journal` (Journal là một lớp cache khi client ghi dữ liệu, thực tế thường dùng ổ SSD để làm cache)
+    - `sdc, sdd, sde`: sử dụng làm OSD (nơi chứa dữ liệu của client)
   - 02 NICs: 
-    - eth0 dùng để replicate cho CEPH. 10.10.10.231/24
-    - eth1 dùng để ssh và client sử dụng. 172.16.69.247/24
+    - `eno16777728`: dùng để replicate cho CEPH, sử dụng dải 10.10.10.0/24
+    - `eno33554952`: dùng để ssh và tải gói cho máy chủ CEPH AIO, sử dụng dải172.16.69.0/24
+    - `eno50332176`: dùng client (các máy trong OpenStack) sử dụng, sử dụng dải10.10.30.0/24
   
 - CEPH Jewel
 
