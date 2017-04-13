@@ -1,6 +1,6 @@
-## Hướng dẫn cài đặt CEPH sử dụng `ceph-deploy` trên 1 máy duy nhất (CEPH AIO)
+# Hướng dẫn cài đặt CEPH sử dụng `ceph-deploy` trên 1 máy duy nhất (CEPH AIO)
 
-### Mục tiêu LAB
+## 1. Mục tiêu LAB
 - Mô hình này sẽ cài tất cả các thành phần của CEPH lên một máy duy nhất, bao gồm:
   - ceph-deploy
   - ceph-admin
@@ -9,15 +9,15 @@
 - Máy CEPH AIO được cài đặt để có thể sẵn sàng tích hợp với hệ thống OpenStack
 - LAB này chỉ phù hợp với việc nghiên cức các tính năng và demo thử nghiệm, không áp dụng được trong thực tế.
 
-## Mô hình 
+## 2. Mô hình 
 - Sử dụng mô hình dưới để cài đặt CEPH AIO, nếu chỉ dựng CEPH AIO thì chỉ cần một máy CEPH. 
 ![img](../images/topology_OPS_CEPH-AIO_CentOS7.2.png)
 
-## IP Planning
+## 3. IP Planning
 - Phân hoạch IP cho các máy chủ trong mô hình trên, nếu chỉ dựng CEPH-AIO thì chỉ cần quan tâm tới node CEPH-AIO
 ![img](../images/ip-planning-OPS-CEPH-AIO-CentOS7.2.png)
 
-## Chuẩn bị và môi trường LAB
+## 4. Chuẩn bị và môi trường LAB
  
 - OS
   - CentOS Server 7.2 64 bit
@@ -32,7 +32,7 @@
   
 - CEPH Jewel
 
-## Cài đặt CEPH
+## 5. Cài đặt CEPH
 
 - Thực hiện bằng quyền root
   ```sh
