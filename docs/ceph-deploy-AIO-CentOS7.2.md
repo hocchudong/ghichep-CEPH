@@ -151,10 +151,10 @@
   ```
 
 - Tạo thư mục để chứa các file cần thiết cho việc cài đặt CEPH 
-```sh
-mkdir cluster-ceph
-cd cluster-ceph
-```
+  ```sh
+  mkdir cluster-ceph
+  cd cluster-ceph
+  ```
 
 - Thiết lập các file cấu hình cho CEPH.
   ```sh
@@ -162,16 +162,15 @@ cd cluster-ceph
   ```
 
 - Sau khi thực hiện lệnh trên xong, sẽ thu được 03 file ở dưới (sử dụng lệnh `ll -alh` để xem). Trong đó cần cập nhật file `ceph.conf` để cài đặt CEPH được hoàn chỉnh.
-  ```sh
-  ceph-deploy@cephaio:~/my-cluster$ ls -alh
-  total 20K
-  drwxrwxr-x 2 ceph-deploy ceph-deploy 4.0K Apr 12 17:11 .
-  drwxr-xr-x 5 ceph-deploy ceph-deploy 4.0K Apr 12 17:11 ..
-  -rw-rw-r-- 1 ceph-deploy ceph-deploy  198 Apr 12 17:11 ceph.conf
-  -rw-rw-r-- 1 ceph-deploy ceph-deploy 3.2K Apr 12 17:11 ceph-deploy-ceph.log
-  -rw------- 1 ceph-deploy ceph-deploy   73 Apr 12 17:11 ceph.mon.keyring
-  ceph-deploy@cephaio:~/my-cluster$
-  ```
+```sh
+[root@cephaio cluster-ceph]# ls -alh
+total 16K
+drwxr-xr-x. 2 root root   72 Apr 14 09:29 .
+dr-xr-x---. 4 root root 4.0K Apr 14 09:28 ..
+-rw-r--r--. 1 root root  196 Apr 14 09:29 ceph.conf
+-rw-r--r--. 1 root root 2.9K Apr 14 09:29 ceph-deploy-ceph.log
+-rw-------. 1 root root   73 Apr 14 09:29 ceph.mon.keyring
+```
 
 - Thêm các dòng dưới vào file `ceph.conf` vừa được tạo ra ở trên
   ```sh
