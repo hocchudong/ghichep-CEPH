@@ -60,11 +60,6 @@
   nmcli c modify eno50332176 ipv4.method manual
   ```
   
-- Vô hiệu hóa Selinux
-  ```sh
-  sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/sysconfig/selinux
-  ```
-
 - Cấu hình các thành phần mạng cơ bản
   ```sh
   sudo systemctl disable firewalld
@@ -73,6 +68,11 @@
   sudo systemctl stop NetworkManager
   sudo systemctl enable network
   sudo systemctl start network
+  ```
+
+  - Vô hiệu hóa Selinux
+  ```sh
+  sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/sysconfig/selinux
   ```
 
 - Sửa file host 
