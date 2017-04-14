@@ -79,16 +79,19 @@
   ```sh
   echo "10.10.10.71 cephAIO" >> /etc/hosts
   ```
-  
+
 - Tạo user `ceph-deploy`
   ```sh
   sudo useradd -d /home/ceph-deploy -m ceph-deploy
   ```
-  
-- Khởi động lại máy chủ sau khi cấu hình cơ bản.
+
+  - Khởi động lại máy chủ sau khi cấu hình cơ bản.
   ```sh
   init 6
   ```
+
+- Đăng nhập lại bằng quyền `root` sau khi máy chủ reboot xong.
+  
   
 - Đặt mật khẩu cho user `ceph-deploy`
   ```sh
