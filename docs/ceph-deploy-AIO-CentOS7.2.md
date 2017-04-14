@@ -318,3 +318,9 @@
    1 0.04880         osd.1         up  1.00000          1.00000
    2 0.04880         osd.2         up  1.00000          1.00000
   ```
+  
+- Kiểm tra bằng lệnh `ceph health`, kết quả như sau là ok.
+  ```sh
+  [ceph-deploy@cephaio cluster-ceph]$ ceph health
+  HEALTH_OK
+  ```
