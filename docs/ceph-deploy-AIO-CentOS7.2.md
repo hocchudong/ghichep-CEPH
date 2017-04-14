@@ -113,6 +113,10 @@
   ```sh
   ssh-keygen -t rsa
   ```
+- Thực hiện copy ssh key, nhập yes và mật khẩu của user `ceph-deploy` ở bước trước.
+  ```sh
+  ssh-copy-id ceph-deploy@cephAIO
+  ```
 
 - Khai báo repos cho CEPH 
   ```sh
