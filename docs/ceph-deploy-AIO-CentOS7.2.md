@@ -131,6 +131,7 @@
 
   sed -i s'/Defaults requiretty/#Defaults requiretty'/g /etc/sudoers
   ```
+
 - Chuyển sang user `ceph-deploy`
   ```sh
   su - ceph-deploy
@@ -140,6 +141,7 @@
   ```sh
   ssh-keygen -t rsa
   ```
+
 - Thực hiện copy ssh key, nhập yes và mật khẩu của user `ceph-deploy` ở bước trước.
   ```sh
   ssh-copy-id ceph-deploy@cephaio
