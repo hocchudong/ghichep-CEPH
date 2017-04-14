@@ -10,7 +10,7 @@
 - LAB này chỉ phù hợp với việc nghiên cức các tính năng và demo thử nghiệm, không áp dụng được trong thực tế.
 
 ## 2. Mô hình 
-- Sử dụng mô hình dưới để cài đặt CEPH AIO, nếu chỉ dựng CEPH AIO thì chỉ cần một máy CEPH. 
+- Sử dụng mô hình dưới để cài đặt CEPH AIO, nếu chỉ dựng CEPH AIO thì chỉ cần một máy chủ để cài đặt CEPH. 
 ![img](../images/topology_OPS_CEPH-AIO_CentOS7.2.png)
 
 ## 3. IP Planning
@@ -34,11 +34,15 @@
 
 ## 5. Cài đặt CEPH
 
+- Update các gói cho máy chủ 
+  ```sh
+  yum update -y
+  ```
+
 - Đặt hostname cho máy cài AIO
   ```sh
   hostnamectl set-hostname cephAIO  
   ```
-
 - Thiết lập IP cho máy CEPH AIO
   ```sh
   echo "Setup IP  eno16777728"
@@ -75,16 +79,22 @@
   ```sh
   echo "10.10.10.71 cephAIO" >> /etc/hosts
   ```
+  
 - Tạo user `ceph-deploy`
   ```sh
   sudo useradd -d /home/ceph-deploy -m ceph-deploy
   ```
-
+  
+- Khởi động lại máy chủ sau khi cấu hình cơ bản.
+  ```sh
+  init 6
+  ```
+  
 - Đặt mật khẩu cho user `ceph-deploy`
   ```sh
   sudo passwd ceph-deploy
   ```
-
+  
 - Phân quyền cho user `ceph`
   ```sh
   echo "ceph-deploy ALL = (root) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/ceph
@@ -92,7 +102,6 @@
   
   sudo chmod 0440 /etc/sudoers.d/ceph
   ```
-
 - Chuyển sang user `ceph-deploy`
   ```sh
   su - ceph-deploy

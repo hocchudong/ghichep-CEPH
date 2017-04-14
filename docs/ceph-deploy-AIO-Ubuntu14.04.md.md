@@ -10,7 +10,7 @@
 - LAB này chỉ phù hợp với việc nghiên cức các tính năng và demo thử nghiệm, không áp dụng được trong thực tế.
 
 ## Mô hình 
-- Sử dụng mô hình dưới để cài đặt CEPH AIO, nếu chỉ dựng CEPH AIO thì chỉ cần một máy CEPH. 
+- Sử dụng mô hình dưới để cài đặt CEPH AIO, nếu chỉ dựng CEPH AIO thì chỉ cần một máy chủ để cài đặt CEPH. 
 ![img](../images/topology_OPS_CEPH-AIO_Ubuntu14.04.png)
 
 ## IP Planning
