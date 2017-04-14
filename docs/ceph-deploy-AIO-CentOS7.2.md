@@ -97,7 +97,7 @@
   ```
    
   ```sh
-  cat << EOF > /etc/yum.repos.d/ceph.repo
+  cat << EOF > /etc/yum.repos.d/ceph-deploy.repo
   [Ceph-noarch]
   name=Ceph noarch packages
   baseurl=http://download.ceph.com/rpm-jewel/el7/noarch
@@ -187,27 +187,37 @@
   ```sh
   ceph-deploy install cephaio
   ```
+  
+  - Sau khi cài xong, nếu thành công sẽ có kết quả như sau.
+    ```sh
+    [cephaio][DEBUG ] Complete!
+    [cephaio][INFO  ] Running command: sudo ceph --version
+    [cephaio][DEBUG ] ceph version 10.2.7 (50e863e0f4bc8f4b9e31156de690d765af245185
+    ```
 
 - Cấu hình `MON` (một thành phần của CEPH)
   ```sh
   ceph-deploy mon create-initial
   ```
 
-- Sau khi thực hiện lệnh để cấu hình `MON` xong, sẽ sinh thêm ra 03 file : `ceph.bootstrap-mds.keyring`, `ceph.bootstrap-osd.keyring` và `ceph.bootstrap-rgw.keyring`. Quan sát bằng lệnh `ll -alh`
+- Sau khi thực hiện lệnh để cấu hình `MON` xong, sẽ sinh thêm ra 03 file : 
+  - `ceph.bootstrap-mds.keyring`, 
+  - `ceph.bootstrap-osd.keyring` 
+  - `ceph.bootstrap-rgw.keyring`. 
 
+- Quan sát bằng lệnh `ll -alh`
   ```sh
-  ceph-deploy@cephaio:~/my-cluster$ ls -alh
-  total 96K
-  drwxrwxr-x 2 ceph-deploy ceph-deploy 4.0K Apr 12 17:20 .
-  drwxr-xr-x 5 ceph-deploy ceph-deploy 4.0K Apr 12 17:11 ..
-  -rw------- 1 ceph-deploy ceph-deploy  113 Apr 12 17:20 ceph.bootstrap-mds.keyring
-  -rw------- 1 ceph-deploy ceph-deploy  113 Apr 12 17:20 ceph.bootstrap-osd.keyring
-  -rw------- 1 ceph-deploy ceph-deploy  113 Apr 12 17:20 ceph.bootstrap-rgw.keyring
-  -rw------- 1 ceph-deploy ceph-deploy  129 Apr 12 17:20 ceph.client.admin.keyring
-  -rw-rw-r-- 1 ceph-deploy ceph-deploy  342 Apr 12 17:14 ceph.conf
-  -rw-rw-r-- 1 ceph-deploy ceph-deploy  54K Apr 12 17:20 ceph-deploy-ceph.log
-  -rw------- 1 ceph-deploy ceph-deploy   73 Apr 12 17:11 ceph.mon.keyring
-  -rw-r--r-- 1 root        root        1.7K Oct 16  2015 release.asc
+  [ceph-deploy@cephaio cluster-ceph]$ ls -lah
+  total 160K
+  drwxrwxr-x. 2 ceph-deploy ceph-deploy 4.0K Apr 14 10:28 .
+  drwx------. 4 ceph-deploy ceph-deploy 4.0K Apr 14 10:18 ..
+  -rw-------. 1 ceph-deploy ceph-deploy  113 Apr 14 10:28 ceph.bootstrap-mds.keyring
+  -rw-------. 1 ceph-deploy ceph-deploy  113 Apr 14 10:28 ceph.bootstrap-osd.keyring
+  -rw-------. 1 ceph-deploy ceph-deploy  113 Apr 14 10:28 ceph.bootstrap-rgw.keyring
+  -rw-------. 1 ceph-deploy ceph-deploy  129 Apr 14 10:28 ceph.client.admin.keyring
+  -rw-rw-r--. 1 ceph-deploy ceph-deploy  339 Apr 14 10:18 ceph.conf
+  -rw-rw-r--. 1 ceph-deploy ceph-deploy  66K Apr 14 10:28 ceph-deploy-ceph.log
+  -rw-------. 1 ceph-deploy ceph-deploy   73 Apr 14 10:18 ceph.mon.keyring
   ```
 
 - Tạo các OSD cho CEPH, thay `cephaio` bằng tên hostname của máy bạn 
@@ -223,10 +233,56 @@
   ceph-deploy osd activate cephaio:/dev/sdd1:/dev/sdb2
   ceph-deploy osd activate cephaio:/dev/sde1:/dev/sdb3
   ```
+
+- Sau khi cấu hình các OSD xong, kiểm tra xem các phân vùng bằng lệnh `sudo lsblk`, nếu thành công, kết quả như sau
+  ```sh
+  [ceph-deploy@cephaio cluster-ceph]$ lsblk
+  NAME            MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+  sda               8:0    0   60G  0 disk
+  ├─sda1            8:1    0  500M  0 part /boot
+  └─sda2            8:2    0 59.5G  0 part
+    ├─centos-root 253:0    0 35.9G  0 lvm  /
+    ├─centos-swap 253:1    0    6G  0 lvm  [SWAP]
+    └─centos-home 253:2    0 17.5G  0 lvm  /home
+  sdb               8:16   0   50G  0 disk
+  ├─sdb1            8:17   0  7.8G  0 part
+  ├─sdb2            8:18   0  7.8G  0 part
+  └─sdb3            8:19   0  7.8G  0 part
+  sdc               8:32   0   50G  0 disk
+  └─sdc1            8:33   0   50G  0 part /var/lib/ceph/osd/ceph-0
+  sdd               8:48   0   50G  0 disk
+  └─sdd1            8:49   0   50G  0 part /var/lib/ceph/osd/ceph-1
+  sde               8:64   0   50G  0 disk
+  └─sde1            8:65   0   50G  0 part /var/lib/ceph/osd/ceph-2
+  sr0              11:0    1  603M  0 rom
+  [ceph-deploy@cephaio cluster-ceph]$
+  ```
+
 - Tạo file config và key
   ```sh
   ceph-deploy admin cephaio
   ```
+
+- Sau khi thực hiện lệnh trên xong, sẽ có các file dưới được sinh ra
+  - `ceph.bootstrap-mds.keyring`
+  - `ceph.bootstrap-osd.keyring`
+  - `ceph.bootstrap-rgw.keyring` 
+
+- Quan sát các file mới sinh ra bằng lệnh `ls -alh` 
+  
+  ```sh
+  [ceph-deploy@cephaio cluster-ceph]$ ls -alh
+  total 160K
+  drwxrwxr-x. 2 ceph-deploy ceph-deploy 4.0K Apr 14 10:28 .
+  drwx------. 4 ceph-deploy ceph-deploy 4.0K Apr 14 10:18 ..
+  -rw-------. 1 ceph-deploy ceph-deploy  113 Apr 14 10:28 ceph.bootstrap-mds.keyring
+  -rw-------. 1 ceph-deploy ceph-deploy  113 Apr 14 10:28 ceph.bootstrap-osd.keyring
+  -rw-------. 1 ceph-deploy ceph-deploy  113 Apr 14 10:28 ceph.bootstrap-rgw.keyring
+  -rw-------. 1 ceph-deploy ceph-deploy  129 Apr 14 10:28 ceph.client.admin.keyring
+  -rw-rw-r--. 1 ceph-deploy ceph-deploy  339 Apr 14 10:18 ceph.conf
+  -rw-rw-r--. 1 ceph-deploy ceph-deploy 127K Apr 14 10:55 ceph-deploy-ceph.log
+  -rw-------. 1 ceph-deploy ceph-deploy   73 Apr 14 10:18 ceph.mon.keyring
+  ``` 
 
 - Phân quyền cho file `/etc/ceph/ceph.client.admin.keyring`
   ```sh
@@ -237,3 +293,28 @@
   ```sh
   ceph -s
   ```  
+  
+  - Kết của lệnh `ceph -s`
+    ```sh
+    [ceph-deploy@cephaio cluster-ceph]$   ceph -s
+      cluster ae46be36-dee3-4bb9-9448-91aa148b301e
+       health HEALTH_OK
+       monmap e1: 1 mons at {cephaio=10.10.10.71:6789/0}
+              election epoch 3, quorum 0 cephaio
+       osdmap e15: 3 osds: 3 up, 3 in
+              flags sortbitwise,require_jewel_osds
+        pgmap v34: 64 pgs, 1 pools, 0 bytes data, 0 objects
+              100 MB used, 149 GB / 149 GB avail
+                    64 active+clean
+  ```
+  
+- Kiểm tra các OSD bằng lệnh `ceph osd tree`, kết quả như sau:
+  ```sh
+  [ceph-deploy@cephaio cluster-ceph]$ ceph osd tree
+  ID WEIGHT  TYPE NAME        UP/DOWN REWEIGHT PRIMARY-AFFINITY
+  -1 0.14639 root default
+  -2 0.14639     host cephaio
+   0 0.04880         osd.0         up  1.00000          1.00000
+   1 0.04880         osd.1         up  1.00000          1.00000
+   2 0.04880         osd.2         up  1.00000          1.00000
+  ```
