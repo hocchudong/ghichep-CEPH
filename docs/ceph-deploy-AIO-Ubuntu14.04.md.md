@@ -10,7 +10,7 @@
 - LAB này chỉ phù hợp với việc nghiên cức các tính năng và demo thử nghiệm, không áp dụng được trong thực tế.
 
 ## Mô hình 
-- Sử dụng mô hình dưới để cài đặt CEPH AIO, nếu chỉ dựng CEPH AIO thì chỉ cần một máy CEPH. 
+- Sử dụng mô hình dưới để cài đặt CEPH AIO, nếu chỉ dựng CEPH AIO thì chỉ cần một máy chủ để cài đặt CEPH. 
 ![img](../images/topology_OPS_CEPH-AIO_Ubuntu14.04.png)
 
 ## IP Planning
@@ -26,9 +26,9 @@
     - `sdb`: sử dụng làm `journal` (Journal là một lớp cache khi client ghi dữ liệu, thực tế thường dùng ổ SSD để làm cache)
     - `sdc, sdd, sde`: sử dụng làm OSD (nơi chứa dữ liệu của client)
   - 02 NICs: 
-    - `eth0`: dùng để replicate cho CEPH, sử dụng dải 10.10.10.0/24
+    - `eth0`: dùng để client (các máy chủ trong OpenStack) sử dụng, dải 10.10.10.0/24
     - `eth1`: dùng để ssh và tải gói cài đặt cho máy chủ CEPH AIO, sử dụng dải 172.16.69.0/24
-    - `eth2`: dùng để client (các máy chủ trong OpenStack) sử dụng, sử dụng dải 10.10.30.0/24
+    - `eth2`: dùng để replicate cho CEPH sử dụng, dải 10.10.30.0/24
   
 - CEPH Jewel
 
@@ -41,13 +41,13 @@
   
 - Đặt hostname cho máy cài AIO
   ```sh
-  echo "cephAIO" > /etc/hostname
+  echo "cephaio" > /etc/hostname
   hostname -F /etc/hostname
   ```
 
 - Sửa file host 
   ```sh
-  echo "172.16.69.247 cephAIO" >> /etc/hosts
+  echo "10.10.10.71 cephaio" >> /etc/hosts
   ```
 
 - Khai báo Repo cho CEPH đối với Ubuntu Server 14.04
@@ -94,14 +94,14 @@
   ssh-keygen
   ```
 
-- Copy ssh key để sử dụng, thay `cephAIO` bằng tên hostname của máy bạn nếu có thay đổi.
+- Copy ssh key để sử dụng, thay `cephaio` bằng tên hostname của máy bạn nếu có thay đổi.
   ```sh
-  ssh-copy-id ceph-deploy@cephAIO
+  ssh-copy-id ceph-deploy@cephaio
   ```
 
   - Nhập `Yes` và mật khẩu của user `ceph-deploy` đã tạo ở trước, kết quả như bên dưới
     ```sh
-    ceph-deploy@cephAIO:~$ ssh-copy-id ceph-deploy@cephAIO
+    ceph-deploy@cephaio:~$ ssh-copy-id ceph-deploy@cephaio
     The authenticity of host 'cephaio (172.16.69.247)' can't be established.
     ECDSA key fingerprint is f2:38:1e:50:44:94:6f:0a:32:a3:23:63:90:7b:53:27.
     Are you sure you want to continue connecting (yes/no)? yes
@@ -111,7 +111,7 @@
 
     Number of key(s) added: 1
 
-    Now try logging into the machine, with:   "ssh 'ceph-deploy@cephAIO'"
+    Now try logging into the machine, with:   "ssh 'ceph-deploy@cephaio'"
     and check to make sure that only the key(s) you wanted were added.
     ```
   
@@ -124,19 +124,19 @@
 
 - Thiết lập các file cấu hình cho CEPH.
   ```sh
-  ceph-deploy new cephAIO
+  ceph-deploy new cephaio
   ```
 
 - Sau khi thực hiện lệnh trên xong, sẽ thu được 03 file ở dưới (sử dụng lệnh `ll -alh` để xem). Trong đó cần cập nhật file `ceph.conf` để cài đặt CEPH được hoàn chỉnh.
   ```sh
-  ceph-deploy@cephAIO:~/my-cluster$ ls -alh
+  ceph-deploy@cephaio:~/my-cluster$ ls -alh
   total 20K
   drwxrwxr-x 2 ceph-deploy ceph-deploy 4.0K Apr 12 17:11 .
   drwxr-xr-x 5 ceph-deploy ceph-deploy 4.0K Apr 12 17:11 ..
   -rw-rw-r-- 1 ceph-deploy ceph-deploy  198 Apr 12 17:11 ceph.conf
   -rw-rw-r-- 1 ceph-deploy ceph-deploy 3.2K Apr 12 17:11 ceph-deploy-ceph.log
   -rw------- 1 ceph-deploy ceph-deploy   73 Apr 12 17:11 ceph.mon.keyring
-  ceph-deploy@cephAIO:~/my-cluster$
+  ceph-deploy@cephaio:~/my-cluster$
   ```
 
 - Thêm các dòng dưới vào file `ceph.conf` vừa được tạo ra ở trên
@@ -144,13 +144,13 @@
   echo "osd pool default size = 2" >> ceph.conf
   echo "osd crush chooseleaf type = 0" >> ceph.conf
   echo "osd journal size = 8000" >> ceph.conf
-  echo "public network = 172.16.69.0/24" >> ceph.conf
-  echo "cluster network = 10.10.10.0/24" >> ceph.conf
+  echo "public network = 10.10.10.0/24" >> ceph.conf
+  echo "cluster network = 10.10.30.0/24" >> ceph.conf
   ```
   
-- Cài đặt CEPH, thay `cephAIO` bằng tên hostname của máy bạn nếu có thay đổi.
+- Cài đặt CEPH, thay `cephaio` bằng tên hostname của máy bạn nếu có thay đổi.
   ```sh
-  ceph-deploy install cephAIO
+  ceph-deploy install cephaio
   ```
 
 - Cấu hình `MON` (một thành phần của CEPH)
@@ -160,7 +160,7 @@
 - Sau khi thực hiện lệnh để cấu hình `MON` xong, sẽ sinh thêm ra 03 file : `ceph.bootstrap-mds.keyring`, `ceph.bootstrap-osd.keyring` và `ceph.bootstrap-rgw.keyring`. Quan sát bằng lệnh `ll -alh`
 
   ```sh
-  ceph-deploy@cephAIO:~/my-cluster$ ls -alh
+  ceph-deploy@cephaio:~/my-cluster$ ls -alh
   total 96K
   drwxrwxr-x 2 ceph-deploy ceph-deploy 4.0K Apr 12 17:20 .
   drwxr-xr-x 5 ceph-deploy ceph-deploy 4.0K Apr 12 17:11 ..
@@ -174,21 +174,21 @@
   -rw-r--r-- 1 root        root        1.7K Oct 16  2015 release.asc
   ```
 
-- Tạo các OSD cho CEPH, thay `cephAIO` bằng tên hostname của máy bạn 
+- Tạo các OSD cho CEPH, thay `cephaio` bằng tên hostname của máy bạn 
   ```sh
-  ceph-deploy osd prepare cephAIO:sdc:/dev/sdb
-  ceph-deploy osd prepare cephAIO:sdd:/dev/sdb
+  ceph-deploy osd prepare cephaio:sdc:/dev/sdb
+  ceph-deploy osd prepare cephaio:sdd:/dev/sdb
   ```
 
 - Active các OSD vừa tạo ở trên
   ```sh
-  ceph-deploy osd activate cephAIO:/dev/sdc1:/dev/sdb1
-  ceph-deploy osd activate cephAIO:/dev/sdd1:/dev/sdb2
+  ceph-deploy osd activate cephaio:/dev/sdc1:/dev/sdb1
+  ceph-deploy osd activate cephaio:/dev/sdd1:/dev/sdb2
   ```
   
 - Kiểm tra các phân vùng được tạo ra bằng lệnh `sudo lsblk` (nhớ phải có lệnh sudo vì đang dùng user `ceph-deploy`)
 ```sh
-ceph-deploy@cephAIO:~/my-cluster$ sudo lsblk
+ceph-deploy@cephaio:~/my-cluster$ sudo lsblk
 NAME                            MAJ:MIN RM   SIZE RO TYPE MOUNTPOINT
 sda                               8:0    0    50G  0 disk
 ├─sda1                            8:1    0   243M  0 part /boot
@@ -204,11 +204,11 @@ sdc                               8:32   0    30G  0 disk
 sdd                               8:48   0    30G  0 disk
 └─sdd1                            8:49   0    30G  0 part /var/lib/ceph/osd/ceph-1
 sr0                              11:0    1   574M  0 rom
-ceph-deploy@cephAIO:~/my-cluster$
+ceph-deploy@cephaio:~/my-cluster$
 ````
 - Tạo file config và key
   ```sh
-  ceph-deploy admin cephAIO
+  ceph-deploy admin cephaio
   ```
 
 - Phân quyền cho file `/etc/ceph/ceph.client.admin.keyring`
@@ -223,17 +223,17 @@ ceph-deploy@cephAIO:~/my-cluster$
 
 - Kết quả của lệnh trên như sau: 
   ```sh
-  ceph-deploy@cephAIO:~/my-cluster$ ceph -s
+  ceph-deploy@cephaio:~/my-cluster$ ceph -s
       cluster 17321823-d3cc-4781-97c1-66228d12b007
        health HEALTH_OK
-       monmap e1: 1 mons at {cephAIO=172.16.69.247:6789/0}
-              election epoch 3, quorum 0 cephAIO
+       monmap e1: 1 mons at {cephaio=172.16.69.247:6789/0}
+              election epoch 3, quorum 0 cephaio
        osdmap e10: 2 osds: 2 up, 2 in
               flags sortbitwise,require_jewel_osds
         pgmap v17: 64 pgs, 1 pools, 0 bytes data, 0 objects
               68960 kB used, 61340 MB / 61407 MB avail
                     64 active+clean
-  ceph-deploy@cephAIO:~/my-cluster$
+  ceph-deploy@cephaio:~/my-cluster$
   ```
 
 - Nếu có dòng `health HEALTH_OK` thì việc cài đặt đã ok.
