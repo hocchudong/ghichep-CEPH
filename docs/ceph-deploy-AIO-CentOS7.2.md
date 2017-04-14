@@ -126,10 +126,10 @@
   
 - Phân quyền cho user `ceph`
   ```sh
-  echo "ceph-deploy ALL = (root) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/ceph
-  echo "Defaults:ceph-deploy !requiretty" | sudo tee -a /etc/sudoers.d/ceph
-  
-  sudo chmod 0440 /etc/sudoers.d/ceph
+  echo "ceph-deploy ALL = (root) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/ceph-deploy
+  chmod 0440 /etc/sudoers.d/ceph-deploy
+
+  sed -i s'/Defaults requiretty/#Defaults requiretty'/g /etc/sudoers
   ```
 - Chuyển sang user `ceph-deploy`
   ```sh
@@ -162,15 +162,15 @@
   ```
 
 - Sau khi thực hiện lệnh trên xong, sẽ thu được 03 file ở dưới (sử dụng lệnh `ll -alh` để xem). Trong đó cần cập nhật file `ceph.conf` để cài đặt CEPH được hoàn chỉnh.
-```sh
-[root@cephaio cluster-ceph]# ls -alh
-total 16K
-drwxr-xr-x. 2 root root   72 Apr 14 09:29 .
-dr-xr-x---. 4 root root 4.0K Apr 14 09:28 ..
--rw-r--r--. 1 root root  196 Apr 14 09:29 ceph.conf
--rw-r--r--. 1 root root 2.9K Apr 14 09:29 ceph-deploy-ceph.log
--rw-------. 1 root root   73 Apr 14 09:29 ceph.mon.keyring
-```
+  ```sh
+  [ceph-deploy@cephaio cluster-ceph]$ ls -alh
+  total 16K
+  drwxrwxr-x. 2 ceph-deploy ceph-deploy   72 Apr 14 09:36 .
+  drwx------. 4 ceph-deploy ceph-deploy 4.0K Apr 14 09:36 ..
+  -rw-rw-r--. 1 ceph-deploy ceph-deploy  196 Apr 14 09:36 ceph.conf
+  -rw-rw-r--. 1 ceph-deploy ceph-deploy 3.0K Apr 14 09:36 ceph-deploy-ceph.log
+  -rw-------. 1 ceph-deploy ceph-deploy   73 Apr 14 09:36 ceph.mon.keyring
+  ```
 
 - Thêm các dòng dưới vào file `ceph.conf` vừa được tạo ra ở trên
   ```sh
