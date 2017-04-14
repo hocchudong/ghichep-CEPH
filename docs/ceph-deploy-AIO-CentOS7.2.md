@@ -41,7 +41,7 @@
 
 - Đặt hostname cho máy cài AIO
   ```sh
-  hostnamectl set-hostname cephAIO  
+  hostnamectl set-hostname cephaio  
   ```
 - Thiết lập IP cho máy CEPH AIO
   ```sh
@@ -77,7 +77,7 @@
 
 - Sửa file host 
   ```sh
-  echo "10.10.10.71 cephAIO" >> /etc/hosts
+  echo "10.10.10.71 cephaio" >> /etc/hosts
   ```
 
 - Khởi động lại máy chủ sau khi cấu hình cơ bản.
@@ -142,7 +142,7 @@
   ```
 - Thực hiện copy ssh key, nhập yes và mật khẩu của user `ceph-deploy` ở bước trước.
   ```sh
-  ssh-copy-id ceph-deploy@cephAIO
+  ssh-copy-id ceph-deploy@cephaio
   ```
 
 - Cài đặt `ceph-deploy` 
@@ -158,19 +158,19 @@ cd cluster-ceph
 
 - Thiết lập các file cấu hình cho CEPH.
   ```sh
-  ceph-deploy new cephAIO
+  ceph-deploy new cephaio
   ```
 
 - Sau khi thực hiện lệnh trên xong, sẽ thu được 03 file ở dưới (sử dụng lệnh `ll -alh` để xem). Trong đó cần cập nhật file `ceph.conf` để cài đặt CEPH được hoàn chỉnh.
   ```sh
-  ceph-deploy@cephAIO:~/my-cluster$ ls -alh
+  ceph-deploy@cephaio:~/my-cluster$ ls -alh
   total 20K
   drwxrwxr-x 2 ceph-deploy ceph-deploy 4.0K Apr 12 17:11 .
   drwxr-xr-x 5 ceph-deploy ceph-deploy 4.0K Apr 12 17:11 ..
   -rw-rw-r-- 1 ceph-deploy ceph-deploy  198 Apr 12 17:11 ceph.conf
   -rw-rw-r-- 1 ceph-deploy ceph-deploy 3.2K Apr 12 17:11 ceph-deploy-ceph.log
   -rw------- 1 ceph-deploy ceph-deploy   73 Apr 12 17:11 ceph.mon.keyring
-  ceph-deploy@cephAIO:~/my-cluster$
+  ceph-deploy@cephaio:~/my-cluster$
   ```
 
 - Thêm các dòng dưới vào file `ceph.conf` vừa được tạo ra ở trên
@@ -182,9 +182,9 @@ cd cluster-ceph
   echo "cluster network = 10.10.30.0/24" >> ceph.conf
   ```
   
-- Cài đặt CEPH, thay `cephAIO` bằng tên hostname của máy bạn nếu có thay đổi.
+- Cài đặt CEPH, thay `cephaio` bằng tên hostname của máy bạn nếu có thay đổi.
   ```sh
-  ceph-deploy install cephAIO
+  ceph-deploy install cephaio
   ```
 
 - Cấu hình `MON` (một thành phần của CEPH)
@@ -195,7 +195,7 @@ cd cluster-ceph
 - Sau khi thực hiện lệnh để cấu hình `MON` xong, sẽ sinh thêm ra 03 file : `ceph.bootstrap-mds.keyring`, `ceph.bootstrap-osd.keyring` và `ceph.bootstrap-rgw.keyring`. Quan sát bằng lệnh `ll -alh`
 
   ```sh
-  ceph-deploy@cephAIO:~/my-cluster$ ls -alh
+  ceph-deploy@cephaio:~/my-cluster$ ls -alh
   total 96K
   drwxrwxr-x 2 ceph-deploy ceph-deploy 4.0K Apr 12 17:20 .
   drwxr-xr-x 5 ceph-deploy ceph-deploy 4.0K Apr 12 17:11 ..
@@ -209,22 +209,22 @@ cd cluster-ceph
   -rw-r--r-- 1 root        root        1.7K Oct 16  2015 release.asc
   ```
 
-- Tạo các OSD cho CEPH, thay `cephAIO` bằng tên hostname của máy bạn 
+- Tạo các OSD cho CEPH, thay `cephaio` bằng tên hostname của máy bạn 
   ```sh
-  ceph-deploy osd prepare cephAIO:sdc:/dev/sdb
-  ceph-deploy osd prepare cephAIO:sdd:/dev/sdb
-  ceph-deploy osd prepare cephAIO:sde:/dev/sdb
+  ceph-deploy osd prepare cephaio:sdc:/dev/sdb
+  ceph-deploy osd prepare cephaio:sdd:/dev/sdb
+  ceph-deploy osd prepare cephaio:sde:/dev/sdb
   ```
 
 - Active các OSD vừa tạo ở trên
   ```sh
-  ceph-deploy osd activate cephAIO:/dev/sdc1:/dev/sdb1
-  ceph-deploy osd activate cephAIO:/dev/sdd1:/dev/sdb2
-  ceph-deploy osd activate cephAIO:/dev/sde1:/dev/sdb3
+  ceph-deploy osd activate cephaio:/dev/sdc1:/dev/sdb1
+  ceph-deploy osd activate cephaio:/dev/sdd1:/dev/sdb2
+  ceph-deploy osd activate cephaio:/dev/sde1:/dev/sdb3
   ```
 - Tạo file config và key
   ```sh
-  ceph-deploy admin cephAIO
+  ceph-deploy admin cephaio
   ```
 
 - Phân quyền cho file `/etc/ceph/ceph.client.admin.keyring`
