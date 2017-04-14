@@ -87,6 +87,33 @@
  
 - Đăng nhập lại bằng quyền `root` sau khi máy chủ reboot xong.
 
+- Khai báo repos cho CEPH 
+  ```sh
+  sudo yum install -y yum-utils
+  sudo yum-config-manager --add-repo https://dl.fedoraproject.org/pub/epel/7/x86_64/ 
+  sudo yum install --nogpgcheck -y epel-release 
+  sudo rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-7 
+  sudo rm /etc/yum.repos.d/dl.fedoraproject.org*
+  ```
+   
+  ```sh
+  cat << EOF > /etc/yum.repos.d/ceph.repo
+  [Ceph-noarch]
+  name=Ceph noarch packages
+  baseurl=http://download.ceph.com/rpm-jewel/el7/noarch
+  enabled=1
+  gpgcheck=1
+  type=rpm-md
+  gpgkey=https://download.ceph.com/keys/release.asc
+  priority=1
+  EOF
+  ```
+
+- Update sau khi khai báo repo
+  ```sh
+  sudo yum -y update
+  ```
+  
 - Tạo user `ceph-deploy`
   ```sh
   sudo useradd -d /home/ceph-deploy -m ceph-deploy
@@ -116,32 +143,6 @@
 - Thực hiện copy ssh key, nhập yes và mật khẩu của user `ceph-deploy` ở bước trước.
   ```sh
   ssh-copy-id ceph-deploy@cephAIO
-  ```
-
-- Khai báo repos cho CEPH 
-  ```sh
-  sudo yum install -y yum-utils
-  sudo yum-config-manager --add-repo https://dl.fedoraproject.org/pub/epel/7/x86_64/ 
-  sudo yum install --nogpgcheck -y epel-release 
-  sudo rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-7 
-  sudo rm /etc/yum.repos.d/dl.fedoraproject.org*
-  ```
-   
-  ```sh
-  cat << EOF > /etc/yum.repos.d/ceph.repo
-  [Ceph-noarch]
-  name=Ceph noarch packages
-  baseurl=http://download.ceph.com/rpm-jewel/el7/noarch
-  enabled=1
-  gpgcheck=1
-  type=rpm-md
-  gpgkey=https://download.ceph.com/keys/release.asc
-  priority=1
-  ```
-
-- Update sau khi khai báo repo
-  ```sh
-  sudo yum -y update
   ```
 
 - Cài đặt `ceph-deploy` 
