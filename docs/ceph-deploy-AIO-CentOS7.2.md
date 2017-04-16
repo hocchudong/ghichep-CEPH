@@ -60,11 +60,6 @@
   nmcli c modify eno50332176 ipv4.method manual
   ```
   
-- Vô hiệu hóa Selinux
-  ```sh
-  sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/sysconfig/selinux
-  ```
-
 - Cấu hình các thành phần mạng cơ bản
   ```sh
   sudo systemctl disable firewalld
@@ -73,6 +68,11 @@
   sudo systemctl stop NetworkManager
   sudo systemctl enable network
   sudo systemctl start network
+  ```
+
+- Vô hiệu hóa Selinux
+  ```sh
+  sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/sysconfig/selinux
   ```
 
 - Sửa file host 
@@ -262,27 +262,6 @@
   ```sh
   ceph-deploy admin cephaio
   ```
-
-- Sau khi thực hiện lệnh trên xong, sẽ có các file dưới được sinh ra
-  - `ceph.bootstrap-mds.keyring`
-  - `ceph.bootstrap-osd.keyring`
-  - `ceph.bootstrap-rgw.keyring` 
-
-- Quan sát các file mới sinh ra bằng lệnh `ls -alh` 
-  
-  ```sh
-  [ceph-deploy@cephaio cluster-ceph]$ ls -alh
-  total 160K
-  drwxrwxr-x. 2 ceph-deploy ceph-deploy 4.0K Apr 14 10:28 .
-  drwx------. 4 ceph-deploy ceph-deploy 4.0K Apr 14 10:18 ..
-  -rw-------. 1 ceph-deploy ceph-deploy  113 Apr 14 10:28 ceph.bootstrap-mds.keyring
-  -rw-------. 1 ceph-deploy ceph-deploy  113 Apr 14 10:28 ceph.bootstrap-osd.keyring
-  -rw-------. 1 ceph-deploy ceph-deploy  113 Apr 14 10:28 ceph.bootstrap-rgw.keyring
-  -rw-------. 1 ceph-deploy ceph-deploy  129 Apr 14 10:28 ceph.client.admin.keyring
-  -rw-rw-r--. 1 ceph-deploy ceph-deploy  339 Apr 14 10:18 ceph.conf
-  -rw-rw-r--. 1 ceph-deploy ceph-deploy 127K Apr 14 10:55 ceph-deploy-ceph.log
-  -rw-------. 1 ceph-deploy ceph-deploy   73 Apr 14 10:18 ceph.mon.keyring
-  ``` 
 
 - Phân quyền cho file `/etc/ceph/ceph.client.admin.keyring`
   ```sh
