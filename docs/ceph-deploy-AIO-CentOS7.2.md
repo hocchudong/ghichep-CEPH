@@ -200,10 +200,11 @@
   ceph-deploy mon create-initial
   ```
 
-- Sau khi thực hiện lệnh để cấu hình `MON` xong, sẽ sinh thêm ra 03 file : 
-  - `ceph.bootstrap-mds.keyring`, 
+- Sau khi thực hiện lệnh để cấu hình `MON` xong, sẽ sinh thêm ra 04 file : 
+  - `ceph.bootstrap-mds.keyring`
   - `ceph.bootstrap-osd.keyring` 
-  - `ceph.bootstrap-rgw.keyring`. 
+  - `ceph.bootstrap-rgw.keyring`
+  - `ceph.client.admin.keyring`
 
 - Quan sát bằng lệnh `ll -alh`
   ```sh
