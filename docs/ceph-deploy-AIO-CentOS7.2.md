@@ -309,6 +309,9 @@
 
 ### 6.2. Cấu hình client - Ubuntu Server 14.04 64 bit
 #### 6.2.1 Thực hiện cài đặt trên máy chủ Client - Ubuntu Server 14.04 64 bit
+- Bước này sẽ hướng dẫn sử dụng RBD của CEPH để cung cấp cho các Client
+
+#### Bước 1: Chuẩn bị trên Client 
 
 - Login vào máy chủ client và chuyển sang quyền `root`
   ```sh
@@ -384,6 +387,8 @@
   sudo chmod 0440 /etc/sudoers.d/ceph-deploy
   ```
 
+#### Bước 2: Chuẩn bị trên Server CEPH 
+
 - Login vào máy chủ CEPH AIO và thực hiện các lệnh dưới
   - Khai báo thêm host của client 
     ```sh
@@ -407,6 +412,7 @@
 ceph-deploy admin ubuntuclient2
 ```
 
+#### Bước 3: Tạo các RBD trên client 
 - Login vào mà hình của máy client để thực hiện các bước tiếp theo.
   
 ### 7. Các ghi chú cấu hình client sử dụng CEPH 
