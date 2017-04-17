@@ -403,9 +403,9 @@
     ```
     
   - Copy ssh key đã tạo trước đó sang client, gõ `yes` và nhập mật khẩu của user `ceph-deploy` phía client đã tạo trước đó.
-  ```sh
-  ssh-copy-id ceph-deploy@ubuntuclient2
-  ```
+    ```sh
+    ssh-copy-id ceph-deploy@ubuntuclient2
+    ```
   
 - Thực hiện copy file config cho ceph và key sang client
 ```sh
@@ -413,8 +413,79 @@ ceph-deploy admin ubuntuclient2
 ```
 
 #### Bước 3: Tạo các RBD trên client 
-- Login vào mà hình của máy client để thực hiện các bước tiếp theo.
+- Login vào mà hình của máy client để thực hiện các bước tiếp theo như sau:
+- Chuyển sang quyền `root`
+```sh
+...
+```
+- Phân quyền cho file `/etc/ceph/ceph.client.admin.keyring` vừa được copy sang ở trên
+  ```sh
+  sudo chmod +r /etc/ceph/ceph.client.admin.keyring
+  ```
+
+- Kiểm tra trạng thái của CEPH từ client
+  ```sh
+  ceph -s
+  ```
+  - Kết quả là:
+    ```sh
+    root@ubuntuclient2:/etc/ceph# ceph -s
+        cluster 2406781c-afdf-40c5-83a4-3ae49b2a3dea
+         health HEALTH_OK
+         monmap e1: 1 mons at {cephaio=10.10.10.71:6789/0}
+                election epoch 4, quorum 0 cephaio
+         osdmap e24: 3 osds: 3 up, 3 in
+                flags sortbitwise,require_jewel_osds
+          pgmap v3484: 64 pgs, 1 pools, 0 bytes data, 1 objects
+                101 MB used, 149 GB / 149 GB avail
+                      64 active+clean
+    ```
+- Chạy lệnh dưới để fix lỗi `RBD image feature set mismatch. You can disable features unsupported by the kernel with "rbd feature disable".` ở bản  CEPH Jewel
+  ```sh
+  rbd feature disable rbd/disk01 fast-diff,object-map,exclusive-lock,deep-flatten
+  ```
+
+- Cài đặt thêm gói `xfsprogs` để có thể sử dụng lệnh `mkfs.xfs`
+```sh
+sudo apt-get install xfsprogs
+
+- Tạo 1 RBD có dung lượng 10Gb
+  ```sh
+  rbd create disk01 --size 10240
+  ```
+  - Có thể kiểm tra lại kết quả tạo bằng lệnh
+  ```sh
+  rbd ls -l
+  ```
   
+- Thực hiện map rbd vừa tạo 
+  ```sh
+  sudo rbd map disk01 
+  ```
+  - Kiểm tra lại kết quả map bằng lệnh dưới
+    ```sh
+    rbd showmapped 
+    ```
+  
+- Thực hiện format disk vừa được map
+  ```sh
+  sudo mkfs.xfs /dev/rbd0
+  ```
+  
+- Thực hiện mount disk vừa được format để sử dụng (mount vào thư mục `mnt` của client)
+  ```sh
+  sudo mount /dev/rbd0 /mnt
+  ```
+
+- Kiểm tra lại việc mount đã thành công hay chưa bằng một trong các lệnh dưới
+  ```sh
+  df -hT
+  ```
+
+  ```sh
+  lsblk
+  ```
+ 
 ### 7. Các ghi chú cấu hình client sử dụng CEPH 
 
 - File lỗi khi thực hiện `map` các rbd, nếu chạy xuất hiện lỗi dưới
