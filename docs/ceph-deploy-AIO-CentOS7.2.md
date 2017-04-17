@@ -310,6 +310,11 @@
 ### 6.2. Cấu hình client - Ubuntu Server 14.04 64 bit
 #### 6.2.1 Thực hiện cài đặt trên máy chủ Client - Ubuntu Server 14.04 64 bit
 
+- Login vào máy chủ client và chuyển sang quyền `root`
+  ```sh
+  su -
+  ```
+
 - Cấu hình IP cho các NICs theo IP Planning
   ```sh
   cp /etc/network/interfaces  /etc/network/interfaces.orig
@@ -330,7 +335,7 @@
   netmask 255.255.255.0
 
   auto eth1
-  iface eth1 inet dhcp
+  iface eth1 inet static
   address 172.16.69.82
   gateway 172.16.69.1
   netmask 255.255.255.0
@@ -355,8 +360,54 @@
   ```
 - Thực hiện update sau khi khai báo repos và khởi động lại
   ```sh
-  sudo apt-get update -y
+  apt-get update -y && apt-get upgrade -y && apt-get dist-upgrade -y && init 6
   ```
+
+- Cài đặt các gói ceph phía client
+  ```sh
+  sudo apt-get install -y python-rbd ceph-common
+  ```
+
+- Tạo user `ceph-deploy` để sử dụng cho việc cài đặt cho CEPH.
+  ```sh
+  sudo useradd -m -s /bin/bash ceph-deploy
+  ```
+
+- Đặt mật mẩu cho user `ceph-deploy`  
+  ```sh
+  sudo passwd ceph-deploy
+  ```
+
+- Phân quyền cho user `ceph-deploy`
+  ```sh
+  echo "ceph-deploy ALL = (root) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/ceph-deploy
+  sudo chmod 0440 /etc/sudoers.d/ceph-deploy
+  ```
+
+- Login vào máy chủ CEPH AIO và thực hiện các lệnh dưới
+  - Khai báo thêm host của client 
+    ```sh
+    echo "10.10.10.82 ubuntuclient2" >> /etc/hosts
+    ```
+    
+  - Chuyển sang tài khoản `ceph-deploy` để thực hiện cài đặt
+    ```sh
+    sudo su - ceph-deploy
+    
+    cd cluster-ceph
+    ```
+    
+  - Copy ssh key đã tạo trước đó sang client, gõ `yes` và nhập mật khẩu của user `ceph-deploy` phía client đã tạo trước đó.
+  ```sh
+  ssh-copy-id ceph-deploy@ubuntuclient2
+  ```
+  
+- Thực hiện copy file config cho ceph và key sang client
+```sh
+ceph-deploy admin ubuntuclient2
+```
+
+- Login vào mà hình của máy client để thực hiện các bước tiếp theo.
   
 ### 7. Các ghi chú cấu hình client sử dụng CEPH 
 
