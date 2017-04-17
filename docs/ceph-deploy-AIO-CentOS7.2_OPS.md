@@ -6,15 +6,16 @@
   - ceph-admin
   - mon
   - OSD
+- Máy CEPH AIO được cài đặt để có thể sẵn sàng tích hợp với hệ thống OpenStack
 - LAB này chỉ phù hợp với việc nghiên cức các tính năng và demo thử nghiệm, không áp dụng được trong thực tế.
 
 ## 2. Mô hình 
 - Sử dụng mô hình dưới để cài đặt CEPH AIO, nếu chỉ dựng CEPH AIO thì chỉ cần một máy chủ để cài đặt CEPH. 
-![img](../images/topology_CEPH_AIO_CentOS7.2.png)
+![img](../images/topology_OPS_CEPH-AIO_CentOS7.2.png)
 
 ## 3. IP Planning
 - Phân hoạch IP cho các máy chủ trong mô hình trên, nếu chỉ dựng CEPH-AIO thì chỉ cần quan tâm tới node CEPH-AIO
-![img](../images/ip-Planning-CEPH_AIO_CentOS7.2.png)
+![img](../images/ip-planning-OPS-CEPH-AIO-CentOS7.2.png)
 
 ## 4. Chuẩn bị và môi trường LAB
  
@@ -303,12 +304,9 @@
   [ceph-deploy@cephaio cluster-ceph]$ ceph health
   HEALTH_OK
   ```
-
-## 6. Cấu hình ceph để client sử dụng
-### 6.1. Cấu hình client là Ubuntu Server 14.04 64 bit
   
   
-### Các ghi chú cấu hình client sử dụng CEPH 
+### Cấu hình client sử dụng CEPH 
 
 - File lỗi khi thực hiện `map` các rbd, nếu chạy xuất hiện lỗi dưới
   ```sh
