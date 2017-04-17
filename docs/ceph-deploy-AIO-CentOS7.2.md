@@ -31,7 +31,7 @@
   
 - CEPH Jewel
 
-## 5. Cài đặt CEPH
+## 5. Cài đặt CEPH trên máy chủ CEPH
 
 - Update các gói cho máy chủ 
   ```sh
@@ -305,10 +305,58 @@
   ```
 
 ## 6. Cấu hình ceph để client sử dụng
-### 6.1. Cấu hình client là Ubuntu Server 14.04 64 bit
+### 6.1. Cấu hình client -  CentOS 7.x 64 bit
+
+### 6.2. Cấu hình client - Ubuntu Server 14.04 64 bit
+#### 6.2.1 Thực hiện cài đặt trên máy chủ Client - Ubuntu Server 14.04 64 bit
+
+- Cấu hình IP cho các NICs theo IP Planning
+  ```sh
+  cp /etc/network/interfaces  /etc/network/interfaces.orig
+  cat << EOF > /etc/network/interfaces
+  # This file describes the network interfaces available on your system
+  # and how to activate them. For more information, see interfaces(5).
+
+  # The loopback network interface
+  auto lo
+  iface lo inet loopback
+
+  # The primary network interface
+  auto eth0
+  iface eth0 inet static
+  address 10.10.10.82
+  netmask 255.255.255.0
+
+  auto eth1
+  iface eth1 inet dhcp
+  address 172.16.69.82
+  gateway 172.16.69.1
+  netmask 255.255.255.0
+  dns-nameservers 8.8.8.8
+  EOF
+  ```
+
+- Thiết lập hostname
+  ```sh
+  echo "ubuntuclient2" > /etc/hostname
+  hostname -F /etc/hostname
+  ```
+- Sửa file host 
+  ```sh
+  echo "10.10.10.71 cephaio" >> /etc/hosts
+  echo "10.10.10.82 ubuntuclient2" >> /etc/hosts
+  ```
+- Khai báo Repo cho CEPH đối với Ubuntu Server 14.04
+  ```sh
+  wget -q -O- 'https://download.ceph.com/keys/release.asc' | sudo apt-key add -
+  echo deb http://download.ceph.com/debian-jewel/ trusty main | sudo tee /etc/apt/sources.list.d/ceph.list
+  ```
+- Thực hiện update sau khi khai báo repos và khởi động lại
+  ```sh
+  sudo apt-get update -y
+  ```
   
-  
-### Các ghi chú cấu hình client sử dụng CEPH 
+### 7. Các ghi chú cấu hình client sử dụng CEPH 
 
 - File lỗi khi thực hiện `map` các rbd, nếu chạy xuất hiện lỗi dưới
   ```sh
