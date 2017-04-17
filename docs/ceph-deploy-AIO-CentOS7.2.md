@@ -313,6 +313,8 @@
 - Cấu hình IP cho các NICs theo IP Planning
   ```sh
   cp /etc/network/interfaces  /etc/network/interfaces.orig
+  
+  
   cat << EOF > /etc/network/interfaces
   # This file describes the network interfaces available on your system
   # and how to activate them. For more information, see interfaces(5).
