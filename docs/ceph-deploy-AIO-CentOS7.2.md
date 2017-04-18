@@ -313,9 +313,9 @@
 
 #### Bước 1: Chuẩn bị trên client 
 - Login vào máy chủ và chuyển sang quyền `root`
-```sh
-su -
-```
+  ```sh
+  su -
+  ```
 
 - Update các gói cho máy chủ 
   ```sh
@@ -526,7 +526,7 @@ su -
 - Mặc định khi khởi động lại thì việc map rbd sẽ bị mất, xử lý như sau:
   - Mở file /etc/ceph/rbdmap và thêm dòng dưới
     ```sh
-    rbd/disk02   id=admin,keyring=/etc/ceph/ceph.client.admin.keyring
+    rbd/disk01   id=admin,keyring=/etc/ceph/ceph.client.admin.keyring
     ```
     - Lưu ý cần khai báo pool `rbd` và tên images là `disk01` đã được khai báo ở bên trên.
     
