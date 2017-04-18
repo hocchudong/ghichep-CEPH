@@ -455,8 +455,8 @@
     ```   
   - Thực hiện xong lệnh trên, ceph-deploy sẽ copy các file cần thiết vào thư mục `/etc/ceph` của client. Chuyển sang client để thực hiện tiếp các thao tác. 
   
-#### Bước 4: Thực hiện các thao tác để sử dụng rbd trên Client.
-- Đăng nhập vào tài khoản `root` của client (CentOS7 để thực hiện tiếp các)
+#### Bước 3: Thực hiện các thao tác để sử dụng rbd trên Client.
+- Đăng nhập vào tài khoản `root` của client (Trong phần này client là CentOS 7)
 - Thực hiện việc kiểm tra các gói `ceph` đã được cài bằng lệnh `rpm -qa | grep ceph`
   ```sh
   [root@centos7client1 yum.repos.d]# rpm -qa | grep ceph
@@ -496,7 +496,7 @@
   
 - Thực hiện map rbd vừa tạo 
   ```sh
-  sudo rbd map disk02 
+  sudo rbd map disk01
   ```
   - Kiểm tra lại kết quả map bằng lệnh dưới
     ```sh
@@ -538,7 +538,7 @@
     
   - Sửa file `/etc/fstab` để việc mount được thực hiện mỗi khi khởi động lại OS, thêm dòng
     ```sh
-    /dev/rbd1   /mnt  xfs defaults,noatime,_netdev        0       0
+    /dev/rbd0   /mnt  xfs defaults,noatime,_netdev        0       0
     ```
     
   - Trong quá trình lab với client là ubuntu và centos tôi gặp hiện tượng khởi động lại Client 2 lần thì mới đăng nhập được, chưa hiểu tại sao lại bị tình trạng như vậy.
