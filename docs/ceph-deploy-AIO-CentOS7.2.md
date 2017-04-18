@@ -511,6 +511,8 @@ ceph-deploy admin ubuntuclient2
     ```sh
     /dev/rbd0   /mnt  xfs defaults,noatime,_netdev        0       0
     ```
+    
+  - Trong quá trình lab với client là ubuntu tôi gặp hiện tượng khởi động lại Client 2 lần thì mới đăng nhập được, chưa hiểu tại sao lại bị tình trạng như vậy.
 
   
 ### 7. Các ghi chú cấu hình client sử dụng CEPH 
