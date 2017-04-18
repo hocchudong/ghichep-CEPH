@@ -473,9 +473,69 @@ su -
   ceph-release-1-1.el7.noarch
   ```
 
-- 
+- Tạo 1 RBD có dung lượng 10Gb
+  ```sh
+  rbd create disk02 --size 10240
+  ```
+  - Có thể kiểm tra lại kết quả tạo bằng lệnh
+    ```sh
+    rbd ls -l
+    ```
+ 
+- Chạy lệnh dưới để fix lỗi `RBD image feature set mismatch. You can disable features unsupported by the kernel with "rbd feature disable".` ở bản  CEPH Jewel. Lưu ý từ khóa `disk01` trong lệnh, nó là tên image của rbd được tạo.
+  ```sh
+  rbd feature disable rbd/disk01 fast-diff,object-map,exclusive-lock,deep-flatten
+  ```
 
+  
+- Thực hiện map rbd vừa tạo 
+  ```sh
+  sudo rbd map disk02 
+  ```
+  - Kiểm tra lại kết quả map bằng lệnh dưới
+    ```sh
+    rbd showmapped 
+    ```
+  
+- Thực hiện format disk vừa được map
+  ```sh
+  sudo mkfs.xfs /dev/rbd0
+  ```
+  
+- Thực hiện mount disk vừa được format để sử dụng (mount vào thư mục `mnt` của client)
+  ```sh
+  sudo mount /dev/rbd0 /mnt
+  ```
 
+- Kiểm tra lại việc mount đã thành công hay chưa bằng một trong các lệnh dưới
+  ```sh
+  df -hT
+  ```
+
+  ```sh
+  lsblk
+  ```
+- Tạo thử 1 file 5GB vào thư mục `/mnt` bằng lệnh `dd`. Lệnh này thực hiện trên client.
+  ```sh
+  cd /mnt 
+  
+  dd if=/dev/zero of=test bs=1M count=5000
+  ```
+  - Nếu muốn quan sát quá trình ghi đọc trên server CEPH-AIO thì thực hiện lệnh `ceph -w` 
+
+- Mặc định khi khởi động lại thì việc map rbd sẽ bị mất, xử lý như sau:
+  - Mở file /etc/ceph/rbdmap và thêm dòng dưới
+    ```sh
+    rbd/disk02   id=admin,keyring=/etc/ceph/ceph.client.admin.keyring
+    ```
+    - Lưu ý cần khai báo pool `rbd` và tên images là `disk01` đã được khai báo ở bên trên.
+    
+  - Sửa file `/etc/fstab` để việc mount được thực hiện mỗi khi khởi động lại OS, thêm dòng
+    ```sh
+    /dev/rbd1   /mnt  xfs defaults,noatime,_netdev        0       0
+    ```
+    
+  - Trong quá trình lab với client là ubuntu và centos tôi gặp hiện tượng khởi động lại Client 2 lần thì mới đăng nhập được, chưa hiểu tại sao lại bị tình trạng như vậy.
 
 ### 6.2. Cấu hình client - Ubuntu Server 14.04 64 bit
 - Bước này sẽ hướng dẫn sử dụng RBD của CEPH để cung cấp cho các Client
