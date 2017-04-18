@@ -306,9 +306,111 @@
 
 ## 6. Cấu hình ceph để client sử dụng
 ### 6.1. Cấu hình client -  CentOS 7.x 64 bit
+- Thực hiện map và mount các rbd cho client là CentOS 7.x
+
+#### Bước 1: Chuẩn bị trên client 
+- Login vào máy chủ và chuyển sang quyền `root`
+```sh
+su -
+```
+
+- Update các gói cho máy chủ 
+  ```sh
+  yum update -y
+  ```
+
+- Đặt hostname cho máy cài CentOS Client1
+  ```sh
+  hostnamectl set-hostname centos7client1  
+  ```
+- Thiết lập IP cho máy CEPH AIO
+  ```sh
+  echo "Setup IP  eno16777728"
+  nmcli c modify eno16777728 ipv4.addresses 10.10.10.81/24
+  nmcli c modify eno16777728 ipv4.method manual
+
+  echo "Setup IP  eno33554952"
+  nmcli c modify eno33554952 ipv4.addresses 172.16.69.81/24
+  nmcli c modify eno33554952 ipv4.gateway 172.16.69.1
+  nmcli c modify eno33554952 ipv4.dns 8.8.8.8
+  nmcli c modify eno33554952 ipv4.method manual
+  ```
+  
+- Cấu hình các thành phần mạng cơ bản
+  ```sh
+  sudo systemctl disable firewalld
+  sudo systemctl stop firewalld
+  sudo systemctl disable NetworkManager
+  sudo systemctl stop NetworkManager
+  sudo systemctl enable network
+  sudo systemctl start network
+  ```
+
+- Vô hiệu hóa Selinux
+  ```sh
+  sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/sysconfig/selinux
+  ```
+
+- Sửa file host 
+  ```sh
+  echo "10.10.10.71 cephaio" >> /etc/hosts
+  echo "10.10.10.81 centos7client1" >> /etc/hosts
+  ```
+
+- Khởi động lại máy chủ sau khi cấu hình cơ bản.
+  ```sh
+  init 6
+  ```
+ 
+- Đăng nhập lại bằng quyền `root` sau khi máy chủ reboot xong.
+
+- Khai báo repos cho CEPH 
+  ```sh
+  sudo yum install -y yum-utils
+  sudo yum-config-manager --add-repo https://dl.fedoraproject.org/pub/epel/7/x86_64/ 
+  sudo yum install --nogpgcheck -y epel-release 
+  sudo rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-7 
+  sudo rm /etc/yum.repos.d/dl.fedoraproject.org*
+  ```
+   
+  ```sh
+  cat << EOF > /etc/yum.repos.d/ceph-deploy.repo
+  [Ceph-noarch]
+  name=Ceph noarch packages
+  baseurl=http://download.ceph.com/rpm-jewel/el7/noarch
+  enabled=1
+  gpgcheck=1
+  type=rpm-md
+  gpgkey=https://download.ceph.com/keys/release.asc
+  priority=1
+  EOF
+  ```
+
+- Update sau khi khai báo repo
+  ```sh
+  sudo yum -y update
+  ```
+  
+- Tạo user `ceph-deploy`
+  ```sh
+  sudo useradd -d /home/ceph-deploy -m ceph-deploy
+  ```  
+  
+- Đặt mật khẩu cho user `ceph-deploy`
+  ```sh
+  sudo passwd ceph-deploy
+  ```
+  
+- Phân quyền cho user `ceph`
+  ```sh
+  echo "ceph-deploy ALL = (root) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/ceph-deploy
+  chmod 0440 /etc/sudoers.d/ceph-deploy
+
+  sed -i s'/Defaults requiretty/#Defaults requiretty'/g /etc/sudoers
+  ```
+
 
 ### 6.2. Cấu hình client - Ubuntu Server 14.04 64 bit
-#### 6.2.1 Thực hiện cài đặt trên máy chủ Client - Ubuntu Server 14.04 64 bit
 - Bước này sẽ hướng dẫn sử dụng RBD của CEPH để cung cấp cho các Client
 
 #### Bước 1: Chuẩn bị trên Client 
