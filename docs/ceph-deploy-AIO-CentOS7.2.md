@@ -473,6 +473,12 @@
   ceph-release-1-1.el7.noarch
   ```
 
+- Kích hoạt rbdmap để khởi động cùng OS.
+  ```sh
+  [root@centos7client1 ceph]# systemctl enable rbdmap
+  Created symlink from /etc/systemd/system/multi-user.target.wants/rbdmap.service to /usr/lib/systemd/system/rbdmap.service.
+  ```
+  
 - Tạo 1 RBD có dung lượng 10Gb
   ```sh
   rbd create disk02 --size 10240
