@@ -360,7 +360,7 @@ su -
 - Sửa file host 
   ```sh
   echo "10.10.10.71 cephaio" >> /etc/hosts
-  echo "10.10.10.81 centos7client1" >> /etc/hosts
+  echo "10.10.10.51 centos7client1" >> /etc/hosts
   ```
 
 - Khởi động lại máy chủ sau khi cấu hình cơ bản.
@@ -462,7 +462,7 @@ su -
 - Sửa file host 
   ```sh
   echo "10.10.10.71 cephaio" >> /etc/hosts
-  echo "10.10.10.82 ubuntuclient2" >> /etc/hosts
+  echo "10.10.10.52 ubuntuclient2" >> /etc/hosts
   ```
 - Khai báo Repo cho CEPH đối với Ubuntu Server 14.04
   ```sh
