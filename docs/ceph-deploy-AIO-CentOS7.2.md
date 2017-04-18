@@ -485,7 +485,14 @@ ceph-deploy admin ubuntuclient2
   ```sh
   lsblk
   ```
- 
+- Tạo thử 1 file 5GB vào thư mục `/mnt` bằng lệnh `dd`. Lệnh này thực hiện trên client.
+  ```sh
+  cd /mnt 
+  
+  dd if=/dev/zero of=test bs=1M count=5000
+  ```
+  - Nếu muốn quan sát quá trình ghi đọc trên server CEPH-AIO thì thực hiện lệnh `ceph -w` 
+  
 ### 7. Các ghi chú cấu hình client sử dụng CEPH 
 
 - File lỗi khi thực hiện `map` các rbd, nếu chạy xuất hiện lỗi dưới
