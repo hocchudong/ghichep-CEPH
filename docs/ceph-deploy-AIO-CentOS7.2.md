@@ -440,9 +440,10 @@ ceph-deploy admin ubuntuclient2
                 101 MB used, 149 GB / 149 GB avail
                       64 active+clean
     ```
-- Chạy lệnh dưới để fix lỗi `RBD image feature set mismatch. You can disable features unsupported by the kernel with "rbd feature disable".` ở bản  CEPH Jewel
+
+- Khởi động rbdmap cùng OS
   ```sh
-  rbd feature disable rbd/disk01 fast-diff,object-map,exclusive-lock,deep-flatten
+  sudo update-rc.d rbdmap defaults
   ```
 
 - Cài đặt thêm gói `xfsprogs` để có thể sử dụng lệnh `mkfs.xfs`
@@ -454,9 +455,15 @@ ceph-deploy admin ubuntuclient2
   rbd create disk01 --size 10240
   ```
   - Có thể kiểm tra lại kết quả tạo bằng lệnh
+    ```sh
+    rbd ls -l
+    ```
+ 
+- Chạy lệnh dưới để fix lỗi `RBD image feature set mismatch. You can disable features unsupported by the kernel with "rbd feature disable".` ở bản  CEPH Jewel
   ```sh
-  rbd ls -l
+  rbd feature disable rbd/disk01 fast-diff,object-map,exclusive-lock,deep-flatten
   ```
+
   
 - Thực hiện map rbd vừa tạo 
   ```sh
@@ -492,6 +499,19 @@ ceph-deploy admin ubuntuclient2
   dd if=/dev/zero of=test bs=1M count=5000
   ```
   - Nếu muốn quan sát quá trình ghi đọc trên server CEPH-AIO thì thực hiện lệnh `ceph -w` 
+
+- Mặc định khi khởi động lại thì việc map rbd sẽ bị mất, xử lý như sau:
+  - Mở file /etc/ceph/rbdmap và thêm dòng dưới
+    ```sh
+    rbd/disk01   id=admin,keyring=/etc/ceph/ceph.client.admin.keyring
+    ```
+    - Lưu ý cần khai báo pool `rbd` và tên images là `disk01` đã được khai báo ở bên trên.
+    
+  - Sửa file `/etc/fstab` để việc mount được thực hiện mỗi khi khởi động lại OS, thêm dòng
+    ```sh
+    /dev/rbd0   /mnt  xfs defaults,noatime,_netdev        0       0
+    ```
+
   
 ### 7. Các ghi chú cấu hình client sử dụng CEPH 
 
@@ -512,5 +532,16 @@ ceph-deploy admin ubuntuclient2
 - Nếu khi thực hiện format phân vùng RBD trên client`sudo: mkfs.xfs: command not found`, thì cần cài đặt gói để sử dụng lệnh `mkfs.xfs`
   ```sh
   sudo apt-get install xfsprogs
+  ```  
+
+- Lệnh để xem thuộc tính của các loại disk trong linux
+  ```sh
+  blkid
+  ```
+  
+- Lệnh xem các pool trong CEPH
+  ``` 
+  root@ubuntuclient2:~# ceph osd lspools
+  0 rbd,
   ```  
 
