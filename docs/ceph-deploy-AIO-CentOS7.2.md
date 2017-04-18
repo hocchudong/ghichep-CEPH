@@ -415,9 +415,9 @@ ceph-deploy admin ubuntuclient2
 #### Bước 3: Tạo các RBD trên client 
 - Login vào mà hình của máy client để thực hiện các bước tiếp theo như sau:
 - Chuyển sang quyền `root`
-```sh
-...
-```
+  ```sh
+  su -
+  ```
 - Phân quyền cho file `/etc/ceph/ceph.client.admin.keyring` vừa được copy sang ở trên
   ```sh
   sudo chmod +r /etc/ceph/ceph.client.admin.keyring
@@ -446,9 +446,9 @@ ceph-deploy admin ubuntuclient2
   ```
 
 - Cài đặt thêm gói `xfsprogs` để có thể sử dụng lệnh `mkfs.xfs`
-```sh
-sudo apt-get install xfsprogs
-
+  ```sh
+  sudo apt-get install xfsprogs
+  ```
 - Tạo 1 RBD có dung lượng 10Gb
   ```sh
   rbd create disk01 --size 10240
