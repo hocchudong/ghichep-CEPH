@@ -417,6 +417,10 @@ su -
 
 #### Bước 2: Đứng trên node CEPH-AIO thực hiện các lệnh dưới.
 - Login vào máy chủ CEPH AIO và thực hiện các lệnh dưới
+  - Chuyển sang tài khoản `root`
+    ```sh
+    su -
+    ```
   - Khai báo thêm host của client 
     ```sh
     echo "10.10.10.51 centos7client1" >> /etc/hosts
@@ -437,8 +441,39 @@ su -
 - Thực hiện copy file config cho ceph và key sang client
   ```sh
   ceph-deploy install centos7client1 
-  ceph-deploy admin centos7client1
   ```
+  
+  - Sau khi kết thúc quá trình cài đặt cho client, nếu thành công sẽ có báo kết quả như sau ở màn hình.
+    ```sh
+    [centos7client1][DEBUG ] Complete!
+    [centos7client1][INFO  ] Running command: sudo ceph --version
+    [centos7client1][DEBUG ] ceph version 10.2.7 (50e863e0f4bc8f4b9e31156de690d765af245185)
+    ```
+  - Tiếp tục thực hiện lệnh để copy các file cần thiết từ node CEPH-AIO sang client
+    ```sh
+    ceph-deploy admin centos7client1
+    ```   
+  - Thực hiện xong lệnh trên, ceph-deploy sẽ copy các file cần thiết vào thư mục `/etc/ceph` của client. Chuyển sang client để thực hiện tiếp các thao tác. 
+  
+#### Bước 4: Thực hiện các thao tác để sử dụng rbd trên Client.
+- Đăng nhập vào tài khoản `root` của client (CentOS7 để thực hiện tiếp các)
+- Thực hiện việc kiểm tra các gói `ceph` đã được cài bằng lệnh `rpm -qa | grep ceph`
+  ```sh
+  [root@centos7client1 yum.repos.d]# rpm -qa | grep ceph
+  python-cephfs-10.2.7-0.el7.x86_64
+  ceph-base-10.2.7-0.el7.x86_64
+  ceph-selinux-10.2.7-0.el7.x86_64
+  ceph-osd-10.2.7-0.el7.x86_64
+  ceph-mds-10.2.7-0.el7.x86_64
+  ceph-radosgw-10.2.7-0.el7.x86_64
+  libcephfs1-10.2.7-0.el7.x86_64
+  ceph-common-10.2.7-0.el7.x86_64
+  ceph-mon-10.2.7-0.el7.x86_64
+  ceph-10.2.7-0.el7.x86_64
+  ceph-release-1-1.el7.noarch
+  ```
+
+- 
 
 
 
@@ -586,22 +621,22 @@ ceph-deploy admin ubuntuclient2
   ```
 - Tạo 1 RBD có dung lượng 10Gb
   ```sh
-  rbd create disk01 --size 10240
+  rbd create disk02 --size 10240
   ```
   - Có thể kiểm tra lại kết quả tạo bằng lệnh
     ```sh
     rbd ls -l
     ```
  
-- Chạy lệnh dưới để fix lỗi `RBD image feature set mismatch. You can disable features unsupported by the kernel with "rbd feature disable".` ở bản  CEPH Jewel
+- Chạy lệnh dưới để fix lỗi `RBD image feature set mismatch. You can disable features unsupported by the kernel with "rbd feature disable".` ở bản  CEPH Jewel. Lưu ý từ khóa `disk02` trong lệnh, nó là tên image của rbd được tạo.
   ```sh
-  rbd feature disable rbd/disk01 fast-diff,object-map,exclusive-lock,deep-flatten
+  rbd feature disable rbd/disk02 fast-diff,object-map,exclusive-lock,deep-flatten
   ```
 
   
 - Thực hiện map rbd vừa tạo 
   ```sh
-  sudo rbd map disk01 
+  sudo rbd map disk02 
   ```
   - Kiểm tra lại kết quả map bằng lệnh dưới
     ```sh
@@ -610,12 +645,12 @@ ceph-deploy admin ubuntuclient2
   
 - Thực hiện format disk vừa được map
   ```sh
-  sudo mkfs.xfs /dev/rbd0
+  sudo mkfs.xfs /dev/rbd1
   ```
   
 - Thực hiện mount disk vừa được format để sử dụng (mount vào thư mục `mnt` của client)
   ```sh
-  sudo mount /dev/rbd0 /mnt
+  sudo mount /dev/rbd1 /mnt
   ```
 
 - Kiểm tra lại việc mount đã thành công hay chưa bằng một trong các lệnh dưới
@@ -637,13 +672,13 @@ ceph-deploy admin ubuntuclient2
 - Mặc định khi khởi động lại thì việc map rbd sẽ bị mất, xử lý như sau:
   - Mở file /etc/ceph/rbdmap và thêm dòng dưới
     ```sh
-    rbd/disk01   id=admin,keyring=/etc/ceph/ceph.client.admin.keyring
+    rbd/disk02   id=admin,keyring=/etc/ceph/ceph.client.admin.keyring
     ```
     - Lưu ý cần khai báo pool `rbd` và tên images là `disk01` đã được khai báo ở bên trên.
     
   - Sửa file `/etc/fstab` để việc mount được thực hiện mỗi khi khởi động lại OS, thêm dòng
     ```sh
-    /dev/rbd0   /mnt  xfs defaults,noatime,_netdev        0       0
+    /dev/rbd1   /mnt  xfs defaults,noatime,_netdev        0       0
     ```
     
   - Trong quá trình lab với client là ubuntu tôi gặp hiện tượng khởi động lại Client 2 lần thì mới đăng nhập được, chưa hiểu tại sao lại bị tình trạng như vậy.
@@ -664,6 +699,7 @@ ceph-deploy admin ubuntuclient2
     ```sh
     rbd feature disable rbd/disk01 fast-diff,object-map,exclusive-lock,deep-flatten
     ```
+    - Lưu ý từ khóa `disk02` trong lệnh, nó là tên image của rbd được tạo.
     
 - Nếu khi thực hiện format phân vùng RBD trên client`sudo: mkfs.xfs: command not found`, thì cần cài đặt gói để sử dụng lệnh `mkfs.xfs`
   ```sh
