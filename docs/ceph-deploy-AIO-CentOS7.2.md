@@ -329,13 +329,13 @@ su -
 - Thiết lập IP cho máy CEPH AIO
   ```sh
   echo "Setup IP  eno16777728"
-  nmcli c modify eno16777728 ipv4.addresses 10.10.10.81/24
+  nmcli c modify eno16777728 ipv4.addresses 10.10.10.51/24
   nmcli c modify eno16777728 ipv4.method manual
   nmcli con mod eno16777728 connection.autoconnect yes
 
 
   echo "Setup IP  eno33554952"
-  nmcli c modify eno33554952 ipv4.addresses 172.16.69.81/24
+  nmcli c modify eno33554952 ipv4.addresses 172.16.69.51/24
   nmcli c modify eno33554952 ipv4.gateway 172.16.69.1
   nmcli c modify eno33554952 ipv4.dns 8.8.8.8
   nmcli c modify eno33554952 ipv4.method manual
@@ -442,12 +442,12 @@ su -
   # The primary network interface
   auto eth0
   iface eth0 inet static
-  address 10.10.10.82
+  address 10.10.10.52
   netmask 255.255.255.0
 
   auto eth1
   iface eth1 inet static
-  address 172.16.69.82
+  address 172.16.69.52
   gateway 172.16.69.1
   netmask 255.255.255.0
   dns-nameservers 8.8.8.8
