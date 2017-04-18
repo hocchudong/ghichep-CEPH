@@ -415,6 +415,32 @@ su -
   sed -i s'/Defaults requiretty/#Defaults requiretty'/g /etc/sudoers
   ```
 
+#### Bước 2: Đứng trên node CEPH-AIO thực hiện các lệnh dưới.
+- Login vào máy chủ CEPH AIO và thực hiện các lệnh dưới
+  - Khai báo thêm host của client 
+    ```sh
+    echo "10.10.10.51 centos7client1" >> /etc/hosts
+    ```
+    
+  - Chuyển sang tài khoản `ceph-deploy` để thực hiện cài đặt
+    ```sh
+    sudo su - ceph-deploy
+    
+    cd cluster-ceph
+    ```
+    
+  - Copy ssh key đã tạo trước đó sang client, gõ `yes` và nhập mật khẩu của user `ceph-deploy` phía client đã tạo trước đó.
+    ```sh
+    ssh-copy-id ceph-deploy@centos7client1
+    ```
+  
+- Thực hiện copy file config cho ceph và key sang client
+  ```sh
+  ceph-deploy install centos7client1 
+  ceph-deploy admin centos7client1
+  ```
+
+
 
 ### 6.2. Cấu hình client - Ubuntu Server 14.04 64 bit
 - Bước này sẽ hướng dẫn sử dụng RBD của CEPH để cung cấp cho các Client
@@ -500,7 +526,7 @@ su -
 - Login vào máy chủ CEPH AIO và thực hiện các lệnh dưới
   - Khai báo thêm host của client 
     ```sh
-    echo "10.10.10.82 ubuntuclient2" >> /etc/hosts
+    echo "10.10.10.52 ubuntuclient2" >> /etc/hosts
     ```
     
   - Chuyển sang tài khoản `ceph-deploy` để thực hiện cài đặt
