@@ -7,6 +7,7 @@
   - mon
   - OSD
 - LAB này chỉ phù hợp với việc nghiên cức các tính năng và demo thử nghiệm, không áp dụng được trong thực tế.
+- Việc dựng CEPH-AIO có thể chạy theo đúng mô hình này hoặc theo mô hình để tích hợp cùng OpenStack tại tài liệu này [link tài liệu]
 
 ## 2. Mô hình 
 - Sử dụng mô hình dưới để cài đặt CEPH AIO, nếu chỉ dựng CEPH AIO thì chỉ cần một máy chủ để cài đặt CEPH. 
@@ -32,6 +33,10 @@
 - CEPH Jewel
 
 ## 5. Cài đặt CEPH trên máy chủ CEPH
+- Nếu chưa login vào máy chủ CEPH-AIO bằng quyền `root` thì thực hiện chuyển sang quyền `root`
+  ```sh
+  su -
+  ```
 
 - Update các gói cho máy chủ 
   ```sh
