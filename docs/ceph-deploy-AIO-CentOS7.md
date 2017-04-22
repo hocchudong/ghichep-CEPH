@@ -59,12 +59,12 @@
   nmcli c modify eno33554952 ipv4.gateway 172.16.69.1
   nmcli c modify eno33554952 ipv4.dns 8.8.8.8
   nmcli c modify eno33554952 ipv4.method manual
-  nmcli con mod eno16777728 connection.autoconnect yes
+  nmcli con mod eno33554952 connection.autoconnect yes
 
   echo "Setup IP  eno50332176"
   nmcli c modify eno50332176 ipv4.addresses 10.10.30.71/24
   nmcli c modify eno50332176 ipv4.method manual
-  nmcli con mod eno16777728 connection.autoconnect yes
+  nmcli con mod eno50332176 connection.autoconnect yes
   ```
   
 - Cấu hình các thành phần mạng cơ bản
