@@ -10,12 +10,12 @@
 ### 1.1 Mô hình mạng
 - Mô hình đầy đủ
 
-![Ceph Jewel Topo](Ceph_Storage/images/OPSMitaka_CephJewel.jpg)
+![Ceph Jewel Topo](../../images/OPSMitaka_CephJewel.jpg)
 
 <a name="1.2"> </a> 
 ### 1.2 Các tham số phần cứng đối với các node
 
-![Ceph hardware](Ceph_Storage/images/Cauhinh_phancung_Mitaka_Jewel.jpg)
+![Ceph hardware](../../images/Cauhinh_phancung_Mitaka_Jewel.jpg)
 
 ### Chú ý khi lựa chọn OS và lựa chọn dải mạng
 
