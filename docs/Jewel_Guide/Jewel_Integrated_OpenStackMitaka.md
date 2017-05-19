@@ -68,8 +68,7 @@
 	ceph auth get-key client.cinder | ssh 172.16.69.51 tee client.cinder.key
 	```
 
-## 3. Trên node Controller
-
+## 3. Trên 2 node Controller và Copute
 ### 3.1. Cài đặt package cho Ceph Jewel
 - Cài đặt repo
 
@@ -124,7 +123,10 @@
 	fc6a2ccd-eb9f-4e6e-9bd5-4a0c5feb4d50
 	```
 
-### 3.2. Cấu hình `glance-api.conf` để lưu image xuống Ceph
+
+## 4. Trên node Controller
+
+### 4.1. Cấu hình `glance-api.conf` để lưu image xuống Ceph
 	```
 	vim /etc/glance/glance-api.conf
 	```
@@ -153,7 +155,7 @@
 	rbd_store_chunk_size = 8
 	```
 
-### 3.3. Cấu hình `cinder.conf` để lưu volume và volume backup xuống Ceph
+### 4.2. Cấu hình `cinder.conf` để lưu volume và volume backup xuống Ceph
 	```
 	vim /etc/cinder/cinder.conf
 	```
@@ -196,60 +198,16 @@
 	rbd_secret_uuid = fc6a2ccd-eb9f-4e6e-9bd5-4a0c5feb4d50
 	report_discard_supported = true
 	```
-### 3.4. Khởi động lại các dịch vụ
+### 4.3. Khởi động lại các dịch vụ
 	```
 	cd /etc/init/; for i in $(ls cinder-* | cut -d \. -f 1 | xargs); do sudo service $i restart; done
 	cd /etc/init/; for i in $(ls glance-* | cut -d \. -f 1 | xargs); do sudo service $i restart; done
 	```
 
 
-## 4. Trên node Compute
+## 5. Trên node Compute
 
-### 4.1. Cài đặt package cho Ceph Jewel
-- Cài đặt repo
-
-	```sh
-	wget -q -O- 'https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/release.asc' | sudo apt-key add -
-	```
-	Kết quả: `OK`
-
-	```sh
-	echo deb http://download.ceph.com/debian-jewel/ trusty main | sudo tee /etc/apt/sources.list.d/ceph.list
-	```
-- Cập nhật các gói phần mềm
-	```sh
-	apt-get -y update
-	```
-- Nếu node Controller có service `glance-api`, cài đặt `python-rbd package
-
-	```sh
-	apt-get install python-rbd -y
-	```
-- Nếu node Controller có service `cinder-backup` và `cinder-volume`, cài đặt `ceph-common` package
-
-    ```sh
-    apt-get install ceph-common -y
-    ```
-
-- Kiểm tra các gói sau khi cài
-
-	```sh
-	dpkg -l | egrep -i "ceph|rados|rbd"
-	```
-	Kết quả:
-
-	```sh
-	ii  ceph-common                          10.2.6-1trusty                        amd64        common utilities to mount and interact with a ceph storage cluster
-	ii  libcephfs1                           10.2.6-1trusty                        amd64        Ceph distributed file system client library
-	ii  librados2                            10.2.6-1trusty                        amd64        RADOS distributed object store client library
-	ii  libradosstriper1                     10.2.6-1trusty                        amd64        RADOS striping interface
-	ii  librbd1                              10.2.6-1trusty                        amd64        RADOS block device client library
-	ii  librgw2                              10.2.6-1trusty                        amd64        RADOS Gateway client library
-	ii  python-cephfs                        10.2.6-1trusty                        amd64        Python libraries for the Ceph libcephfs library
-	ii  python-rados                         10.2.6-1trusty                        amd64        Python libraries for the Ceph librados library
-	ii  python-rbd                           10.2.6-1trusty                        amd64        Python libraries for the Ceph librbd library
-	```
-### 4.2. Cấu hình `nova.conf` để lưu VM xuống Ceph
+### 5.1. Cấu hình `nova.conf` để lưu VM xuống Ceph
 	```
 	vim /etc/nova/nova.conf
 	```
@@ -269,7 +227,7 @@
 	disk_cachemodes = network=writeback
 	hw_disk_discard = unmap
 	```
-### 4.3. Add secret key vào libvirt
+### 5.2. Add secret key vào libvirt
 - Tạo file `secret.xml` đặt tại `/root`
 	```
 	<secret ephemeral='no' private='no'>
@@ -292,7 +250,7 @@
 	```
 	sudo virsh secret-set-value --secret fc6a2ccd-eb9f-4e6e-9bd5-4a0c5feb4d50 --base64 $(cat client.cinder.key)
 	```
-### 4.4. Khởi động lại các dịch vụ
+### 5.3. Khởi động lại các dịch vụ
 	```
 	cd /etc/init/; for i in $(ls nova-* | cut -d \. -f 1 | xargs); do sudo service $i restart; done
 	```
