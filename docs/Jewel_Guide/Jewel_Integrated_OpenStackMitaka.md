@@ -115,6 +115,15 @@
 	ii  python-rados                         10.2.6-1trusty                        amd64        Python libraries for the Ceph librados library
 	ii  python-rbd                           10.2.6-1trusty                        amd64        Python libraries for the Ceph librbd library
 	```
+- Tạo secret key (để VM có thể sử dụng Volume)
+	```
+	uuidgen
+	```
+	Kết quả:
+	```
+	fc6a2ccd-eb9f-4e6e-9bd5-4a0c5feb4d50
+	```
+
 ### 3.2. Cấu hình `glance-api.conf` để lưu image xuống Ceph
 	```
 	vim /etc/glance/glance-api.conf
@@ -183,9 +192,16 @@
 	rbd_store_chunk_size = 4
 	rados_connect_timeout = -1
 	rbd_user = cinder
+	#Khai báo secret key đã tạo
 	rbd_secret_uuid = fc6a2ccd-eb9f-4e6e-9bd5-4a0c5feb4d50
 	report_discard_supported = true
 	```
+### 3.4. Khởi động lại các dịch vụ
+	```
+	cd /etc/init/; for i in $(ls cinder-* | cut -d \. -f 1 | xargs); do sudo service $i restart; done
+	cd /etc/init/; for i in $(ls glance-* | cut -d \. -f 1 | xargs); do sudo service $i restart; done
+	```
+
 
 ## 4. Trên node Compute
 
@@ -248,10 +264,36 @@
 	images_rbd_pool = vms-hdd
 	images_rbd_ceph_conf = /etc/ceph/ceph.conf
 	rbd_user = cinder
+	#Khai báo secret key đã tạo
 	rbd_secret_uuid = fc6a2ccd-eb9f-4e6e-9bd5-4a0c5feb4d50
 	disk_cachemodes = network=writeback
 	hw_disk_discard = unmap
 	```
+### 4.3. Add secret key vào libvirt
+- Tạo file `secret.xml` đặt tại `/root`
+	```
+	<secret ephemeral='no' private='no'>
+  		<uuid>fc6a2ccd-eb9f-4e6e-9bd5-4a0c5feb4d50</uuid>
+  		<usage type='ceph'>
+    		name>client.cinder secret</name>
+  		</usage>
+	</secret>
+	```
+- Định nghĩa secret key
+	```
+	virsh secret-define --file secret.xml
+	```
 
+	Kết quả:
 
+	Secret fc6a2ccd-eb9f-4e6e-9bd5-4a0c5feb4d50 created
+
+- Add secret key vào libvirt
+	```
+	sudo virsh secret-set-value --secret fc6a2ccd-eb9f-4e6e-9bd5-4a0c5feb4d50 --base64 $(cat client.cinder.key)
+	```
+### 4.4. Khởi động lại các dịch vụ
+	```
+	cd /etc/init/; for i in $(ls nova-* | cut -d \. -f 1 | xargs); do sudo service $i restart; done
+	```
 
