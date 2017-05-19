@@ -23,7 +23,7 @@
 - OS: Ubuntu Server 14.04.5 64 bit, kernel >= 4.4.0-31-generic
 - Các dải mạng: 
 	- Management Network: sử dụng để quản lý (ssh) các máy chủ và để các máy chủ tải các gói cài đặt từ Internet.
-	- Public Network: sử dụng để các máy client có thể truy cập và sử dụng tài nguyên lưu trữ trên Ceph.
+	- Data Network: sử dụng để các máy client có thể truy cập và sử dụng tài nguyên lưu trữ trên Ceph.
 	- Replication Network: Sử dụng để nhân bản dữ liệu giữa các node Ceph.
 - Ổ cứng:
 	- Label của các ổ cứng trong hướng dẫn này là sda, sdb,sdc,sdd. Tùy từng môi trường thực hiện label này có thể thay đổi (vda, vdb)
