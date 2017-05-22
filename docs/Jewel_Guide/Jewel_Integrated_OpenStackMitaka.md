@@ -43,30 +43,30 @@ root@ceph1:~# ceph osd pool create vms 128 128
 ```	
 
 ### 2.2. Chuyển file `ceph.conf`  sang các node Controller và Compute, đặt tại `/etc/ceph` (nếu chưa có thì tạo thư mục bằng lệnh `mkdir /etc/ceph`)
-	```
-	root@ceph1:~# ssh 172.16.69.50 sudo tee /etc/ceph/ceph.conf < /etc/ceph/ceph.conf
-	root@ceph1:~# ssh 172.16.69.51 sudo tee /etc/ceph/ceph.conf < /etc/ceph/ceph.conf
-	```
+```
+root@ceph1:~# ssh 172.16.69.50 sudo tee /etc/ceph/ceph.conf < /etc/ceph/ceph.conf
+root@ceph1:~# ssh 172.16.69.51 sudo tee /etc/ceph/ceph.conf < /etc/ceph/ceph.conf
+```
 ### 2.3. Tạo các ceph user cho dịch vụ OpenStack
-	```
-	root@ceph1:~# ceph auth get-or-create client.glance mon 'allow r' osd 'allow class-read object_prefix rbd_children, allow rwx pool=images'
-	root@ceph1:~# ceph auth get-or-create client.cinder-backup mon 'allow r' osd 'allow class-read object_prefix rbd_children, allow rwx pool=backups'
-	root@ceph1:~# ceph auth get-or-create client.cinder mon 'allow r' osd 'allow class-read object_prefix rbd_children, allow rwx pool=volumes, allow rwx pool=vms, allow rwx pool=images'
-	```
+```
+root@ceph1:~# ceph auth get-or-create client.glance mon 'allow r' osd 'allow class-read object_prefix rbd_children, allow rwx pool=images'
+root@ceph1:~# ceph auth get-or-create client.cinder-backup mon 'allow r' osd 'allow class-read object_prefix rbd_children, allow rwx pool=backups'
+root@ceph1:~# ceph auth get-or-create client.cinder mon 'allow r' osd 'allow class-read object_prefix rbd_children, allow rwx pool=volumes, allow rwx pool=vms, allow rwx pool=images'
+```
 ### 2.4. Chuyển các key `client.cinder`, `client.glance`, `client.cinder-backup` sang node Controller
-	```
-	root@ceph1:~# ceph auth get-or-create client.glance | ssh 172.16.69.50 sudo tee /etc/ceph/ceph.client.glance.keyring
-	root@ceph1:~# ssh 172.16.69.50 sudo chown glance:glance /etc/ceph/ceph.client.glance.keyring
-	root@ceph1:~# ceph auth get-or-create client.cinder | ssh 172.16.69.50 sudo tee /etc/ceph/ceph.client.cinder.keyring
-	root@ceph1:~# ssh 172.16.69.50 sudo chown cinder:cinder /etc/ceph/ceph.client.cinder.keyring
-	root@ceph1:~# ceph auth get-or-create client.cinder-backup | ssh 172.16.69.50 sudo tee /etc/ceph/ceph.client.cinder-backup.keyring
-	root@ceph1:~# ssh 172.16.69.50 sudo chown cinder:cinder /etc/ceph/ceph.client.cinder-backup.keyring
-	```
+```
+root@ceph1:~# ceph auth get-or-create client.glance | ssh 172.16.69.50 sudo tee /etc/ceph/ceph.client.glance.keyring
+root@ceph1:~# ssh 172.16.69.50 sudo chown glance:glance /etc/ceph/ceph.client.glance.keyring
+root@ceph1:~# ceph auth get-or-create client.cinder | ssh 172.16.69.50 sudo tee /etc/ceph/ceph.client.cinder.keyring
+root@ceph1:~# ssh 172.16.69.50 sudo chown cinder:cinder /etc/ceph/ceph.client.cinder.keyring
+root@ceph1:~# ceph auth get-or-create client.cinder-backup | ssh 172.16.69.50 sudo tee /etc/ceph/ceph.client.cinder-backup.keyring
+root@ceph1:~# ssh 172.16.69.50 sudo chown cinder:cinder /etc/ceph/ceph.client.cinder-backup.keyring
+```
 ### 2.5. Chuyển key `client.cinder` sang node Compute
-	```
-	root@ceph1:~# ceph auth get-or-create client.cinder | ssh 172.16.69.51 sudo tee /etc/ceph/ceph.client.cinder.keyring
-	root@ceph1:~# ceph auth get-key client.cinder | ssh 172.16.69.51 tee client.cinder.key
-	```
+```
+root@ceph1:~# ceph auth get-or-create client.cinder | ssh 172.16.69.51 sudo tee /etc/ceph/ceph.client.cinder.keyring
+root@ceph1:~# ceph auth get-key client.cinder | ssh 172.16.69.51 tee client.cinder.key
+```
 
 ## 3. Trên 2 node Controller và Copute
 ### 3.1. Cài đặt package cho Ceph Jewel
@@ -128,113 +128,113 @@ root@ceph1:~# ceph osd pool create vms 128 128
 
 ### 4.1. Cấu hình `glance-api.conf` để lưu image xuống Ceph
 
-	`root@controller1:~# vim /etc/glance/glance-api.conf`
-	
+`root@controller1:~# vim /etc/glance/glance-api.conf`
 
-	```
-	[DEFAULT]
-	show_multiple_locations = True
-	enable_v2_api = true
-	enable_v2_registry = true
-	enable_v1_api = true
-	enable_v1_registry = true
 
-	...
+```
+[DEFAULT]
+show_multiple_locations = True
+enable_v2_api = true
+enable_v2_registry = true
+enable_v1_api = true
+enable_v1_registry = true
 
-	[glance_store]
-	#Option để enable COW cho image
-	show_image_direct_url = True
-	default_store = rbd
-	#Khai báo các store để lưu trữ image (mặc định là rbd)
-	stores = file,rbd,http
-	filesystem_store_datadir = /var/lib/glance/images/
-	#Khai báo ceph pool và user để lưu trữ image vào ceph
-	rbd_store_pool = images
-	rbd_store_user = glance
-	rbd_store_ceph_conf = /etc/ceph/ceph.conf
-	rbd_store_chunk_size = 8
-	```
+...
+
+[glance_store]
+#Option để enable COW cho image
+show_image_direct_url = True
+default_store = rbd
+#Khai báo các store để lưu trữ image (mặc định là rbd)
+stores = file,rbd,http
+filesystem_store_datadir = /var/lib/glance/images/
+#Khai báo ceph pool và user để lưu trữ image vào ceph
+rbd_store_pool = images
+rbd_store_user = glance
+rbd_store_ceph_conf = /etc/ceph/ceph.conf
+rbd_store_chunk_size = 8
+```
 
 ### 4.2. Cấu hình `cinder.conf` để lưu volume và volume backup xuống Ceph
 	
-	`root@controller1:~# vim /etc/cinder/cinder.conf`
+`root@controller1:~# vim /etc/cinder/cinder.conf`
 
-	```
-	[DEFAULT]
-	notification_driver = messagingv2
-	#Khai báo kết nối tới Glance để lấy image (sử dụng Glance API v2)
-	glance_api_servers = http://171.16.69.50:9292
-	glance_api_version = 2
-	#khai báo backend cho Cinder là ceph_hdd, nếu có nhiều backend thì ngăn cách bằng dấu ','
-	enabled_backends = ceph_hdd
-	#Bỏ dòng khai báo `volume_group = cinder-volumes`
-	#volume_group = cinder-volumes
+```
+[DEFAULT]
+notification_driver = messagingv2
+#Khai báo kết nối tới Glance để lấy image (sử dụng Glance API v2)
+glance_api_servers = http://171.16.69.50:9292
+glance_api_version = 2
+#khai báo backend cho Cinder là ceph_hdd, nếu có nhiều backend thì ngăn cách bằng dấu ','
+enabled_backends = ceph_hdd
+#Bỏ dòng khai báo `volume_group = cinder-volumes`
+#volume_group = cinder-volumes
 
 
-	#Khai báo ceph pool và user để lưu các bản volume backup xuống ceph
-	backup_driver = cinder.backup.drivers.ceph
-	backup_ceph_conf = /etc/ceph/ceph.conf
-	backup_ceph_user = cinder-backup
-	backup_ceph_chunk_size = 134217728
-	#Khai báo ceph pool chứa volume backup
-	backup_ceph_pool = backups
-	backup_ceph_stripe_unit = 0
-	backup_ceph_stripe_count = 0
-	restore_discard_excess_bytes = true
+#Khai báo ceph pool và user để lưu các bản volume backup xuống ceph
+backup_driver = cinder.backup.drivers.ceph
+backup_ceph_conf = /etc/ceph/ceph.conf
+backup_ceph_user = cinder-backup
+backup_ceph_chunk_size = 134217728
+#Khai báo ceph pool chứa volume backup
+backup_ceph_pool = backups
+backup_ceph_stripe_unit = 0
+backup_ceph_stripe_count = 0
+restore_discard_excess_bytes = true
 
-	...
-	#Khai báo backend ceph_ssd
-	[ceph_hdd]
-	volume_driver = cinder.volume.drivers.rbd.RBDDriver
-	volume_backend_name = ceph_hdd
-	#Khai báo ceph pool chứa volume
-	rbd_pool = volumes
-	rbd_ceph_conf = /etc/ceph/ceph.conf
-	rbd_flatten_volume_from_snapshot = true
-	rbd_max_clone_depth = 5
-	rbd_store_chunk_size = 4
-	rados_connect_timeout = -1
-	rbd_user = cinder
-	#Khai báo secret key đã tạo
-	rbd_secret_uuid = fc6a2ccd-eb9f-4e6e-9bd5-4a0c5feb4d50
-	report_discard_supported = true
-	```
+...
+#Khai báo backend ceph_ssd
+[ceph_hdd]
+volume_driver = cinder.volume.drivers.rbd.RBDDriver
+volume_backend_name = ceph_hdd
+#Khai báo ceph pool chứa volume
+rbd_pool = volumes
+rbd_ceph_conf = /etc/ceph/ceph.conf
+rbd_flatten_volume_from_snapshot = true
+rbd_max_clone_depth = 5
+rbd_store_chunk_size = 4
+rados_connect_timeout = -1
+rbd_user = cinder
+#Khai báo secret key đã tạo
+rbd_secret_uuid = fc6a2ccd-eb9f-4e6e-9bd5-4a0c5feb4d50
+report_discard_supported = true
+```
 
 ### 4.3. Tạo các backend cho volume
-	```
-	root@controller1:~# cinder type-create hdd
-	root@controller1:~# cinder type-key hdd set volume_backend_name=ceph_hdd
-	```
+```
+root@controller1:~# cinder type-create hdd
+root@controller1:~# cinder type-key hdd set volume_backend_name=ceph_hdd
+```
 
 ### 4.4. Khởi động lại các dịch vụ
-	```
-	root@controller1:~# cd /etc/init/; for i in $(ls cinder-* | cut -d \. -f 1 | xargs); do sudo service $i restart; done
-	root@controller1:~# cd /etc/init/; for i in $(ls glance-* | cut -d \. -f 1 | xargs); do sudo service $i restart; done
-	```
+```
+root@controller1:~# cd /etc/init/; for i in $(ls cinder-* | cut -d \. -f 1 | xargs); do sudo service $i restart; done
+root@controller1:~# cd /etc/init/; for i in $(ls glance-* | cut -d \. -f 1 | xargs); do sudo service $i restart; done
+```
 
 
 ## 5. Trên node Compute
 
 ### 5.1. Cấu hình `nova.conf` để lưu VM xuống Ceph
 	
-	`root@compute1:~# vim /etc/nova/nova.conf`
+`root@compute1:~# vim /etc/nova/nova.conf`
 
-	```
-	[libvirt]
-	inject_partition = -2
-	inject_password = false
-	live_migration_flag = VIR_MIGRATE_UNDEFINE_SOURCE,VIR_MIGRATE_PEER2PEER,VIR_MIGRATE_LIVE,VIR_MIGRATE_PERSIST_DEST
-	inject_key = False
-	images_type = rbd
-	#Khai báo ceph pool chứa vm
-	images_rbd_pool = vms
-	images_rbd_ceph_conf = /etc/ceph/ceph.conf
-	rbd_user = cinder
-	#Khai báo secret key đã tạo
-	rbd_secret_uuid = fc6a2ccd-eb9f-4e6e-9bd5-4a0c5feb4d50
-	disk_cachemodes = network=writeback
-	hw_disk_discard = unmap
-	```
+```
+[libvirt]
+inject_partition = -2
+inject_password = false
+live_migration_flag = VIR_MIGRATE_UNDEFINE_SOURCE,VIR_MIGRATE_PEER2PEER,VIR_MIGRATE_LIVE,VIR_MIGRATE_PERSIST_DEST
+inject_key = False
+images_type = rbd
+#Khai báo ceph pool chứa vm
+images_rbd_pool = vms
+images_rbd_ceph_conf = /etc/ceph/ceph.conf
+rbd_user = cinder
+#Khai báo secret key đã tạo
+rbd_secret_uuid = fc6a2ccd-eb9f-4e6e-9bd5-4a0c5feb4d50
+disk_cachemodes = network=writeback
+hw_disk_discard = unmap
+```
 ### 5.2. Add secret key vào libvirt
 - Tạo file `secret.xml` đặt tại `/root`
 
