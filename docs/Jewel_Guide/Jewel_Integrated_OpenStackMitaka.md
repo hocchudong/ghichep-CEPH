@@ -35,12 +35,12 @@
 <a name="2"> </a> 
 ## 2. Trên Ceph 1
 ### 2.1. Tạo ra các pool cho các dịch vụ của OpenStack
-	```
+	
 	root@ceph1:~# ceph osd pool create volumes 128 128
 	root@ceph1:~# ceph osd pool create images 128 128
 	root@ceph1:~# ceph osd pool create backups 128 128
 	root@ceph1:~# ceph osd pool create vms 128 128
-	```
+	
 
 ### 2.2. Chuyển file `ceph.conf`  sang các node Controller và Compute, đặt tại `etc/ceph` (nếu chưa có thì tạo thư mục bằng lệnh `mkdir /etc/ceph`)
 	```
@@ -127,7 +127,7 @@
 ## 4. Trên node Controller
 
 ### 4.1. Cấu hình `glance-api.conf` để lưu image xuống Ceph
-	
+
 	`root@controller1:~# vim /etc/glance/glance-api.conf`
 	
 
