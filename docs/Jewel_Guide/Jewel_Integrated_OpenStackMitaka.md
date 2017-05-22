@@ -36,10 +36,10 @@
 ## 2. Trên Ceph 1
 ### 2.1. Tạo ra các pool cho các dịch vụ của OpenStack
 	```
-	root@ceph1:~# ceph osd pool create volumes-ssd 128 128
-	root@ceph1:~# ceph osd pool create images-ssd 128 128
+	root@ceph1:~# ceph osd pool create volumes 128 128
+	root@ceph1:~# ceph osd pool create images 128 128
 	root@ceph1:~# ceph osd pool create backups 128 128
-	root@ceph1:~# ceph osd pool create vms-hdd 128 128
+	root@ceph1:~# ceph osd pool create vms 128 128
 	```
 
 ### 2.2. Chuyển file `ceph.conf`  sang các node Controller và Compute, đặt tại `etc/ceph` (nếu chưa có thì tạo thư mục bằng lệnh `mkdir /etc/ceph`)
@@ -49,9 +49,9 @@
 	```
 ### 2.3. Tạo các ceph user cho dịch vụ OpenStack
 	```
-	root@ceph1:~# ceph auth get-or-create client.glance mon 'allow r' osd 'allow class-read object_prefix rbd_children, allow rwx pool=images-ssd'
+	root@ceph1:~# ceph auth get-or-create client.glance mon 'allow r' osd 'allow class-read object_prefix rbd_children, allow rwx pool=images'
 	root@ceph1:~# ceph auth get-or-create client.cinder-backup mon 'allow r' osd 'allow class-read object_prefix rbd_children, allow rwx pool=backups'
-	root@ceph1:~# ceph auth get-or-create client.cinder mon 'allow r' osd 'allow class-read object_prefix rbd_children, allow rwx pool=volumes-ssd, allow rwx pool=vms-hdd, allow rwx pool=images-ssd'
+	root@ceph1:~# ceph auth get-or-create client.cinder mon 'allow r' osd 'allow class-read object_prefix rbd_children, allow rwx pool=volumes, allow rwx pool=vms, allow rwx pool=images'
 	```
 ### 2.4. Chuyển các key `client.cinder`, `client.glance`, `client.cinder-backup` sang node Controller
 	```
@@ -149,7 +149,7 @@
 	stores = file,rbd,http
 	filesystem_store_datadir = /var/lib/glance/images/
 	#Khai báo ceph pool và user để lưu trữ image vào ceph
-	rbd_store_pool = images-ssd
+	rbd_store_pool = images
 	rbd_store_user = glance
 	rbd_store_ceph_conf = /etc/ceph/ceph.conf
 	rbd_store_chunk_size = 8
@@ -166,8 +166,8 @@
 	#Khai báo kết nối tới Glance để lấy image (sử dụng Glance API v2)
 	glance_api_servers = http://171.16.69.50:9292
 	glance_api_version = 2
-	#khai báo backend cho Cinder là ceph_ssd, nếu có nhiều backend thì ngăn cách bằng dấu ','
-	enabled_backends = ceph_ssd
+	#khai báo backend cho Cinder là ceph_hdd, nếu có nhiều backend thì ngăn cách bằng dấu ','
+	enabled_backends = ceph_hdd
 	#Bỏ dòng khai báo `volume_group = cinder-volumes`
 	#volume_group = cinder-volumes
 
@@ -187,9 +187,9 @@
 	#Khai báo backend ceph_ssd
 	[ceph_hdd]
 	volume_driver = cinder.volume.drivers.rbd.RBDDriver
-	volume_backend_name = ceph_ssd
+	volume_backend_name = ceph_hdd
 	#Khai báo ceph pool chứa volume
-	rbd_pool = volumes-ssd
+	rbd_pool = volumes
 	rbd_ceph_conf = /etc/ceph/ceph.conf
 	rbd_flatten_volume_from_snapshot = true
 	rbd_max_clone_depth = 5
@@ -203,8 +203,8 @@
 
 ### 4.3. Tạo các backend cho volume
 	```
-	root@controller1:~# cinder type-create ssd
-	root@controller1:~# cinder type-key ssd set volume_backend_name=ceph_ssd
+	root@controller1:~# cinder type-create hdd
+	root@controller1:~# cinder type-key hdd set volume_backend_name=ceph_hdd
 	```
 
 ### 4.4. Khởi động lại các dịch vụ
@@ -229,7 +229,7 @@
 	inject_key = False
 	images_type = rbd
 	#Khai báo ceph pool chứa vm
-	images_rbd_pool = vms-ssd
+	images_rbd_pool = vms
 	images_rbd_ceph_conf = /etc/ceph/ceph.conf
 	rbd_user = cinder
 	#Khai báo secret key đã tạo
@@ -270,28 +270,61 @@
 ### 6.1. Kiểm tra việc tích hợp Glance và Ceph
 Trên OpenStack, tạo 1 image mới
 
-![glance_image](../../images/ubuntu_ceph_jewel/glance_ceph_1.png)
+```
+root@controller1:~# glance image-list
++--------------------------------------+--------+
+| ID                                   | Name   |
++--------------------------------------+--------+
+| c1a1a7f3-7dc3-46e7-870c-c2f792945566 | cirros |
++--------------------------------------+--------+
+```
 
 Trên ceph1, kiểm tra RBD-image của Image vừa tạo
 
-![glance_image](../../images/ubuntu_ceph_jewel/glance_ceph_2.png)
+```
+root@ceph1:~# rbd -p images ls
+c1a1a7f3-7dc3-46e7-870c-c2f792945566
+```
 
 ### 6.2. Kiểm tra việc tích hợp Cinder và Ceph
 
 Trên OpenStack, tạo 1 volume thuộc backend volumes-hdd
 
-![cinder_image](../../images/ubuntu_ceph_jewel/cinder_ceph_1.png)
+```
+root@controller1:~# cinder list
++--------------------------------------+-----------+------+------+-------------+----------+-------------+
+|                  ID                  |   Status  | Name | Size | Volume Type | Bootable | Attached to |
++--------------------------------------+-----------+------+------+-------------+----------+-------------+
+| 3a4dab6c-e5d1-4ec8-b39c-ef70f6045cb5 | available | test |  1   |   ceph_hdd  |  false   |             |
++--------------------------------------+-----------+------+------+-------------+----------+-------------+
+```
+
 
 Trên ceph1, kiểm tra RBD-image của Image vừa tạo
 
-![cinder_image](../../images/ubuntu_ceph_jewel/cinder_ceph_2.png)
+```
+root@ceph1:~# rbd -p volumes ls
+volume-3a4dab6c-e5d1-4ec8-b39c-ef70f6045cb5
+```
+
 
 ### 6.3. Kiểm tra việc tích hợp Nova và Ceph
 
 Trên OpenStack, tạo một máy ảo boot từ image
 
-![nova_image](../../images/ubuntu_ceph_jewel/nova_ceph_1.png)
+```
+root@controller1:~# nova list
++--------------------------------------+-------+---------+------------+-------------+----------------------------------------------+
+| ID                                   | Name  | Status  | Task State | Power State | Networks                                     |
++--------------------------------------+-------+---------+------------+-------------+----------------------------------------------+
+| 72f300b7-d9e2-4734-828e-d6e99aaad6f0 | CR    | ACTIVE  | -          | Running     | pri_network=192.168.0.13 					   |
++--------------------------------------+-------+---------+------------+-------------+----------------------------------------------+
+```
+
 
 Trên ceph1, kiểm tra RBD-image của Image vừa tạo
 
-![nova_image](../../images/ubuntu_ceph_jewel/nova_ceph_2.png)
+```
+root@ceph1:~# rbd -p vms ls
+72f300b7-d9e2-4734-828e-d6e99aaad6f0_disk
+```
