@@ -255,7 +255,7 @@
 
 	Kết quả:
 
-	Secret fc6a2ccd-eb9f-4e6e-9bd5-4a0c5feb4d50 created
+	`Secret fc6a2ccd-eb9f-4e6e-9bd5-4a0c5feb4d50 created`
 
 - Add secret key vào libvirt
 	```
@@ -327,3 +327,5 @@ Trên ceph1, kiểm tra RBD-image của Image vừa tạo
 root@ceph1:~# rbd -p vms ls
 72f300b7-d9e2-4734-828e-d6e99aaad6f0_disk
 ```
+
+## Done
