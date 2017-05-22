@@ -286,7 +286,7 @@ Trên ceph1, kiểm tra RBD-image của Image vừa tạo
 
 ![cinder_image](../../images/ubuntu_ceph_jewel/cinder_ceph_2.png)
 
-### 6.2. Kiểm tra việc tích hợp Nova và Ceph
+### 6.3. Kiểm tra việc tích hợp Nova và Ceph
 
 Trên OpenStack, tạo một máy ảo boot từ image
 
