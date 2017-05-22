@@ -127,9 +127,9 @@
 ## 4. Trên node Controller
 
 ### 4.1. Cấu hình `glance-api.conf` để lưu image xuống Ceph
-	```
-	root@controller1:~# vim /etc/glance/glance-api.conf
-	```
+	
+	`root@controller1:~# vim /etc/glance/glance-api.conf`
+	
 
 	```
 	[DEFAULT]
@@ -156,9 +156,8 @@
 	```
 
 ### 4.2. Cấu hình `cinder.conf` để lưu volume và volume backup xuống Ceph
-	```
-	root@controller1:~# vim /etc/cinder/cinder.conf
-	```
+	
+	`root@controller1:~# vim /etc/cinder/cinder.conf`
 
 	```
 	[DEFAULT]
@@ -217,9 +216,8 @@
 ## 5. Trên node Compute
 
 ### 5.1. Cấu hình `nova.conf` để lưu VM xuống Ceph
-	```
-	root@compute1:~# vim /etc/nova/nova.conf
-	```
+	
+	`root@compute1:~# vim /etc/nova/nova.conf`
 
 	```
 	[libvirt]
