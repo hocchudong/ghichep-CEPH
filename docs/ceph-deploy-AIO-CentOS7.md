@@ -104,7 +104,7 @@
   ```
    
   ```sh
-  cat << EOF > /etc/yum.repos.d/ceph-deploy.repo
+  cat << EOF > /etc/yum.repos.d/ceph.repo
   [Ceph-noarch]
   name=Ceph noarch packages
   baseurl=http://download.ceph.com/rpm-jewel/el7/noarch
