@@ -35,16 +35,16 @@
 <a name="2"> </a> 
 ## 2. Trên Ceph 1
 ### 2.1. Tạo ra các pool cho các dịch vụ của OpenStack
-	Tạo pool cho Cinder volumes
+	- Tạo pool cho Cinder volumes
 	`ceph osd pool create volumes 128 128`
 
-	Tạo pool cho Glance images
+	- Tạo pool cho Glance images
 	`ceph osd pool create images 128 128`
 
-	Tạo pool cho Cinder backups
+	- Tạo pool cho Cinder backups
 	`ceph osd pool create backups 128 128`
 
-	Tạo pool cho Nova vms
+	- Tạo pool cho Nova vms
 	`ceph osd pool create vms 128 128`
 
 
