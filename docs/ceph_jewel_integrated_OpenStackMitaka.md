@@ -35,16 +35,16 @@
 <a name="2"> </a> 
 ## 2. Trên Ceph 1
 ### 2.1. Tạo ra các pool cho các dịch vụ của OpenStack
-	- Tạo pool cho Cinder volumes
+- Tạo pool cho Cinder volumes
 	`ceph osd pool create volumes 128 128`
 
-	- Tạo pool cho Glance images
+- Tạo pool cho Glance images
 	`ceph osd pool create images 128 128`
 
-	- Tạo pool cho Cinder backups
+- Tạo pool cho Cinder backups
 	`ceph osd pool create backups 128 128`
 
-	- Tạo pool cho Nova vms
+- Tạo pool cho Nova vms
 	`ceph osd pool create vms 128 128`
 
 
@@ -56,35 +56,35 @@
 
 ### 2.3. Tạo các ceph user cho dịch vụ OpenStack
 
-	Tạo user cho glance
+- Tạo user cho glance
 	```
 	ceph auth get-or-create client.glance mon 'allow r' osd 'allow class-read object_prefix rbd_children, allow rwx pool=images'
 
-	Tạo user cho cinder-backup
+- Tạo user cho cinder-backup
 	```
 	ceph auth get-or-create client.cinder-backup mon 'allow r' osd 'allow class-read object_prefix rbd_children, allow rwx pool=backups'
 	```
 
-	Tạo user cho cinder-volume và nova-compute (dùng chung 1 user)
+- Tạo user cho cinder-volume và nova-compute (dùng chung 1 user)
 	```
 	ceph auth get-or-create client.cinder mon 'allow r' osd 'allow class-read object_prefix rbd_children, allow rwx pool=volumes, allow rwx pool=vms, allow rwx pool=images'
 	```
 
 ### 2.4. Chuyển các key  sang node Controller
 
-	Chuyển key `client.glance` sang node Controller và phân quyền cho user glance
+- Chuyển key `client.glance` sang node Controller và phân quyền cho user glance
 	```
 	ceph auth get-or-create client.glance | ssh 172.16.69.50 sudo tee /etc/ceph/ceph.client.glance.keyring
 	ssh 172.16.69.50 sudo chown glance:glance /etc/ceph/ceph.client.glance.keyring
 	```
 
-	Chuyển key `client.cinder` sang node Controller và phân quyền cho user cinder
+- Chuyển key `client.cinder` sang node Controller và phân quyền cho user cinder
 	```
 	ceph auth get-or-create client.cinder | ssh 172.16.69.50 sudo tee /etc/ceph/ceph.client.cinder.keyring
 	ssh 172.16.69.50 sudo chown cinder:cinder /etc/ceph/ceph.client.cinder.keyring
 	```
 
-	Chuyển key `client.cinder-backup` sang node Controller và phân quyền cho user cinder
+- Chuyển key `client.cinder-backup` sang node Controller và phân quyền cho user cinder
 	```
 	ceph auth get-or-create client.cinder-backup | ssh 172.16.69.50 sudo tee /etc/ceph/ceph.client.cinder-backup.keyring
 	ssh 172.16.69.50 sudo chown cinder:cinder /etc/ceph/ceph.client.cinder-backup.keyring
@@ -161,6 +161,9 @@
 	- show_image_direct_url = True: Option để enable tính năng COW cho RBD image
 	- stores = file,rbd,http: Khai báo các store để lưu trữ image (mặc định là rbd)
 
+
+	Nội dung:
+	
 	```
 	[DEFAULT]
 	show_multiple_locations = True
