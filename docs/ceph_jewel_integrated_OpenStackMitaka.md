@@ -424,7 +424,6 @@ cinder create --volume-type hdd --display_name test_volume 10
 +---------------------------------------+--------------------------------------+
 ```
 
-
 - Trên ceph1, kiểm tra RBD-image của Image vừa tạo
 
 ```
@@ -444,14 +443,6 @@ Như vậy id của cinder volume và id của RBD image trong pool volumes là 
 nova boot --flavor  a05ce8a5-49da-4144-977f-95598bbc5271 --image cirros-0.3.4-x86_64-disk.raw --security-groups default cirros_vm --nic net-id=8ec901ed-6beb-4ec8-90fe-f3db8fdb0511
 ```
 
-```
-nova list
-+--------------------------------------+-------+---------+------------+-------------+---------------------------+
-| ID                                   | Name  | Status  | Task State | Power State | Networks                  |
-+--------------------------------------+-------+---------+------------+-------------+---------------------------+
-| 72f300b7-d9e2-4734-828e-d6e99aaad6f0 | CR    | ACTIVE  | -          | Running     | pri_network=192.168.0.13 	|
-+--------------------------------------+-------+---------+------------+-------------+---------------------------+
-```
 - Kết quả:
 
 ```
@@ -475,8 +466,7 @@ nova list
 | flavor                               | CloudServer_4 (12db321b-f41b-425e-886d-aa480a131d0b)     |
 | hostId                               | 23b674eccf1e728ade3fb20eca885435de82eb8eab06d4dc0a8ffb19 |
 | id                                   | 72f300b7-d9e2-4734-828e-d6e99aaad6f0                     |
-| image                                | cirros-0.3.4-x86_64-disk.raw 							  |	
-|									   | (c1a1a7f3-7dc3-46e7-870c-c2f792945566)                   |
+| image                                | cirros-0.3.4-x86_64-disk.raw                             |
 | key_name                             | -                                                        |
 | metadata                             | {}                            							  |
 | name                                 | cirros_vm			                                      |
@@ -489,7 +479,6 @@ nova list
 | updated                              | 2016-11-17T16:33:43Z                                     |
 | user_id                              | 175a8fc76958472181bf19c977f2f8e2                         |
 +--------------------------------------+----------------------------------------------------------+
-
 ```
 
 - Trên ceph1, kiểm tra RBD-image của Image vừa tạo
