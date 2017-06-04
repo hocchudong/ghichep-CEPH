@@ -157,7 +157,9 @@ ii  python-rados                         10.2.6-1trusty                        a
 ii  python-rbd                           10.2.6-1trusty                        amd64        Python libraries for the Ceph librbd library
 ```
 ### 3.1. Cài đặt công cụ để chỉnh sửa file cấu hình:
-	`apt-get install crudini -y`
+```
+apt-get install crudini -y
+```
 
 ## 4. Trên node Controller
 
@@ -182,7 +184,9 @@ crudini --set /etc/glance/glance-api.conf DEFAULT enable_v1_registry True
 
 
 - Option để enable tính năng COW cho RBD image
-`crudini --set /etc/glance/glance-api.conf glance_store show_image_direct_url True`
+```
+crudini --set /etc/glance/glance-api.conf glance_store show_image_direct_url True
+```
 
 - Khai báo các store để lưu trữ image (mặc định là rbd)
 ```
@@ -200,7 +204,9 @@ crudini --set /etc/glance/glance-api.conf glance_store rbd_store_chunk_size 8
 
 ### 4.2. Cấu hình `cinder.conf` để lưu volume và volume backup xuống Ceph
 	
-`crudini --set /etc/glance/cinder.conf DEFAULT notification_driver messagingv2`
+```
+crudini --set /etc/glance/cinder.conf DEFAULT notification_driver messagingv2
+```
 
 - Khai báo kết nối tới Glance để lấy image (sử dụng Glance API v2)
 ```
@@ -209,10 +215,14 @@ crudini --set /etc/cinder/cinder.conf DEFAULT glance_api_version 2
 ```
 
 - Khai báo backend cho Cinder là ceph_hdd, nếu có nhiều backend thì ngăn cách bằng dấu ','
-`crudini --set /etc/cinder/cinder.conf DEFAULT enabled_backends ceph_hdd`
+```
+crudini --set /etc/cinder/cinder.conf DEFAULT enabled_backends ceph_hdd
+```
 
 - Bỏ dòng khai báo `volume_group = cinder-volumes`
-`crudini --del cinder.conf DEFAULT volume_group `
+```
+crudini --del cinder.conf DEFAULT volume_group
+```
 
 - Khai báo ceph pool và user để lưu các bản volume backup xuống ceph
 ```
@@ -327,13 +337,19 @@ cd /etc/init/; for i in $(ls nova-* | cut -d \. -f 1 | xargs); do sudo service $
 ## 6. Kiểm tra
 ### 6.1. Kiểm tra việc tích hợp Glance và Ceph
 - Trên OpenStack controller, download image cirros và đặt tại root
-`wget http://download.cirros-cloud.net/0.3.4/cirros-0.3.4-x86_64-disk.img`
+```
+wget http://download.cirros-cloud.net/0.3.4/cirros-0.3.4-x86_64-disk.img
+```
 
 - Convert image vừa download sang định dạng raw
-`qemu-img convert -f qcow2 -O raw /root/cirros-0.3.4-x86_64-disk.img /root/cirros-0.3.4-x86_64-disk.raw`
+```
+qemu-img convert -f qcow2 -O raw /root/cirros-0.3.4-x86_64-disk.img /root/cirros-0.3.4-x86_64-disk.raw
+```
 
 - Upload image lên Glance
-`openstack image create cirros-0.3.4-x86_64-disk.raw --disk-format raw --container-format bare --public < /root/cirros-0.3.4-x86_64-disk.raw`
+```
+openstack image create cirros-0.3.4-x86_64-disk.raw --disk-format raw --container-format bare --public < /root/cirros-0.3.4-x86_64-disk.raw
+```
 
 - Kết quả sau khi upload image thành công
 ```
@@ -344,7 +360,7 @@ cd /etc/init/; for i in $(ls nova-* | cut -d \. -f 1 | xargs); do sudo service $
 | created_at       | 2016-06-08T02:21:33.000000           |
 | deleted          | False                                |
 | disk_format      | raw                                  |
-| id               |*c1a1a7f3-7dc3-46e7-870c-c2f792945566*|
+| id               | c1a1a7f3-7dc3-46e7-870c-c2f792945566 |
 | is_public        | False                                |
 | min_disk         | 0                                    |
 | min_ram          | 0                                    |
@@ -358,38 +374,75 @@ cd /etc/init/; for i in $(ls nova-* | cut -d \. -f 1 | xargs); do sudo service $
 ```
 
 - Trên ceph1, kiểm tra RBD-image của Image vừa tạo
-`rbd -p images ls`
+```
+rbd -p images ls
+```
 
 - Kết quả:
-*c1a1a7f3-7dc3-46e7-870c-c2f792945566*
+```
+c1a1a7f3-7dc3-46e7-870c-c2f792945566
+```
 
 Như vậy id của image được upload và id của RBD image trong pool image là trùng nhau, image đã được tải vào Ceph backend.
 
 ### 6.2. Kiểm tra việc tích hợp Cinder và Ceph
 
-- Trên OpenStack, tạo 1 volume thuộc backend volumes-hdd
-
+- Trên OpenStack, tạo 1 volume thuộc backend hdd
 ```
-cinder list
-+--------------------------------------+-----------+------+------+-------------+----------+-------------+
-|                  ID                  |   Status  | Name | Size | Volume Type | Bootable | Attached to |
-+--------------------------------------+-----------+------+------+-------------+----------+-------------+
-| 3a4dab6c-e5d1-4ec8-b39c-ef70f6045cb5 | available | test |  1   |   ceph_hdd  |  false   |             |
-+--------------------------------------+-----------+------+------+-------------+----------+-------------+
+cinder create --volume-type hdd --display_name test_volume 10
 ```
 
+- Kết quả:
+```
++---------------------------------------+--------------------------------------+
+|                Property               |                Value                 |
++---------------------------------------+--------------------------------------+
+|              attachments              |                  []                  |
+|           availability_zone           |                 nova                 |
+|                bootable               |                false                 |
+|          consistencygroup_id          |                 None                 |
+|               created_at              |      2017-03-20T10:34:31.000000      |
+|              description              |                 None                 |
+|               encrypted               |                False                 |
+|                   id                  | 3a4dab6c-e5d1-4ec8-b39c-ef70f6045cb5 |
+|                metadata               |                  {}                  |
+|              multiattach              |                False                 |
+|                  name                 |                 test_volume          |
+|         os-vol-host-attr:host         |           controller#RBD             |
+|     os-vol-mig-status-attr:migstat    |                 None                 |
+|     os-vol-mig-status-attr:name_id    |                 None                 |
+|      os-vol-tenant-attr:tenant_id     |   e72c7e1e60814fcb93a5afc4b3c66342   |
+|   os-volume-replication:driver_data   |                 None                 |
+| os-volume-replication:extended_status |                 None                 |
+|           replication_status          |               disabled               |
+|                  size                 |                  10                  |
+|              snapshot_id              |                 None                 |
+|              source_volid             |                 None                 |
+|                 status                |              available               |
+|                user_id                |   7d2f1302a89e43b89dfc01c9fceda51f   |
+|              volume_type              |                 hdd 	               |
++---------------------------------------+--------------------------------------+
+```
 
-Trên ceph1, kiểm tra RBD-image của Image vừa tạo
+
+- Trên ceph1, kiểm tra RBD-image của Image vừa tạo
 
 ```
 rbd -p volumes ls
-volume-3a4dab6c-e5d1-4ec8-b39c-ef70f6045cb5
 ```
 
+- Kết quả:
+```
+volume-3a4dab6c-e5d1-4ec8-b39c-ef70f6045cb5
+```
+Như vậy id của cinder volume và id của RBD image trong pool volumes là trùng nhau, volume đã được tải vào Ceph backend.
 
 ### 6.3. Kiểm tra việc tích hợp Nova và Ceph
 
-Trên OpenStack, tạo một máy ảo boot từ image
+- Trên OpenStack, tạo một máy ảo boot từ image cirros-0.3.4-x86_64-disk.raw
+```
+nova boot --flavor  a05ce8a5-49da-4144-977f-95598bbc5271 --image cirros-0.3.4-x86_64-disk.raw --security-groups default cirros_vm --nic net-id=8ec901ed-6beb-4ec8-90fe-f3db8fdb0511
+```
 
 ```
 nova list
@@ -399,13 +452,56 @@ nova list
 | 72f300b7-d9e2-4734-828e-d6e99aaad6f0 | CR    | ACTIVE  | -          | Running     | pri_network=192.168.0.13 	|
 +--------------------------------------+-------+---------+------------+-------------+---------------------------+
 ```
+- Kết quả:
 
+```
++--------------------------------------+----------------------------------------------------------+
+| Property                             | Value                                                    |
++--------------------------------------+----------------------------------------------------------+
+| OS-DCF:diskConfig                    | MANUAL                                                   |
+| OS-EXT-AZ:availability_zone          | nova                                                     |
+| OS-EXT-SRV-ATTR:host                 | compute1                                                 |
+| OS-EXT-SRV-ATTR:hypervisor_hostname  | compute1                                                 |
+| OS-EXT-SRV-ATTR:instance_name        | instance-00000694                                        |
+| OS-EXT-STS:power_state               | 1                                                        |
+| OS-EXT-STS:task_state                | -                                                        |
+| OS-EXT-STS:vm_state                  | active                                                   |
+| OS-SRV-USG:launched_at               | 2016-06-06T03:14:14.000000                               |
+| OS-SRV-USG:terminated_at             | -                                                        |
+| accessIPv4                           |                                                          |
+| accessIPv6                           |                                                          |
+| config_drive                         |                                                          |
+| created                              | 2016-06-06T03:14:06Z                                     |
+| flavor                               | CloudServer_4 (12db321b-f41b-425e-886d-aa480a131d0b)     |
+| hostId                               | 23b674eccf1e728ade3fb20eca885435de82eb8eab06d4dc0a8ffb19 |
+| id                                   | 72f300b7-d9e2-4734-828e-d6e99aaad6f0                     |
+| image                                | cirros-0.3.4-x86_64-disk.raw 							  |	
+|									   | (c1a1a7f3-7dc3-46e7-870c-c2f792945566)                   |
+| key_name                             | -                                                        |
+| metadata                             | {}                            							  |
+| name                                 | cirros_vm			                                      |
+| os-extended-volumes:volumes_attached | []                                                       |
+| pri_network network                  | 192.168.0.3                                              |
+| progress                             | 0                                                        |
+| security_groups                      | default                                                  |
+| status                               | ACTIVE                                                   |
+| tenant_id                            | cbd6c0d9aee948729c5f86073fa385cd                         |
+| updated                              | 2016-11-17T16:33:43Z                                     |
+| user_id                              | 175a8fc76958472181bf19c977f2f8e2                         |
++--------------------------------------+----------------------------------------------------------+
 
-Trên ceph1, kiểm tra RBD-image của Image vừa tạo
+```
+
+- Trên ceph1, kiểm tra RBD-image của Image vừa tạo
 
 ```
 rbd -p vms ls
+```
+
+- Kết quả:
+```
 72f300b7-d9e2-4734-828e-d6e99aaad6f0_disk
 ```
+Như vậy id của vm và id của RBD image trong pool vms là trùng nhau, vm đã được tải vào Ceph backend.
 
 ## Done
