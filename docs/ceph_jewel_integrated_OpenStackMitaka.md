@@ -37,191 +37,206 @@
 ### 2.1. Tạo ra các pool cho các dịch vụ của OpenStack
 - Tạo pool cho Cinder volumes
 	
-	```
-	ceph osd pool create volumes 128 128
-	```
+```
+ceph osd pool create volumes 128 128
+```
 
 - Tạo pool cho Glance images
 
-	```
-	ceph osd pool create images 128 128
-	```
+```
+ceph osd pool create images 128 128
+```
 
 - Tạo pool cho Cinder backups
 	
-	```
-	ceph osd pool create backups 128 128
-	```
+```
+ceph osd pool create backups 128 128
+```
 
 - Tạo pool cho Nova vms
 
-	```
-	ceph osd pool create vms 128 128
-	```
+```
+ceph osd pool create vms 128 128
+```
 
 
 ### 2.2. Chuyển file `ceph.conf`  sang các node Controller và Compute, đặt tại `/etc/ceph` (nếu chưa có thì tạo thư mục bằng lệnh `mkdir /etc/ceph`)
-	```
-	ssh 172.16.69.50 sudo tee /etc/ceph/ceph.conf < /etc/ceph/ceph.conf
-	ssh 172.16.69.51 sudo tee /etc/ceph/ceph.conf < /etc/ceph/ceph.conf
-	```
+```
+ssh 172.16.69.50 sudo tee /etc/ceph/ceph.conf < /etc/ceph/ceph.conf
+ssh 172.16.69.51 sudo tee /etc/ceph/ceph.conf < /etc/ceph/ceph.conf
+```
 
 ### 2.3. Tạo các ceph user cho dịch vụ OpenStack
 
 - Tạo user cho glance
-	```
-	ceph auth get-or-create client.glance mon 'allow r' osd 'allow class-read object_prefix rbd_children, allow rwx pool=images'
+```
+ceph auth get-or-create client.glance mon 'allow r' osd 'allow class-read object_prefix rbd_children, allow rwx pool=images'
+```
 
 - Tạo user cho cinder-backup
-	```
-	ceph auth get-or-create client.cinder-backup mon 'allow r' osd 'allow class-read object_prefix rbd_children, allow rwx pool=backups'
-	```
+```
+ceph auth get-or-create client.cinder-backup mon 'allow r' osd 'allow class-read object_prefix rbd_children, allow rwx pool=backups'
+```
 
 - Tạo user cho cinder-volume và nova-compute (dùng chung 1 user)
-	```
-	ceph auth get-or-create client.cinder mon 'allow r' osd 'allow class-read object_prefix rbd_children, allow rwx pool=volumes, allow rwx pool=vms, allow rwx pool=images'
-	```
+```
+ceph auth get-or-create client.cinder mon 'allow r' osd 'allow class-read object_prefix rbd_children, allow rwx pool=volumes, allow rwx pool=vms, allow rwx pool=images'
+```
 
 ### 2.4. Chuyển các key  sang node Controller
 
 - Chuyển key `client.glance` sang node Controller và phân quyền cho user glance
-	```
-	ceph auth get-or-create client.glance | ssh 172.16.69.50 sudo tee /etc/ceph/ceph.client.glance.keyring
-	ssh 172.16.69.50 sudo chown glance:glance /etc/ceph/ceph.client.glance.keyring
-	```
+```
+ceph auth get-or-create client.glance | ssh 172.16.69.50 sudo tee /etc/ceph/ceph.client.glance.keyring
+ssh 172.16.69.50 sudo chown glance:glance /etc/ceph/ceph.client.glance.keyring
+```
 
 - Chuyển key `client.cinder` sang node Controller và phân quyền cho user cinder
-	```
-	ceph auth get-or-create client.cinder | ssh 172.16.69.50 sudo tee /etc/ceph/ceph.client.cinder.keyring
-	ssh 172.16.69.50 sudo chown cinder:cinder /etc/ceph/ceph.client.cinder.keyring
-	```
+```
+ceph auth get-or-create client.cinder | ssh 172.16.69.50 sudo tee /etc/ceph/ceph.client.cinder.keyring
+ssh 172.16.69.50 sudo chown cinder:cinder /etc/ceph/ceph.client.cinder.keyring
+```
 
 - Chuyển key `client.cinder-backup` sang node Controller và phân quyền cho user cinder
-	```
-	ceph auth get-or-create client.cinder-backup | ssh 172.16.69.50 sudo tee /etc/ceph/ceph.client.cinder-backup.keyring
-	ssh 172.16.69.50 sudo chown cinder:cinder /etc/ceph/ceph.client.cinder-backup.keyring
-	```
+```
+ceph auth get-or-create client.cinder-backup | ssh 172.16.69.50 sudo tee /etc/ceph/ceph.client.cinder-backup.keyring
+ssh 172.16.69.50 sudo chown cinder:cinder /etc/ceph/ceph.client.cinder-backup.keyring
+```
 
 ### 2.5. Chuyển key `client.cinder` sang node Compute
 
-	```
-	ceph auth get-or-create client.cinder | ssh 172.16.69.51 sudo tee /etc/ceph/ceph.client.cinder.keyring
-	ceph auth get-key client.cinder | ssh 172.16.69.51 tee /root/client.cinder.key
-	```
+```
+ceph auth get-or-create client.cinder | ssh 172.16.69.51 sudo tee /etc/ceph/ceph.client.cinder.keyring
+ceph auth get-key client.cinder | ssh 172.16.69.51 tee /root/client.cinder.key
+```
 
 ## 3. Trên 2 node Controller và Copute
 ### 3.1. Cài đặt package cho Ceph Jewel
 - Cài đặt repo
 
-	```sh
-	wget -q -O- 'https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/release.asc' | sudo apt-key add -
-	```
-	Kết quả: `OK`
+```sh
+wget -q -O- 'https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/release.asc' | sudo apt-key add -
+```
+Kết quả: `OK`
 
-	```sh
-	echo deb http://download.ceph.com/debian-jewel/ trusty main | sudo tee /etc/apt/sources.list.d/ceph.list
-	```
+```sh
+echo deb http://download.ceph.com/debian-jewel/ trusty main | sudo tee /etc/apt/sources.list.d/ceph.list
+```
 - Cập nhật các gói phần mềm
 
-	```sh
-	apt-get -y update
-	```
+```sh
+apt-get -y update
+```
 - Nếu node Controller có service `glance-api`, cài đặt `python-rbd package
 
-	```sh
-	apt-get install python-rbd -y
-	```
+```sh
+apt-get install python-rbd -y
+```
 - Nếu node Controller có service `cinder-backup` và `cinder-volume`, cài đặt `ceph-common` package
 
-    ```sh
-    apt-get install ceph-common -y
-    ```
+```sh
+apt-get install ceph-common -y
+```
 
 - Kiểm tra các gói sau khi cài
 
-	```sh
-	dpkg -l | egrep -i "ceph|rados|rbd"
-	```
-	Kết quả:
+```sh
+dpkg -l | egrep -i "ceph|rados|rbd"
+```
+Kết quả:
 
-	```sh
-	ii  ceph-common                          10.2.6-1trusty                        amd64        common utilities to mount and interact with a ceph storage cluster
-	ii  libcephfs1                           10.2.6-1trusty                        amd64        Ceph distributed file system client library
-	ii  librados2                            10.2.6-1trusty                        amd64        RADOS distributed object store client library
-	ii  libradosstriper1                     10.2.6-1trusty                        amd64        RADOS striping interface
-	ii  librbd1                              10.2.6-1trusty                        amd64        RADOS block device client library
-	ii  librgw2                              10.2.6-1trusty                        amd64        RADOS Gateway client library
-	ii  python-cephfs                        10.2.6-1trusty                        amd64        Python libraries for the Ceph libcephfs library
-	ii  python-rados                         10.2.6-1trusty                        amd64        Python libraries for the Ceph librados library
-	ii  python-rbd                           10.2.6-1trusty                        amd64        Python libraries for the Ceph librbd library
-	```
+```sh
+ii  ceph-common                          10.2.6-1trusty                        amd64        common utilities to mount and interact with a ceph storage cluster
+ii  libcephfs1                           10.2.6-1trusty                        amd64        Ceph distributed file system client library
+ii  librados2                            10.2.6-1trusty                        amd64        RADOS distributed object store client library
+ii  libradosstriper1                     10.2.6-1trusty                        amd64        RADOS striping interface
+ii  librbd1                              10.2.6-1trusty                        amd64        RADOS block device client library
+ii  librgw2                              10.2.6-1trusty                        amd64        RADOS Gateway client library
+ii  python-cephfs                        10.2.6-1trusty                        amd64        Python libraries for the Ceph libcephfs library
+ii  python-rados                         10.2.6-1trusty                        amd64        Python libraries for the Ceph librados library
+ii  python-rbd                           10.2.6-1trusty                        amd64        Python libraries for the Ceph librbd library
+```
 ### 3.1. Cài đặt công cụ để chỉnh sửa file cấu hình:
-	apt-get install crudini -y
+	`apt-get install crudini -y`
 
 ## 4. Trên node Controller
 
 ### 4.1. Tạo secret key (Key này sẽ được sử dụng để máy ảo có thể attach volume trên ceph)
-	```
-	uuidgen
-	```
-	Kết quả:
-	```
-	fc6a2ccd-eb9f-4e6e-9bd5-4a0c5feb4d50
-	```
+```
+uuidgen
+```
+Kết quả:
+```
+fc6a2ccd-eb9f-4e6e-9bd5-4a0c5feb4d50
+```
 
 ### 4.1. Cấu hình `glance-api.conf` để lưu image xuống Ceph
 
+- Cấu hình Glance dùng cả api 1 và 2
+```		
+crudini --set /etc/glance/glance-api.conf DEFAULT enable_v2_api True
+crudini --set /etc/glance/glance-api.conf DEFAULT enable_v2_registry True
+crudini --set /etc/glance/glance-api.conf DEFAULT enable_v1_api True
+crudini --set /etc/glance/glance-api.conf DEFAULT enable_v1_registry True
+```
 
-	- Cấu hình Glance dùng cả api 1 và 2
-	crudini --set /etc/glance/glance-api.conf DEFAULT enable_v2_api True
-	crudini --set /etc/glance/glance-api.conf DEFAULT enable_v2_registry True
-	crudini --set /etc/glance/glance-api.conf DEFAULT enable_v1_api True
-	crudini --set /etc/glance/glance-api.conf DEFAULT enable_v1_registry True
 
+- Option để enable tính năng COW cho RBD image
+`crudini --set /etc/glance/glance-api.conf glance_store show_image_direct_url True`
 
-	- Option để enable tính năng COW cho RBD image
-	crudini --set /etc/glance/glance-api.conf glance_store show_image_direct_url True
+- Khai báo các store để lưu trữ image (mặc định là rbd)
+```
+crudini --set /etc/glance/glance-api.conf glance_store default_store rbd
+crudini --set /etc/glance/glance-api.conf glance_store stores rbd
+```
 
-	- Khai báo các store để lưu trữ image (mặc định là rbd)
-	crudini --set /etc/glance/glance-api.conf glance_store default_store rbd
-	crudini --set /etc/glance/glance-api.conf glance_store stores rbd
-
-	- Khai báo ceph pool và user để lưu trữ image vào ceph
-	crudini --set /etc/glance/glance-api.conf glance_store rbd_store_pool images
-	crudini --set /etc/glance/glance-api.conf glance_store rbd_store_user glance
-	crudini --set /etc/glance/glance-api.conf glance_store rbd_store_ceph_conf /etc/ceph/ceph.conf
-	crudini --set /etc/glance/glance-api.conf glance_store rbd_store_chunk_size 8
+- Khai báo ceph pool và user để lưu trữ image vào ceph
+```
+crudini --set /etc/glance/glance-api.conf glance_store rbd_store_pool images
+crudini --set /etc/glance/glance-api.conf glance_store rbd_store_user glance
+crudini --set /etc/glance/glance-api.conf glance_store rbd_store_ceph_conf /etc/ceph/ceph.conf
+crudini --set /etc/glance/glance-api.conf glance_store rbd_store_chunk_size 8
+```
 
 ### 4.2. Cấu hình `cinder.conf` để lưu volume và volume backup xuống Ceph
 	
-	crudini --set /etc/glance/cinder.conf DEFAULT notification_driver messagingv2
+`crudini --set /etc/glance/cinder.conf DEFAULT notification_driver messagingv2`
 
-	- Khai báo kết nối tới Glance để lấy image (sử dụng Glance API v2)
-	crudini --set /etc/cinder/cinder.conf DEFAULT glance_api_servers http://171.16.69.50:9292
-	crudini --set /etc/cinder/cinder.conf DEFAULT glance_api_version 2
-	- Khai báo backend cho Cinder là ceph_hdd, nếu có nhiều backend thì ngăn cách bằng dấu ','
-	crudini --set /etc/cinder/cinder.conf DEFAULT enabled_backends ceph_hdd
+- Khai báo kết nối tới Glance để lấy image (sử dụng Glance API v2)
+```
+crudini --set /etc/cinder/cinder.conf DEFAULT glance_api_servers http://171.16.69.50:9292
+crudini --set /etc/cinder/cinder.conf DEFAULT glance_api_version 2
+```
 
-	- Bỏ dòng khai báo `volume_group = cinder-volumes`
-	crudini --del cinder.conf DEFAULT volume_group 
+- Khai báo backend cho Cinder là ceph_hdd, nếu có nhiều backend thì ngăn cách bằng dấu ','
+`crudini --set /etc/cinder/cinder.conf DEFAULT enabled_backends ceph_hdd`
 
-	- Khai báo ceph pool và user để lưu các bản volume backup xuống ceph
-	crudini --set /etc/cinder/cinder.conf DEFAULT backup_driver cinder.backup.drivers.ceph
-	crudini --set /etc/cinder/cinder.conf DEFAULT backup_ceph_conf /etc/ceph/ceph.conf
-	crudini --set /etc/cinder/cinder.conf DEFAULT backup_ceph_user cinder-backup
-	crudini --set /etc/cinder/cinder.conf DEFAULT backup_ceph_chunk_size 134217728
+- Bỏ dòng khai báo `volume_group = cinder-volumes`
+`crudini --del cinder.conf DEFAULT volume_group `
 
-	- Khai báo ceph pool chứa volume backup
-	crudini --set /etc/cinder/cinder.conf DEFAULT backup_ceph_pool backups
-	crudini --set /etc/cinder/cinder.conf DEFAULT backup_ceph_stripe_unit 0
-	crudini --set /etc/cinder/cinder.conf DEFAULT backup_ceph_stripe_count 0
-	crudini --set /etc/cinder/cinder.conf DEFAULT restore_discard_excess_bytes true
+- Khai báo ceph pool và user để lưu các bản volume backup xuống ceph
+```
+crudini --set /etc/cinder/cinder.conf DEFAULT backup_driver cinder.backup.drivers.ceph
+crudini --set /etc/cinder/cinder.conf DEFAULT backup_ceph_conf /etc/ceph/ceph.conf
+crudini --set /etc/cinder/cinder.conf DEFAULT backup_ceph_user cinder-backup
+crudini --set /etc/cinder/cinder.conf DEFAULT backup_ceph_chunk_size 134217728
+```
 
-	- Khai báo backend ceph_hdd
-	crudini --set /etc/cinder/cinder.conf ceph_hdd volume_driver cinder.volume.drivers.rbd.RBDDriver
-	crudini --set /etc/cinder/cinder.conf ceph_hdd volume_backend_name ceph_hdd
+- Khai báo ceph pool chứa volume backup
+```
+crudini --set /etc/cinder/cinder.conf DEFAULT backup_ceph_pool backups
+crudini --set /etc/cinder/cinder.conf DEFAULT backup_ceph_stripe_unit 0
+crudini --set /etc/cinder/cinder.conf DEFAULT backup_ceph_stripe_count 0
+crudini --set /etc/cinder/cinder.conf DEFAULT restore_discard_excess_bytes true
+```
 
-	- Khai báo ceph pool chứa volume
+- Khai báo backend ceph_hdd
+```
+crudini --set /etc/cinder/cinder.conf ceph_hdd volume_driver cinder.volume.drivers.rbd.RBDDriver
+crudini --set /etc/cinder/cinder.conf ceph_hdd volume_backend_name ceph_hdd
+```
+
+- Khai báo ceph pool chứa volume
 	crudini --set /etc/cinder/cinder.conf ceph_hdd rbd_pool volumes
 	crudini --set /etc/cinder/cinder.conf ceph_hdd rbd_ceph_conf /etc/ceph/ceph.conf
 	crudini --set /etc/cinder/cinder.conf ceph_hdd rbd_flatten_volume_from_snapshot true
@@ -230,7 +245,7 @@
 	crudini --set /etc/cinder/cinder.conf ceph_hdd rrados_connect_timeout -1
 	crudini --set /etc/cinder/cinder.conf ceph_hdd rbd_user cinder
 
-	- Khai báo secret key đã tạo
+- Khai báo secret key đã tạo
 	crudini --set /etc/cinder/cinder.conf rbd_secret_uuid fc6a2ccd-eb9f-4e6e-9bd5-4a0c5feb4d50	
 	crudini --set /etc/cinder/cinder.conf report_discard_supported true
 
