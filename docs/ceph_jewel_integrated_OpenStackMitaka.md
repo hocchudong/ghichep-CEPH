@@ -103,6 +103,7 @@
 	```
 
 ### 2.5. Chuyển key `client.cinder` sang node Compute
+
 	```
 	ceph auth get-or-create client.cinder | ssh 172.16.69.51 sudo tee /etc/ceph/ceph.client.cinder.keyring
 	ceph auth get-key client.cinder | ssh 172.16.69.51 tee /root/client.cinder.key
@@ -154,7 +155,8 @@
 	ii  python-rados                         10.2.6-1trusty                        amd64        Python libraries for the Ceph librados library
 	ii  python-rbd                           10.2.6-1trusty                        amd64        Python libraries for the Ceph librbd library
 	```
-
+### 3.1. Cài đặt công cụ để chỉnh sửa file cấu hình:
+	apt-get install crudini -y
 
 ## 4. Trên node Controller
 
@@ -169,132 +171,110 @@
 
 ### 4.1. Cấu hình `glance-api.conf` để lưu image xuống Ceph
 
-	`vim /etc/glance/glance-api.conf`
-	- show_image_direct_url = True: Option để enable tính năng COW cho RBD image
-	- stores = file,rbd,http: Khai báo các store để lưu trữ image (mặc định là rbd)
+
+	- Cấu hình Glance dùng cả api 1 và 2
+	crudini --set /etc/glance/glance-api.conf DEFAULT enable_v2_api True
+	crudini --set /etc/glance/glance-api.conf DEFAULT enable_v2_registry True
+	crudini --set /etc/glance/glance-api.conf DEFAULT enable_v1_api True
+	crudini --set /etc/glance/glance-api.conf DEFAULT enable_v1_registry True
 
 
-	Nội dung:
+	- Option để enable tính năng COW cho RBD image
+	crudini --set /etc/glance/glance-api.conf glance_store show_image_direct_url True
 
-	```
-	[DEFAULT]
-	show_multiple_locations = True
-	enable_v2_api = true
-	enable_v2_registry = true
-	enable_v1_api = true
-	enable_v1_registry = true
+	- Khai báo các store để lưu trữ image (mặc định là rbd)
+	crudini --set /etc/glance/glance-api.conf glance_store default_store rbd
+	crudini --set /etc/glance/glance-api.conf glance_store stores rbd
 
-
-	[glance_store]
-	# Option để enable COW cho image
-	show_image_direct_url = True
-	default_store = rbd
-	# Khai báo các store để lưu trữ image (mặc định là rbd)
-	stores = file,rbd,http
-	filesystem_store_datadir = /var/lib/glance/images/
-	# Khai báo ceph pool và user để lưu trữ image vào ceph
-	rbd_store_pool = images
-	rbd_store_user = glance
-	rbd_store_ceph_conf = /etc/ceph/ceph.conf
-	rbd_store_chunk_size = 8
-	```
+	- Khai báo ceph pool và user để lưu trữ image vào ceph
+	crudini --set /etc/glance/glance-api.conf glance_store rbd_store_pool images
+	crudini --set /etc/glance/glance-api.conf glance_store rbd_store_user glance
+	crudini --set /etc/glance/glance-api.conf glance_store rbd_store_ceph_conf /etc/ceph/ceph.conf
+	crudini --set /etc/glance/glance-api.conf glance_store rbd_store_chunk_size 8
 
 ### 4.2. Cấu hình `cinder.conf` để lưu volume và volume backup xuống Ceph
 	
-	`vim /etc/cinder/cinder.conf`
+	crudini --set /etc/glance/cinder.conf DEFAULT notification_driver messagingv2
 
-	```
-	[DEFAULT]
-	notification_driver = messagingv2
-	# Khai báo kết nối tới Glance để lấy image (sử dụng Glance API v2)
-	glance_api_servers = http://171.16.69.50:9292
-	glance_api_version = 2
-	# khai báo backend cho Cinder là ceph_hdd, nếu có nhiều backend thì ngăn cách bằng dấu ','
-	enabled_backends = ceph_hdd
-	# Bỏ dòng khai báo `volume_group = cinder-volumes`
-	#volume_group = cinder-volumes
+	- Khai báo kết nối tới Glance để lấy image (sử dụng Glance API v2)
+	crudini --set /etc/cinder/cinder.conf DEFAULT glance_api_servers http://171.16.69.50:9292
+	crudini --set /etc/cinder/cinder.conf DEFAULT glance_api_version 2
+	- Khai báo backend cho Cinder là ceph_hdd, nếu có nhiều backend thì ngăn cách bằng dấu ','
+	crudini --set /etc/cinder/cinder.conf DEFAULT enabled_backends ceph_hdd
 
+	- Bỏ dòng khai báo `volume_group = cinder-volumes`
+	crudini --del cinder.conf DEFAULT volume_group 
 
-	# Khai báo ceph pool và user để lưu các bản volume backup xuống ceph
-	backup_driver = cinder.backup.drivers.ceph
-	backup_ceph_conf = /etc/ceph/ceph.conf
-	backup_ceph_user = cinder-backup
-	backup_ceph_chunk_size = 134217728
-	# Khai báo ceph pool chứa volume backup
-	backup_ceph_pool = backups
-	backup_ceph_stripe_unit = 0
-	backup_ceph_stripe_count = 0
-	restore_discard_excess_bytes = true
+	- Khai báo ceph pool và user để lưu các bản volume backup xuống ceph
+	crudini --set /etc/cinder/cinder.conf DEFAULT backup_driver cinder.backup.drivers.ceph
+	crudini --set /etc/cinder/cinder.conf DEFAULT backup_ceph_conf /etc/ceph/ceph.conf
+	crudini --set /etc/cinder/cinder.conf DEFAULT backup_ceph_user cinder-backup
+	crudini --set /etc/cinder/cinder.conf DEFAULT backup_ceph_chunk_size 134217728
 
-	
-	# Khai báo backend ceph_hdd
-	[ceph_hdd]
-	volume_driver = cinder.volume.drivers.rbd.RBDDriver
-	volume_backend_name = ceph_hdd
-	# Khai báo ceph pool chứa volume
-	rbd_pool = volumes
-	rbd_ceph_conf = /etc/ceph/ceph.conf
-	rbd_flatten_volume_from_snapshot = true
-	rbd_max_clone_depth = 5
-	rbd_store_chunk_size = 4
-	rados_connect_timeout = -1
-	rbd_user = cinder
-	# Khai báo secret key đã tạo
-	rbd_secret_uuid = fc6a2ccd-eb9f-4e6e-9bd5-4a0c5feb4d50
-	report_discard_supported = true
-	```
+	- Khai báo ceph pool chứa volume backup
+	crudini --set /etc/cinder/cinder.conf DEFAULT backup_ceph_pool backups
+	crudini --set /etc/cinder/cinder.conf DEFAULT backup_ceph_stripe_unit 0
+	crudini --set /etc/cinder/cinder.conf DEFAULT backup_ceph_stripe_count 0
+	crudini --set /etc/cinder/cinder.conf DEFAULT restore_discard_excess_bytes true
+
+	- Khai báo backend ceph_hdd
+	crudini --set /etc/cinder/cinder.conf ceph_hdd volume_driver cinder.volume.drivers.rbd.RBDDriver
+	crudini --set /etc/cinder/cinder.conf ceph_hdd volume_backend_name ceph_hdd
+
+	- Khai báo ceph pool chứa volume
+	crudini --set /etc/cinder/cinder.conf ceph_hdd rbd_pool volumes
+	crudini --set /etc/cinder/cinder.conf ceph_hdd rbd_ceph_conf /etc/ceph/ceph.conf
+	crudini --set /etc/cinder/cinder.conf ceph_hdd rbd_flatten_volume_from_snapshot true
+	crudini --set /etc/cinder/cinder.conf ceph_hdd rbd_max_clone_depth 5
+	crudini --set /etc/cinder/cinder.conf ceph_hdd rbd_store_chunk_size 4
+	crudini --set /etc/cinder/cinder.conf ceph_hdd rrados_connect_timeout -1
+	crudini --set /etc/cinder/cinder.conf ceph_hdd rbd_user cinder
+
+	- Khai báo secret key đã tạo
+	crudini --set /etc/cinder/cinder.conf rbd_secret_uuid fc6a2ccd-eb9f-4e6e-9bd5-4a0c5feb4d50	
+	crudini --set /etc/cinder/cinder.conf report_discard_supported true
 
 ### 4.3. Tạo các backend cho volume
-	```
 	cinder type-create hdd
 	cinder type-key hdd set volume_backend_name=ceph_hdd
-	```
+
 
 ### 4.4. Khởi động lại các dịch vụ
-	```
 	cd /etc/init/; for i in $(ls cinder-* | cut -d \. -f 1 | xargs); do sudo service $i restart; done
 	cd /etc/init/; for i in $(ls glance-* | cut -d \. -f 1 | xargs); do sudo service $i restart; done
-	```
+	
 
 
 ## 5. Trên node Compute
 
 ### 5.1. Cấu hình `nova.conf` để lưu VM xuống Ceph
 	
-	`root@compute1:~# vim /etc/nova/nova.conf`
+	crudini --set /etc/nova/nova.conf libvirt inject_partition -2	
+	crudini --set /etc/nova/nova.conf libvirt inject_password false
+	crudini --set /etc/nova/nova.conf libvirt live_migration_flag VIR_MIGRATE_UNDEFINE_SOURCE,VIR_MIGRATE_PEER2PEER,VIR_MIGRATE_LIVE,VIR_MIGRATE_PERSIST_DEST
+	crudini --set /etc/nova/nova.conf libvirt inject_key False
+	crudini --set /etc/nova/nova.conf libvirt images_type rbd
 
-	```
-	[libvirt]
-	inject_partition = -2
-	inject_password = false
-	live_migration_flag = VIR_MIGRATE_UNDEFINE_SOURCE,VIR_MIGRATE_PEER2PEER,VIR_MIGRATE_LIVE,VIR_MIGRATE_PERSIST_DEST
-	inject_key = False
-	images_type = rbd
-	# Khai báo ceph pool chứa vm
-	images_rbd_pool = vms
-	images_rbd_ceph_conf = /etc/ceph/ceph.conf
-	rbd_user = cinder
-	# Khai báo secret key đã tạo
-	rbd_secret_uuid = fc6a2ccd-eb9f-4e6e-9bd5-4a0c5feb4d50
-	disk_cachemodes = network=writeback
-	hw_disk_discard = unmap
-	```
+	- Khai báo ceph pool chứa vm
+	crudini --set /etc/nova/nova.conf libvirt images_rbd_pool vms
+	crudini --set /etc/nova/nova.conf libvirt images_rbd_ceph_conf /etc/ceph/ceph.conf
+
+	- Khai báo secret key đã tạo
+	crudini --set /etc/nova/nova.conf libvirt rbd_secret_uuid fc6a2ccd-eb9f-4e6e-9bd5-4a0c5feb4d50
+	crudini --set /etc/nova/nova.conf libvirt disk_cachemodes network=writeback
+
 
 ### 5.2. Add secret key vào libvirt
-- Tạo file `secret.xml` đặt tại `/root`
+- Tạo file `secret.xml` đặt tại `/root` chứa secret key
 
-	`vim /etc/root/secret.xml`
-
-    Nội dung file:
-
-	```
+	cat > /root/secret.xml <<EOF
 	<secret ephemeral='no' private='no'>
-  		<uuid>fc6a2ccd-eb9f-4e6e-9bd5-4a0c5feb4d50</uuid>
-  		<usage type='ceph'>
-    		name>client.cinder secret</name>
-  		</usage>
+		<uuid>fc6a2ccd-eb9f-4e6e-9bd5-4a0c5feb4d50</uuid>
+		<usage type='ceph'>
+		<name>client.cinder secret</name>
+		</usage>
 	</secret>
-	```
+	EOF
 
 - Định nghĩa secret key
 	```
@@ -317,23 +297,42 @@
 
 ## 6. Kiểm tra
 ### 6.1. Kiểm tra việc tích hợp Glance và Ceph
-	Trên OpenStack, tạo 1 image mới
+	- Trên OpenStack controller, download image cirros và đặt tại root
+	wget http://download.cirros-cloud.net/0.3.4/cirros-0.3.4-x86_64-disk.img
 
-	```
-	glance image-list
-	+--------------------------------------+--------+
-	| ID                                   | Name   |
-	+--------------------------------------+--------+
-	| c1a1a7f3-7dc3-46e7-870c-c2f792945566 | cirros |
-	+--------------------------------------+--------+
-	```
+	- Convert image vừa download sang định dạng raw
+	qemu-img convert -f qcow2 -O raw /root/cirros-0.3.4-x86_64-disk.img /root/cirros-0.3.4-x86_64-disk.raw
 
-	Trên ceph1, kiểm tra RBD-image của Image vừa tạo
+	- Upload image lên Glance
+	openstack image create cirros-0.3.4-x86_64-disk.raw --disk-format raw --container-format bare --public < /root/cirros-0.3.4-x86_64-disk.raw
 
-	```
+ 	- Kết quả sau khi upload image thành công
+ 	+------------------+--------------------------------------+
+	| Property         | Value                                |
+	+------------------+--------------------------------------+
+	| container_format | bare                                 |
+	| created_at       | 2016-06-08T02:21:33.000000           |
+	| deleted          | False                                |
+	| disk_format      | raw                                  |
+	| id               |*c1a1a7f3-7dc3-46e7-870c-c2f792945566*|
+	| is_public        | False                                |
+	| min_disk         | 0                                    |
+	| min_ram          | 0                                    |
+	| name             | cirros-0.3.4-x86_64-disk.raw         |
+	| owner            | e72c7e1e60814fcb93a5afc4b3c66342     |
+	| protected        | False                                |
+	| size             | 32212254720                          |
+	| status           | active                               |
+	| updated_at       | 2016-06-08T02:21:35.000000           |
+	+------------------+--------------------------------------+
+
+
+	- Trên ceph1, kiểm tra RBD-image của Image vừa tạo
+
 	rbd -p images ls
-	c1a1a7f3-7dc3-46e7-870c-c2f792945566
-	```
+	*c1a1a7f3-7dc3-46e7-870c-c2f792945566*
+
+Như vậy id của image được upload và id của RBD image trong pool image là trùng nhau, image đã được tải vào Ceph backend.
 
 ### 6.2. Kiểm tra việc tích hợp Cinder và Ceph
 
