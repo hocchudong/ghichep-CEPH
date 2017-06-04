@@ -237,159 +237,175 @@ crudini --set /etc/cinder/cinder.conf ceph_hdd volume_backend_name ceph_hdd
 ```
 
 - Khai báo ceph pool chứa volume
-	crudini --set /etc/cinder/cinder.conf ceph_hdd rbd_pool volumes
-	crudini --set /etc/cinder/cinder.conf ceph_hdd rbd_ceph_conf /etc/ceph/ceph.conf
-	crudini --set /etc/cinder/cinder.conf ceph_hdd rbd_flatten_volume_from_snapshot true
-	crudini --set /etc/cinder/cinder.conf ceph_hdd rbd_max_clone_depth 5
-	crudini --set /etc/cinder/cinder.conf ceph_hdd rbd_store_chunk_size 4
-	crudini --set /etc/cinder/cinder.conf ceph_hdd rrados_connect_timeout -1
-	crudini --set /etc/cinder/cinder.conf ceph_hdd rbd_user cinder
+```
+crudini --set /etc/cinder/cinder.conf ceph_hdd rbd_pool volumes
+crudini --set /etc/cinder/cinder.conf ceph_hdd rbd_ceph_conf /etc/ceph/ceph.conf
+crudini --set /etc/cinder/cinder.conf ceph_hdd rbd_flatten_volume_from_snapshot true
+crudini --set /etc/cinder/cinder.conf ceph_hdd rbd_max_clone_depth 5
+crudini --set /etc/cinder/cinder.conf ceph_hdd rbd_store_chunk_size 4
+crudini --set /etc/cinder/cinder.conf ceph_hdd rrados_connect_timeout -1
+crudini --set /etc/cinder/cinder.conf ceph_hdd rbd_user cinder
+```
 
 - Khai báo secret key đã tạo
-	crudini --set /etc/cinder/cinder.conf rbd_secret_uuid fc6a2ccd-eb9f-4e6e-9bd5-4a0c5feb4d50	
-	crudini --set /etc/cinder/cinder.conf report_discard_supported true
+```
+crudini --set /etc/cinder/cinder.conf rbd_secret_uuid fc6a2ccd-eb9f-4e6e-9bd5-4a0c5feb4d50	
+crudini --set /etc/cinder/cinder.conf report_discard_supported true
+```
 
 ### 4.3. Tạo các backend cho volume
-	cinder type-create hdd
-	cinder type-key hdd set volume_backend_name=ceph_hdd
+```
+cinder type-create hdd
+cinder type-key hdd set volume_backend_name=ceph_hdd
+```
 
 
 ### 4.4. Khởi động lại các dịch vụ
-	cd /etc/init/; for i in $(ls cinder-* | cut -d \. -f 1 | xargs); do sudo service $i restart; done
-	cd /etc/init/; for i in $(ls glance-* | cut -d \. -f 1 | xargs); do sudo service $i restart; done
+```
+cd /etc/init/; for i in $(ls cinder-* | cut -d \. -f 1 | xargs); do sudo service $i restart; done
+cd /etc/init/; for i in $(ls glance-* | cut -d \. -f 1 | xargs); do sudo service $i restart; done
+```
 	
 
 
 ## 5. Trên node Compute
 
 ### 5.1. Cấu hình `nova.conf` để lưu VM xuống Ceph
-	
-	crudini --set /etc/nova/nova.conf libvirt inject_partition -2	
-	crudini --set /etc/nova/nova.conf libvirt inject_password false
-	crudini --set /etc/nova/nova.conf libvirt live_migration_flag VIR_MIGRATE_UNDEFINE_SOURCE,VIR_MIGRATE_PEER2PEER,VIR_MIGRATE_LIVE,VIR_MIGRATE_PERSIST_DEST
-	crudini --set /etc/nova/nova.conf libvirt inject_key False
-	crudini --set /etc/nova/nova.conf libvirt images_type rbd
+```
+crudini --set /etc/nova/nova.conf libvirt inject_partition -2	
+crudini --set /etc/nova/nova.conf libvirt inject_password false
+crudini --set /etc/nova/nova.conf libvirt live_migration_flag VIR_MIGRATE_UNDEFINE_SOURCE,VIR_MIGRATE_PEER2PEER,VIR_MIGRATE_LIVE,VIR_MIGRATE_PERSIST_DEST
+crudini --set /etc/nova/nova.conf libvirt inject_key False
+crudini --set /etc/nova/nova.conf libvirt images_type rbd
+```
 
-	- Khai báo ceph pool chứa vm
-	crudini --set /etc/nova/nova.conf libvirt images_rbd_pool vms
-	crudini --set /etc/nova/nova.conf libvirt images_rbd_ceph_conf /etc/ceph/ceph.conf
+- Khai báo ceph pool chứa vm
+```
+crudini --set /etc/nova/nova.conf libvirt images_rbd_pool vms
+crudini --set /etc/nova/nova.conf libvirt images_rbd_ceph_conf /etc/ceph/ceph.conf
+```
 
-	- Khai báo secret key đã tạo
-	crudini --set /etc/nova/nova.conf libvirt rbd_secret_uuid fc6a2ccd-eb9f-4e6e-9bd5-4a0c5feb4d50
-	crudini --set /etc/nova/nova.conf libvirt disk_cachemodes network=writeback
+- Khai báo secret key đã tạo
+```
+crudini --set /etc/nova/nova.conf libvirt rbd_secret_uuid fc6a2ccd-eb9f-4e6e-9bd5-4a0c5feb4d50
+crudini --set /etc/nova/nova.conf libvirt disk_cachemodes network=writeback
+```
 
 
 ### 5.2. Add secret key vào libvirt
 - Tạo file `secret.xml` đặt tại `/root` chứa secret key
-
-	cat > /root/secret.xml <<EOF
-	<secret ephemeral='no' private='no'>
-		<uuid>fc6a2ccd-eb9f-4e6e-9bd5-4a0c5feb4d50</uuid>
-		<usage type='ceph'>
-		<name>client.cinder secret</name>
-		</usage>
-	</secret>
-	EOF
+```
+cat > /root/secret.xml <<EOF
+<secret ephemeral='no' private='no'>
+	<uuid>fc6a2ccd-eb9f-4e6e-9bd5-4a0c5feb4d50</uuid>
+	<usage type='ceph'>
+	<name>client.cinder secret</name>
+	</usage>
+</secret>
+EOF
+```
 
 - Định nghĩa secret key
-	```
-	virsh secret-define --file secret.xml
-	```
+```
+virsh secret-define --file secret.xml
+```
 
-	Kết quả:
+- Kết quả:
 
-	`Secret fc6a2ccd-eb9f-4e6e-9bd5-4a0c5feb4d50 created`
+`Secret fc6a2ccd-eb9f-4e6e-9bd5-4a0c5feb4d50 created`
 
 - Add secret key vào libvirt
-	```
-	sudo virsh secret-set-value --secret fc6a2ccd-eb9f-4e6e-9bd5-4a0c5feb4d50 --base64 $(cat client.cinder.key)
-	```
+```
+sudo virsh secret-set-value --secret fc6a2ccd-eb9f-4e6e-9bd5-4a0c5feb4d50 --base64 $(cat client.cinder.key)
+```
 
 ### 5.3. Khởi động lại các dịch vụ
-	```
-	cd /etc/init/; for i in $(ls nova-* | cut -d \. -f 1 | xargs); do sudo service $i restart; done
-	```
+```
+cd /etc/init/; for i in $(ls nova-* | cut -d \. -f 1 | xargs); do sudo service $i restart; done
+```
 
 ## 6. Kiểm tra
 ### 6.1. Kiểm tra việc tích hợp Glance và Ceph
-	- Trên OpenStack controller, download image cirros và đặt tại root
-	wget http://download.cirros-cloud.net/0.3.4/cirros-0.3.4-x86_64-disk.img
+- Trên OpenStack controller, download image cirros và đặt tại root
+`wget http://download.cirros-cloud.net/0.3.4/cirros-0.3.4-x86_64-disk.img`
 
-	- Convert image vừa download sang định dạng raw
-	qemu-img convert -f qcow2 -O raw /root/cirros-0.3.4-x86_64-disk.img /root/cirros-0.3.4-x86_64-disk.raw
+- Convert image vừa download sang định dạng raw
+`qemu-img convert -f qcow2 -O raw /root/cirros-0.3.4-x86_64-disk.img /root/cirros-0.3.4-x86_64-disk.raw`
 
-	- Upload image lên Glance
-	openstack image create cirros-0.3.4-x86_64-disk.raw --disk-format raw --container-format bare --public < /root/cirros-0.3.4-x86_64-disk.raw
+- Upload image lên Glance
+`openstack image create cirros-0.3.4-x86_64-disk.raw --disk-format raw --container-format bare --public < /root/cirros-0.3.4-x86_64-disk.raw`
 
- 	- Kết quả sau khi upload image thành công
- 	+------------------+--------------------------------------+
-	| Property         | Value                                |
-	+------------------+--------------------------------------+
-	| container_format | bare                                 |
-	| created_at       | 2016-06-08T02:21:33.000000           |
-	| deleted          | False                                |
-	| disk_format      | raw                                  |
-	| id               |*c1a1a7f3-7dc3-46e7-870c-c2f792945566*|
-	| is_public        | False                                |
-	| min_disk         | 0                                    |
-	| min_ram          | 0                                    |
-	| name             | cirros-0.3.4-x86_64-disk.raw         |
-	| owner            | e72c7e1e60814fcb93a5afc4b3c66342     |
-	| protected        | False                                |
-	| size             | 32212254720                          |
-	| status           | active                               |
-	| updated_at       | 2016-06-08T02:21:35.000000           |
-	+------------------+--------------------------------------+
+- Kết quả sau khi upload image thành công
+```
++------------------+--------------------------------------+
+| Property         | Value                                |
++------------------+--------------------------------------+
+| container_format | bare                                 |
+| created_at       | 2016-06-08T02:21:33.000000           |
+| deleted          | False                                |
+| disk_format      | raw                                  |
+| id               |*c1a1a7f3-7dc3-46e7-870c-c2f792945566*|
+| is_public        | False                                |
+| min_disk         | 0                                    |
+| min_ram          | 0                                    |
+| name             | cirros-0.3.4-x86_64-disk.raw         |
+| owner            | e72c7e1e60814fcb93a5afc4b3c66342     |
+| protected        | False                                |
+| size             | 32212254720                          |
+| status           | active                               |
+| updated_at       | 2016-06-08T02:21:35.000000           |
++------------------+--------------------------------------+
+```
 
+- Trên ceph1, kiểm tra RBD-image của Image vừa tạo
+`rbd -p images ls`
 
-	- Trên ceph1, kiểm tra RBD-image của Image vừa tạo
-
-	rbd -p images ls
-	*c1a1a7f3-7dc3-46e7-870c-c2f792945566*
+- Kết quả:
+*c1a1a7f3-7dc3-46e7-870c-c2f792945566*
 
 Như vậy id của image được upload và id của RBD image trong pool image là trùng nhau, image đã được tải vào Ceph backend.
 
 ### 6.2. Kiểm tra việc tích hợp Cinder và Ceph
 
-	Trên OpenStack, tạo 1 volume thuộc backend volumes-hdd
+- Trên OpenStack, tạo 1 volume thuộc backend volumes-hdd
 
-	```
-	cinder list
-	+--------------------------------------+-----------+------+------+-------------+----------+-------------+
-	|                  ID                  |   Status  | Name | Size | Volume Type | Bootable | Attached to |
-	+--------------------------------------+-----------+------+------+-------------+----------+-------------+
-	| 3a4dab6c-e5d1-4ec8-b39c-ef70f6045cb5 | available | test |  1   |   ceph_hdd  |  false   |             |
-	+--------------------------------------+-----------+------+------+-------------+----------+-------------+
-	```
+```
+cinder list
++--------------------------------------+-----------+------+------+-------------+----------+-------------+
+|                  ID                  |   Status  | Name | Size | Volume Type | Bootable | Attached to |
++--------------------------------------+-----------+------+------+-------------+----------+-------------+
+| 3a4dab6c-e5d1-4ec8-b39c-ef70f6045cb5 | available | test |  1   |   ceph_hdd  |  false   |             |
++--------------------------------------+-----------+------+------+-------------+----------+-------------+
+```
 
 
-	Trên ceph1, kiểm tra RBD-image của Image vừa tạo
+Trên ceph1, kiểm tra RBD-image của Image vừa tạo
 
-	```
-	rbd -p volumes ls
-	volume-3a4dab6c-e5d1-4ec8-b39c-ef70f6045cb5
-	```
+```
+rbd -p volumes ls
+volume-3a4dab6c-e5d1-4ec8-b39c-ef70f6045cb5
+```
 
 
 ### 6.3. Kiểm tra việc tích hợp Nova và Ceph
 
-	Trên OpenStack, tạo một máy ảo boot từ image
+Trên OpenStack, tạo một máy ảo boot từ image
 
-	```
-	nova list
-	+--------------------------------------+-------+---------+------------+-------------+---------------------------+
-	| ID                                   | Name  | Status  | Task State | Power State | Networks                  |
-	+--------------------------------------+-------+---------+------------+-------------+---------------------------+
-	| 72f300b7-d9e2-4734-828e-d6e99aaad6f0 | CR    | ACTIVE  | -          | Running     | pri_network=192.168.0.13 	|
-	+--------------------------------------+-------+---------+------------+-------------+---------------------------+
-	```
+```
+nova list
++--------------------------------------+-------+---------+------------+-------------+---------------------------+
+| ID                                   | Name  | Status  | Task State | Power State | Networks                  |
++--------------------------------------+-------+---------+------------+-------------+---------------------------+
+| 72f300b7-d9e2-4734-828e-d6e99aaad6f0 | CR    | ACTIVE  | -          | Running     | pri_network=192.168.0.13 	|
++--------------------------------------+-------+---------+------------+-------------+---------------------------+
+```
 
 
-	Trên ceph1, kiểm tra RBD-image của Image vừa tạo
+Trên ceph1, kiểm tra RBD-image của Image vừa tạo
 
-	```
-	rbd -p vms ls
-	72f300b7-d9e2-4734-828e-d6e99aaad6f0_disk
-	```
+```
+rbd -p vms ls
+72f300b7-d9e2-4734-828e-d6e99aaad6f0_disk
+```
 
 ## Done
