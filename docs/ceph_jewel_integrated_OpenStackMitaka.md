@@ -468,7 +468,7 @@ nova boot --flavor  a05ce8a5-49da-4144-977f-95598bbc5271 --image cirros-0.3.4-x8
 | id                                   | 72f300b7-d9e2-4734-828e-d6e99aaad6f0                     |
 | image                                | cirros-0.3.4-x86_64-disk.raw                             |
 | key_name                             | -                                                        |
-| metadata                             | {}                            							  |
+| metadata                             | {}                            				  			  |
 | name                                 | cirros_vm			                                      |
 | os-extended-volumes:volumes_attached | []                                                       |
 | pri_network network                  | 192.168.0.3                                              |
