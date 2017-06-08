@@ -10,12 +10,12 @@
 ### 1.1 Mô hình mạng
 - Mô hình đầy đủ
 
-![Ceph Jewel Topo](../../images/ubuntu_ceph_jewel/Jewel_topo.jpg)
+![Ceph Jewel Topo](../images/ceph_jewel_manual/Jewel_topo.jpg)
 
 <a name="1.2"> </a> 
 ### 1.2 Các tham số phần cứng đối với các node
 
-![Ceph hardware](../../images/ubuntu_ceph_jewel/Cauhinh_phancung.jpg)
+![Ceph hardware](../images/ceph_jewel_manual/Cauhinh_phancung.jpg)
 
 ### Chú ý khi lựa chọn OS và lựa chọn dải mạng
 
@@ -106,9 +106,9 @@
 
 	```sh
 	127.0.0.1      localhost ceph1
-	10.10.30.77    ceph1
-	10.10.30.78    ceph2
-	10.10.30.79    ceph3
+	10.10.20.77    ceph1
+	10.10.20.78    ceph2
+	10.10.20.79    ceph3
 	```
 
 ### 2.2. Cài đặt NTP
@@ -501,7 +501,7 @@ mkdir /root/keyring
  ```
  - Chỉnh sửa lại crushmap như sau
 
-    ##### vim crushmap-decompile
+    `vim crushmap-decompile`
 
  ```sh
  # begin crush map
