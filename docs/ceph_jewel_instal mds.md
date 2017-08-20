@@ -144,4 +144,7 @@ https://drupal.star.bnl.gov/STAR/blog/mpoat/cephfs-client-windows-based-dokan-06
 ## Done
 
 Tham khảo:
-[1] -
+
+[1] - https://access.redhat.com/documentation/en-us/red_hat_ceph_storage/2/html/ceph_file_system_guide_technology_preview/what_is_the_ceph_file_system_cephfs
+
+[2] - https://www.sebastien-han.fr/blog/2013/05/13/deploy-a-ceph-mds-server/
