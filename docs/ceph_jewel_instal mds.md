@@ -16,7 +16,7 @@
 
 Đã cài đặt Ceph theo hướng dẫn ở link [sau](ceph_jewel_install_manual.md)
 
-## 2. Thực hiện trên từng host
+## 2. Thực hiện trên từng ceph host
 
 ### 2.1. Cài đặt gói
 
@@ -56,7 +56,7 @@ e13: 1/1/1 up {0=ceph2=up:active}, 2 up:standby
 ```
 ceph mds chạy theo mô hình active-standby, kết quả trên chỉ ra ceph2 đang là node active, ceph1,3 ở trạng thái standby.
 
-## 3. Thực hiện trên host 1
+## 3. Thực hiện trên ceph 1
 
 ### 3.1. Tạo pool cho cephfs metadata
  - Tạo pool cho cephfs metadata
@@ -72,18 +72,18 @@ ceph mds chạy theo mô hình active-standby, kết quả trên chỉ ra ceph2 
 	ceph fs new cephfs cephfs_metadata cephfs_data
 	```
 ### 3.2. Tạo user truy cập vào cephfs
- - Tạo user client.user có quyền đọc ghi vào pool cephfs_data
+ - Tạo user client.user1 có quyền đọc ghi vào pool cephfs_data
 	```
-	ceph auth get-or-create client.user mon 'allow r' mds 'allow r, allow rw path=/user1_folder' osd 'allow rw pool=cephfs_data'
+	ceph auth get-or-create client.user1 mon 'allow r' mds 'allow r, allow rw path=/user1_folder' osd 'allow rw pool=cephfs_data'
 	```
-	CephFS cho phép admin phân quyền đọc ghi vào filesystem chu từng user, ở VD trên, client.user sau khi mount FS sẽ chỉ được phép đọc ghi vào thư mục /user1_folder và các thư mục con của nó.
- - Xuất file key của client.user ra file /etc/ceph/client.user.keyring
+	CephFS cho phép admin phân quyền đọc ghi vào filesystem chu từng user, ở VD trên, client.user1 sau khi mount FS sẽ chỉ được phép đọc ghi vào thư mục /user1_folder và các thư mục con của nó.
+ - Xuất file key của client.user1 ra file /etc/ceph/client.user1.keyring
  	```
- 	ceph auth get-or-create client.user > /etc/ceph/client.user.keyring
+ 	ceph auth get-or-create client.user1 > /etc/ceph/client.user1.keyring
  	```
- - Loại bỏ các thông tin thừa trong file client.user.keyring 
+ - Loại bỏ các thông tin thừa trong file client.user1.keyring 
  	```
- 	ceph-authtool -p -n client.user /etc/ceph/ceph.client.user.keyring > /etc/ceph/client.user
+ 	ceph-authtool -p -n client.user1 /etc/ceph/ceph.client.user1.keyring > /etc/ceph/client.user1
  	```
 ### 4. Thực hiện trên client (Ubuntu1404)
 #### 4.1. Cài đặt
@@ -112,22 +112,22 @@ Client có 2 cách để mount CephFS
  - Mount bằng kernel driver: hỗ trợ từ Linux kernel 2.6.34
  - Mount bằng Ceph Fuse: với Linux kernel < 2.6.34
 #### 4.3. Mount file system sử dụng kernel driver
- - Trên Ceph1, chuyển file /etc/ceph/client.user sang client
+ - Trên Ceph1, chuyển file /etc/ceph/client.user1 sang client
  	```
- 	scp /etc/ceph/client.user root@client:/etc/ceph
+ 	scp /etc/ceph/client.user1 root@client:/etc/ceph
  	```
  - Mount FS
  	```sh
- 	mount -t ceph 10.10.20.77:6789:/ /mnt/cephfs -o name=user,secretfile=/etc/ceph/client.user
+ 	mount -t ceph 10.10.20.77:6789:/ /mnt/cephfs -o name=user,secretfile=/etc/ceph/client.user1
  	```
  - Để mount FS khi reboot client, sửa /etc/fstab, thêm dòng sau ở cuối file
  	```sh
- 	10.10.20.77:6789:/     /mnt/cephfs    ceph    name=1,secretfile=/etc/ceph/client.user,noatime,_netdev    0       2
+ 	10.10.20.77:6789:/     /mnt/cephfs    ceph    name=user1,secretfile=/etc/ceph/client.user1,noatime,_netdev    0       2
  	```
 #### 4.4. Mount file system sử dụng Ceph Fuse
- - Trên Ceph1, chuyển file /etc/ceph/client.user.keyring sang client
+ - Trên Ceph1, chuyển file /etc/ceph/client.user1.keyring sang client
  	```
- 	scp /etc/ceph/client.user.keyring root@client:/etc/ceph
+ 	scp /etc/ceph/client.user1.keyring root@client:/etc/ceph
  	```
  - Cài đặt Ceph Fuse trên Client
  	```
@@ -135,7 +135,7 @@ Client có 2 cách để mount CephFS
  	```
  - Mount FS sử dụng ceph-fuse
  	```
- 	ceph-fuse --keyring=/etc/ceph/client.user.keyring -n client.user -m 10.10.20.77:6789  /mnt/cephfs
+ 	ceph-fuse --keyring=/etc/ceph/client.user1.keyring -n client.user1 -m 10.10.20.77:6789  /mnt/cephfs
  	```
 
 ### 4.5. Đối với các client là Windows OS, sử dụng cộng cụ Ceph Dokan để mount cephFS
