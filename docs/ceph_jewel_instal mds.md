@@ -9,22 +9,20 @@
 ### 1.1 Mô hình mạng
 - Mô hình đầy đủ
 
-![Ceph Jewel Topo](../images/ceph_jewel_manual/Jewel_topo.jpg)
+![Ceph Jewel Topo](../images/ceph_jewel_manual/JewelMDS_topo.jpg)
 
  
 ### Chú ý
 
-```
 Đã cài đặt Ceph theo hướng dẫn ở link [sau](ceph_jewel_install_manual.md)
-```
 
 ## 2. Thực hiện trên từng host
 
 ### 2.1. Cài đặt gói
 
-	```sh
-	apt-get install ceph ceph-mds -y
-	```
+```sh
+apt-get install ceph ceph-mds -y
+```
 ### 2.2. Cấu hình /etc/ceph/ceph.conf trên từng host
 - Thêm các dòng cấu hình mds sau ở cuối file, lưu ý thay đổi tên host tương ứng
 	```sh
@@ -37,26 +35,26 @@
 	```
 
 ### 2.3. Tạo thư mục ceph-mds daemon để chứa các keyring phục vụ cho việc xác thực bằng cephX
-	```sh
-	mkdir /var/lib/ceph/mds/mds.ceph1
-	ceph auth get-or-create mds.ceph1 mds 'allow ' osd 'allow *' mon 'allow rwx' > /var/lib/ceph/mds/mds.ceph1/mds.ceph1.keyring
-	```
+```sh
+mkdir /var/lib/ceph/mds/mds.ceph1
+ceph auth get-or-create mds.ceph1 mds 'allow ' osd 'allow *' mon 'allow rwx' > /var/lib/ceph/mds/mds.ceph1/mds.ceph1.keyring
+```
 
 ### 2.4. Khởi động ceph mds
-	```sh
-	/etc/init.d/ceph start mds
-	/etc/init.d/ceph status mds
-	```
+```sh
+/etc/init.d/ceph start mds
+/etc/init.d/ceph status mds
+```
 ### 2.5. Kiểm tra trạng thái ceph mds
-	```sh
-	ceph mds stat
-	```
+```sh
+ceph mds stat
+```
 
-	Kết quả:
-	```
-	e13: 1/1/1 up {0=ceph2=up:active}, 2 up:standby
-	```
-	ceph mds chạy theo mô hình active-standby, kết quả trên chỉ ra ceph2 đang là node active, ceph1,3 ở trạng thái standby.
+Kết quả:
+```
+e13: 1/1/1 up {0=ceph2=up:active}, 2 up:standby
+```
+ceph mds chạy theo mô hình active-standby, kết quả trên chỉ ra ceph2 đang là node active, ceph1,3 ở trạng thái standby.
 
 ## 3. Thực hiện trên host 1
 
@@ -141,5 +139,9 @@ Client có 2 cách để mount CephFS
  	```
 
 ### 4.5. Đối với các client là Windows OS, sử dụng cộng cụ Ceph Dokan để mount cephFS
+https://drupal.star.bnl.gov/STAR/blog/mpoat/cephfs-client-windows-based-dokan-060
 
 ## Done
+
+Tham khảo:
+[1] -
