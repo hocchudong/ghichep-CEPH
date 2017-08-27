@@ -119,21 +119,21 @@ Kết quả:
 (../images/ceph_jewel_manual/JewelRGW_1.jpg)
 
 ### 3.7. Cấu hình Private DNS trên host RadosGW
-	- Cài đặt gói bind
+ - Cài đặt gói bind
 	apt-get install bind9 bind9utils bind9-doc -y
 
-	- Cấu hình Bind dùng IPv4
+ - Cấu hình Bind dùng IPv4
 	vim /etc/default/bind9
 	Sửa:
 	OPTIONS="-4 -u bind"
 
-	- Sửa file /etc/bind/named.conf.local
+ - Sửa file /etc/bind/named.conf.local
 	vim /etc/bind/named.conf.local
 	Thêm:
 	listen-on port 53 { 127.0.0.1;172.16.69.163; };
     allow-query      { localhost;172.16.69.0/24; };
 
-    
+
 
 
 
