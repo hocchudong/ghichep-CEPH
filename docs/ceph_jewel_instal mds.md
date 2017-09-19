@@ -83,7 +83,7 @@ ceph mds chạy theo mô hình active-standby, kết quả trên chỉ ra ceph2 
  	```
  - Loại bỏ các thông tin thừa trong file client.user1.keyring 
  	```
- 	ceph-authtool -p -n client.user1 /etc/ceph/ceph.client.user1.keyring > /etc/ceph/client.user1
+ 	ceph-authtool -p -n client.user1 /etc/ceph/client.user1.keyring > /etc/ceph/client.user1
  	```
 ### 4. Thực hiện trên client (Ubuntu1404)
 #### 4.1. Cài đặt

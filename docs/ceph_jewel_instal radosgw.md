@@ -69,8 +69,6 @@ ceph auth add client.radosgw.gateway -i /etc/ceph/ceph.client.radosgw.keyring
 scp /etc/ceph/ceph.conf  root@radosgw:/etc/ceph/ceph.conf
 ```
 
-
-
 ## 3. Thực hiện trên từng host ceph RadosGW
 
 ### 3.1. Update repo
@@ -118,138 +116,146 @@ ceph -s -k /etc/ceph/ceph.client.radosgw.keyring --name client.radosgw.gateway
 Kết quả:
 (../images/ceph_jewel_manual/JewelRGW_1.jpg)
 
+### 3.7. Tạo user longlq cho S3 service
+```
+radosgw-admin user create --uid="longlq" --display-name="Quang Long" --email=longsube@gmail.com -k /etc/ceph/ceph.client.radosgw.keyring --name client.radosgw.gateway
+```
+Kết quả:
+{
+    "user_id": "longlq",
+    "display_name": "Quang Long",
+    "email": "longsube@gmail.com",
+    "suspended": 0,
+    "max_buckets": 1000,
+    "auid": 0,
+    "subusers": [],
+    "keys": [
+        {
+            "user": "longlq",
+            "access_key": "9YZ5LRXK4U5RJR8V7DVV",
+            "secret_key": "HwEvLMjDx7M5RJZyrC8tnMVBlVR71xBtvxa0Nq7m"
+        }
+    ],
+    "swift_keys": [],
+    "caps": [],
+    "op_mask": "read, write, delete",
+    "default_placement": "",
+    "placement_tags": [],
+    "bucket_quota": {
+        "enabled": false,
+        "max_size_kb": -1,
+        "max_objects": -1
+    },
+    "user_quota": {
+        "enabled": false,
+        "max_size_kb": -1,
+        "max_objects": -1
+    },
+    "temp_url_keys": []
+}
+
 ### 3.7. Cấu hình Private DNS trên host RadosGW
  - Cài đặt gói bind
+ 	```
 	apt-get install bind9 bind9utils bind9-doc -y
+	```
 
- - Cấu hình Bind dùng IPv4
-	vim /etc/default/bind9
-	Sửa:
+ - Sửa file /etc/default/bind9
+    ```
+	# Cau hinh DNS dung IPv4
 	OPTIONS="-4 -u bind"
+	```
 
  - Sửa file /etc/bind/named.conf.local
-	vim /etc/bind/named.conf.local
-	Thêm:
+	```
+	# Thu muc mac dinh chua cac zone file
+	directory "/var/cache/bind";
+	# Cau hinh dich vụ DNS cua host radosgw (172.16.69.163) su dung port 53
 	listen-on port 53 { 127.0.0.1;172.16.69.163; };
+	# Cau hinh dai mang cho phep query DNS
     allow-query      { localhost;172.16.69.0/24; };
 
+ - Sửa file /etc/bind/named.conf.local
+ 	```
+ 	# Them zone cho domain "demo.com"
+ 	zone "demo.com" IN {
+		type master;
+		file "db.demo.com";
+		allow-update { none; };
+	};
+ 	```
+ - Tạo zone file db.demo.com tại thư mục /var/cache/bind
+ 	```
+ 	86400 IN SOA demo.com. root.demo.com. (
+        20091028 ; serial yyyy-mm-dd 
+        10800 ; refresh every 180 min 
+        3600 ; retry every hour
+        3600000 ; expire after 1 month + 
+        86400 ); min ttl of 1 day
+	@ 86400 IN NS demo.com.
+	@ 86400 IN A 172.16.69.163
+	* 86400 IN CNAME @
+ 	```
+ - Khởi động lại dịch vụ bind
+ 	```
+ 	service bind9 start
+ 	```
 
-
-
-
-
-
-### 2.3. Tạo thư mục ceph-mds daemon để chứa các keyring phục vụ cho việc xác thực bằng cephX
-```sh
-mkdir /var/lib/ceph/mds/mds.ceph1
-ceph auth get-or-create mds.ceph1 mds 'allow ' osd 'allow *' mon 'allow rwx' > /var/lib/ceph/mds/mds.ceph1/mds.ceph1.keyring
+## 4. Thực hiện trên host client
+### 4.1. Cài đặt s3cmd trên client
+```
+apt-get install s3cmd -y
 ```
 
-### 2.4. Khởi động ceph mds
-```sh
-/etc/init.d/ceph start mds
-/etc/init.d/ceph status mds
+### 4.2. Cấu hình các thông số của s3cmd, thực hiện theo các bước được hướng dẫn, chú ý thay đổi access key và secret key của user longlq
 ```
-### 2.5. Kiểm tra trạng thái ceph mds
-```sh
-ceph mds stat
+s3cmd --configure
 ```
 
-Kết quả:
+### 4.3. Lệnh trên sẽ sinh ra file vim /root/.s3cfg, sửa file đó và thêm vào host_base và host_bucket của S3
 ```
-e13: 1/1/1 up {0=ceph2=up:active}, 2 up:standby
+host_base = radosgw1.demo.com:7480
+host_bucket = %(bucket)s.radosgw1.demo.com:7480
 ```
-ceph mds chạy theo mô hình active-standby, kết quả trên chỉ ra ceph2 đang là node active, ceph1,3 ở trạng thái standby.
 
-## 3. Thực hiện trên ceph 1
+### 4.4. Sửa /etc/resolv.conf để dùng DNS của Radosgw
+```
+nameserver 172.16.69.163
+nameserver 8.8.8.8
+```
 
-### 3.1. Tạo pool cho cephfs metadata
- - Tạo pool cho cephfs metadata
-	```
-	ceph osd pool create cephfs_data 128
-	```
- - Tạo pool cho cephfs data
+### 4.5. Thử S3 API
+ - Tạo bucket trên S3
  	```
-	ceph osd pool create cephfs_metadata  128
-	```
- - Tạo filesystem với tên cephfs trên các pool vừa tạo
+ 	s3cmd mb s3://first-bucket
  	```
-	ceph fs new cephfs cephfs_metadata cephfs_data
-	```
-### 3.2. Tạo user truy cập vào cephfs
- - Tạo user client.user1 có quyền đọc ghi vào pool cephfs_data
-	```
-	ceph auth get-or-create client.user1 mon 'allow r' mds 'allow r, allow rw path=/user1_folder' osd 'allow rw pool=cephfs_data'
-	```
-	CephFS cho phép admin phân quyền đọc ghi vào filesystem chu từng user, ở VD trên, client.user1 sau khi mount FS sẽ chỉ được phép đọc ghi vào thư mục /user1_folder và các thư mục con của nó.
- - Xuất file key của client.user1 ra file /etc/ceph/client.user1.keyring
+ - List bucket
  	```
- 	ceph auth get-or-create client.user1 > /etc/ceph/client.user1.keyring
+ 	s3cmd ls
  	```
- - Loại bỏ các thông tin thừa trong file client.user1.keyring 
+ - Đẩy /etc/hosts lên bucket vừa tạo
  	```
- 	ceph-authtool -p -n client.user1 /etc/ceph/ceph.client.user1.keyring > /etc/ceph/client.user1
+ 	s3cmd put /etc/hosts s3://first-bucket
  	```
-### 4. Thực hiện trên client (Ubuntu1404)
-#### 4.1. Cài đặt
- - Cài đặt repo
-
-	```sh
-	wget -q -O- 'https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/release.asc' | sudo apt-key add -
-	```
-	Kết quả: `OK`
-
-	```sh
-	echo deb http://download.ceph.com/debian-jewel/ trusty main | sudo tee /etc/apt/sources.list.d/ceph.list
-	```
-- Cập nhật các gói phần mềm
-
-	```sh
-	apt-get -y update
-	```
-- Cài đặt `ceph-common` package
-
-	```sh
-	apt-get install ceph-common -y
-	```
-#### 4.2. Mount CephFS
-Client có 2 cách để mount CephFS
- - Mount bằng kernel driver: hỗ trợ từ Linux kernel 2.6.34
- - Mount bằng Ceph Fuse: với Linux kernel < 2.6.34
-#### 4.3. Mount file system sử dụng kernel driver
- - Trên Ceph1, chuyển file /etc/ceph/client.user1 sang client
+ - List các file trong bucket
  	```
- 	scp /etc/ceph/client.user1 root@client:/etc/ceph
+ 	s3cmd ls s3://first-bucket
  	```
- - Mount FS
- 	```sh
- 	mount -t ceph 10.10.20.77:6789:/ /mnt/cephfs -o name=user,secretfile=/etc/ceph/client.user1
+ - Set file về chế độ public
  	```
- - Để mount FS khi reboot client, sửa /etc/fstab, thêm dòng sau ở cuối file
- 	```sh
- 	10.10.20.77:6789:/     /mnt/cephfs    ceph    name=user1,secretfile=/etc/ceph/client.user1,noatime,_netdev    0       2
+ 	s3cmd setacl s3://first/hosts --acl-public --recursive
  	```
-#### 4.4. Mount file system sử dụng Ceph Fuse
- - Trên Ceph1, chuyển file /etc/ceph/client.user1.keyring sang client
+ - Download file sử dụng wget
  	```
- 	scp /etc/ceph/client.user1.keyring root@client:/etc/ceph
- 	```
- - Cài đặt Ceph Fuse trên Client
- 	```
- 	apt-get install ceph-fuse -y
- 	```
- - Mount FS sử dụng ceph-fuse
- 	```
- 	ceph-fuse --keyring=/etc/ceph/client.user1.keyring -n client.user1 -m 10.10.20.77:6789  /mnt/cephfs
+ 	wget http://first.radosgw1.demo.com:7480/hosts
  	```
 
-### 4.5. Đối với các client là Windows OS, sử dụng cộng cụ Ceph Dokan để mount cephFS
-https://drupal.star.bnl.gov/STAR/blog/mpoat/cephfs-client-windows-based-dokan-060
+
 
 ## Done
 
 Tham khảo:
 
-[1] - https://access.redhat.com/documentation/en-us/red_hat_ceph_storage/2/html/ceph_file_system_guide_technology_preview/what_is_the_ceph_file_system_cephfs
+[1] - 
 
-[2] - https://www.sebastien-han.fr/blog/2013/05/13/deploy-a-ceph-mds-server/
+[2] - 
