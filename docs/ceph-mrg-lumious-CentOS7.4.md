@@ -88,16 +88,16 @@ Ceph-mgr hỗ trợ gửi thông tin trạng thái cluster ra các hệ thống 
 
 ## Thực hiện trên zabbix server
 - Download zabbix template tại: https://raw.githubusercontent.com/ceph/ceph/luminous/src/pybind/mgr/zabbix/zabbix_template.xml
-- Trên zabbix server, vào Configuration > Template, lựa chọn Import, Chọn đường dẫn tới zabbix template vừa tải về, và import. Tên của template được import là ceph-mgr Zabbix module.
+- Trên zabbix server, vào **Configuration > Template**, lựa chọn **Import**, Chọn đường dẫn tới zabbix template vừa tải về, và import. Tên của template được import là *ceph-mgr Zabbix module*.
 ![img](../images/ceph_luminous/ceph_mgr_2.jpg)
 
-- Vào Configuration > Host, khai báo các thông số như hình, chú ý Host name phải trùng với identifier khai báo cho ceph-mgr
+- Vào **Configuration > Host**, khai báo các thông số như hình, chú ý Host name phải trùng với identifier khai báo cho ceph-mgr
 ![img](../images/ceph_luminous/ceph_mgr_3.jpg)
 
-- Chuyển sang tab Templates, link tới template ceph-mgr Zabbix module vừa tạo, chọn Add
+- Chuyển sang tab **Templates**, link tới template *ceph-mgr Zabbix module* vừa tạo, chọn **Add**
 ![img](../images/ceph_luminous/ceph_mgr_4.jpg)
 
-- Vào Monitoring > Latest Data, chọn host ceph-zabbix, sẽ thấy các metric của cluster đã được đẩy về
+- Vào **Monitoring > Latest Data**, chọn host *ceph-zabbix*, sẽ thấy các metric của cluster đã được đẩy về
 ![img](../images/ceph_luminous/ceph_mgr_5.jpg)
 
 
