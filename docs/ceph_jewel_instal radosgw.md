@@ -9,7 +9,7 @@
 ### 1.1 Mô hình mạng
 - Mô hình đầy đủ
 
-![Ceph Jewel Topo](../images/ceph_jewel_manual/JewelMDS_topo.jpg)
+![Ceph Jewel Topo](../images/ceph_jewel_manual/JewelRGW_topo.jpg)
 
  
 ### Chú ý
