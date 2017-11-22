@@ -304,3 +304,26 @@
   [ceph-deploy@cephaio cluster-ceph]$ ceph health
   HEALTH_OK
   ```
+  
+  
+### Cấu hình client sử dụng CEPH 
+
+- File lỗi khi thực hiện `map` các rbd, nếu chạy xuất hiện lỗi dưới
+  ```sh
+  ceph-deploy@client:~$ sudo rbd map disk01
+  rbd: sysfs write failed
+  RBD image feature set mismatch. You can disable features unsupported by the kernel with "rbd feature disable".
+  In some cases useful info is found in syslog - try "dmesg | tail" or so.
+  rbd: map failed: (6) No such device or address
+  ```
+  
+  - Thì thực hiện
+    ```sh
+    rbd feature disable rbd/disk01 fast-diff,object-map,exclusive-lock,deep-flatten
+    ```
+    
+- Nếu khi thực hiện format phân vùng RBD trên client`sudo: mkfs.xfs: command not found`, thì cần cài đặt gói để sử dụng lệnh `mkfs.xfs`
+  ```sh
+  sudo apt-get install xfsprogs
+  ```  
+

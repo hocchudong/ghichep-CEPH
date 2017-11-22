@@ -29,17 +29,17 @@ chmod +r /etc/ceph/ceph.client.radosgw.keyring
 ```
 ceph-authtool /etc/ceph/ceph.client.radosgw.keyring -n client.radosgw.gateway --gen-key
 ```
-File /etc/ceph/ceph/ceph.client.radosgw.keyring được tạo ra với nội dung:
+File /etc/ceph/ceph.client.radosgw.keyring được tạo ra với nội dung:
 ```
-[client.user1]
-	key = AQCVZ6JZuSiZLBAATY1bzjF9y+FyybqiSym3Rg==
+[client.radosgw.gateway]
+        key = AQA8E5tZ8vQ0JRAAO/j8HSvgLfsfeHu2dhdx3A==
 ```
 
 ### 2.3. Tạo các quyền cho user
 ```
 ceph-authtool -n client.radosgw.gateway --cap osd 'allow rwx' --cap mon 'allow rwx' /etc/ceph/ceph.client.radosgw.keyring
 ```
-File /etc/ceph/ceph/ceph.client.radosgw.keyring được update
+File /etc/ceph/ceph.client.radosgw.keyring được update
 ```
 [client.radosgw.gateway]
         key = AQA8E5tZ8vQ0JRAAO/j8HSvgLfsfeHu2dhdx3A==
@@ -53,7 +53,7 @@ ceph auth add client.radosgw.gateway -i /etc/ceph/ceph.client.radosgw.keyring
 ```
 
 ### 2.5. Cấu hình /etc/ceph/ceph.conf trên từng host
-- Thêm các dòng cấu hình mds sau ở cuối file, lưu ý thay đổi tên host tương ứng
+- Thêm các dòng cấu hình radosgw sau ở cuối file, lưu ý thay đổi tên host tương ứng
 	```sh
 	[client.radosgw.gateway]
 	host = radosgw1
@@ -67,6 +67,11 @@ ceph auth add client.radosgw.gateway -i /etc/ceph/ceph.client.radosgw.keyring
 ### 2.6. Chuyển ceph.conf từ host ceph1 sang host ceph radosgw
 ```
 scp /etc/ceph/ceph.conf  root@radosgw:/etc/ceph/ceph.conf
+```
+
+### 2.7. Chuyển ragosgw keyring từ host ceph1 sang host ceph radosgw
+```
+scp ceph.client.radosgw.keyring radosgw:/etc/ceph
 ```
 
 ## 3. Thực hiện trên từng host ceph RadosGW
@@ -186,7 +191,7 @@ Kết quả:
  	```
  - Tạo zone file db.demo.com tại thư mục /var/cache/bind
  	```
- 	86400 IN SOA demo.com. root.demo.com. (
+ 	@ 86400 IN SOA demo.com. root.demo.com. (
         20091028 ; serial yyyy-mm-dd 
         10800 ; refresh every 180 min 
         3600 ; retry every hour

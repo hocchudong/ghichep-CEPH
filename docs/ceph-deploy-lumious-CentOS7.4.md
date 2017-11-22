@@ -305,12 +305,18 @@ Lúc này cảnh báo trên sẽ không còn.
 
 - Để add thêm cấu hình trên ceph.conf, cần restart lại mon service:
 ```sh
-systemctl restart ceph-mon.targer
+systemctl restart ceph-mon.target
 ```
 Để kiểm tra cấu hình trên 1 daemon, vd ở đây là mon daemon, dùng lệnh
 ```sh
 ceph daemon /var/run/ceph/ceph-mon.*.asok config show | grep mon_osd_report_timeout
 ```
+
+Tham khảo:
+
+[1] - https://chenmiao2016.github.io/2017/07/29/ceph-luminous%E6%90%AD%E5%BB%BA/
+
+[2] - https://www.zybuluo.com/dyj2017/note/924784
 
 
 

@@ -137,6 +137,14 @@ Client có 2 cách để mount CephFS
  	```
  	ceph-fuse --keyring=/etc/ceph/client.user1.keyring -n client.user1 -m 10.10.20.77:6789  /mnt/cephfs
  	```
+  - Umount
+ 	```
+ 	fusermount -u /mnt/cephfs
+ 	```
+  - fstab
+	```
+	mount -t fuse.ceph id=admin,conf=/etc/ceph/ceph.conf /mnt/ceph/
+	```
 
 ### 4.5. Đối với các client là Windows OS, sử dụng cộng cụ Ceph Dokan để mount cephFS
 https://drupal.star.bnl.gov/STAR/blog/mpoat/cephfs-client-windows-based-dokan-060
