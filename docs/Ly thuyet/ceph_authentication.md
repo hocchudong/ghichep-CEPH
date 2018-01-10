@@ -1,11 +1,11 @@
 # Ceph authentication.
 - Ceph là một hệ thống lưu trữ phân tán. Trên đó được cài đặt các daemon monitors, metadata server (MDs), và OSD. Các daemon được triển khai trên nhiều server. Ceph clients như là CephFS, Ceph Block device, và Ceph Gateway tương tác với Ceph object store. Tất cả Ceph object store clients sử dụng thư viện `librados` để tương tác với ceph object store. Hình sau đây minh họa cho tổ chức stack của ceph
 
-	![](../images/ceph_stack.png)
+	![](../../images/ceph_stack.png)
 	
 - Người dùng, có thể là end user hoặc là dịch vụ hệ thống như là các ứng dụng, sử dụng Ceph clients để tương tác với các Ceph server daemon.
 
-	![](../images/ceph_users.png)
+	![](../../images/ceph_users.png)
 	
 ## Ceph authentication
 - Xác thực mật mã mất vài chi phí cho việc tính toán, tuy nhiên chúng khá là thấp. Nếu môi trường kết nối mạng giữa client và server trong cluster của bạn rất an toàn và bạn không cho xác thực thì bạn có thể sử dụng tùy chọn để tắt cơ chế xác thực. Việc làm này không được khuyến khích.
@@ -13,15 +13,15 @@
 - Users yêu cầu ceph client liên hệ với một monitor.  Mỗi monitor đều có khả năng xác thực người dùng và phân phối key, do vậy không có "single point of failure" hoặc bottleneck khi sử dụng cephx. Monitor trả về một bộ dữ liệu xác thực gọi là ticket chứa session key để sử dụng các service của ceph. Session key được mã hóa với các tham số bí mật của user, do vậy chỉ có user mới có thể yêu cầu dịch vụ từ ceph monitor. Client sử dụng session key này để yêu cầu dịch vụ từ monitor, và monitor cung cấp cho user một ticket, ticket này sẽ xác thực người dùng để sử dụng osd. Monitor và osd chia sẻ một bí mật, do đó client có thể sử dụng ticket đã được monitor cung cấp với bất kỳ osd hay là mds. Ticket này có giới hạn thời gian.
 - Để sử dụng cephx, trước hết quản trị viên phải cấu hình các users. Trong hình dưới đây, user `client.admin` sẽ sử dụng lệnh `ceph auth get-or-create-key` để sinh ra username và khóa bí mật. Hệ thống sẽ sinh ra một username và khóa bí mật, lưu một bản sao lại cho mons và chuyển khóa bí mật lại cho user `client.admin`. Đây có nghĩa là client và mon chia sẻ khóa bí mật.	
 
-	![](../images/ceph_createuser.png)
+	![](../../images/ceph_createuser.png)
 	
 - Để xác thực với mons, người dùng cung cấp username cho mon, mon sẽ sinh ra một session key và mã hóa nó với khóa bí mật đã liên kết với tên người dùng. Sau đó mon sẽ gửi session key này lại cho người dùng. Sau đó người dùng sẽ giả mã bằng khóa chia sẻ đã nhận được từ bước trước. Session key này dùng để định danh người dùng ở phiên hiện tại. Sau đó người dùng sẽ yêu cầu một ticket đại diện cho người dùng được ký bởi session key. Monitor sinh ra một ticket, mã hóa nó với khóa bí mật của người dùng và chuyển nó lại cho người dùng. Người dùng giải mã ticket và dùng nó để ký lên yêu cầu gửi lên OSD và MDS.
 
-	![](../images/ceph_request.png)
+	![](../../images/ceph_request.png)
 
 - Giao thức xác thực cephx truyền thông giữa client và ceph server. Mỗi thông điệp được gửi giữa client và server được ký bởi ticket mà các monitor, OSD, MDS có thể xác thực bằng key chia sẻ:
 
-	![](../images/ceph_auth.png)
+	![](../../images/ceph_auth.png)
 
 - Toàn bộ quá trình được mô tả trong hình sau:
 	

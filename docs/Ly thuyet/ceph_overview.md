@@ -15,7 +15,7 @@
 - Ceph storage cluster được tạo nên từ vài daemons khác nhau. 
 - Hình sau đây cho thấy mô hình logical của một hệ thống ceph storage
 
-	![](../images/ceph_architecture.png)
+	![](../../images/ceph_architecture.png)
 	
 - **Reliable Autonomic Distributed Object Store (RADOS)** là nền tảng của cụm lưu trữ ceph. Mọi thức trong Ceph được lưu dưới dạng các objects, và RADOS chịu trách nhiệm lưu trữ các objects này mà không quan tâm kiểu dữ liệu là gì. RADOS đảm bảo dữ liệu luôn được duy trì ở trạng thái nhất quán và tin cậy. Để đảm bảo nhất quán dữ liệu, ceph thực hiện sao chép, phát hiện lỗi, và khôi phục lại dữ liệu, cũng như migration dữ liệu và cân bằng tải các node trên cả cluster.
 - Dữ liệu sẽ được lưu trên các **Object Storage Device (OSD)** ở dạng object. Đây là thành phần duy nhất lưu dữ liệu thực sự của người dùng. Mỗi OSD daemon sẽ ràng buộc với một ổ cứng vật lý trong cluster. Như vậy mỗi ổ cứng sẽ cần một OSD daemon.
@@ -74,7 +74,7 @@ test                       0            0            0            0            0
 - Object sẽ được chia ra `part`. Các part sẽ được lưu trên các osd khác nhau. 
 - Ví dụ có một object cần lưu trữ. Nó sẽ bị cắt ra 8 part và mỗi part sẽ được replicate 2 lần
 
-	![](../images/ceph_distribute.png)
+	![](../../images/ceph_distribute.png)
 	
 <a name=3></a>
 ## 3. Cơ chế nhân bản dữ liệu
@@ -83,7 +83,7 @@ test                       0            0            0            0            0
 - Sau khi primary object lưu thành công, osd daemon sẽ tự động replicate object đó sang một osd khác. Bản sao của primary object sẽ được coi là secondary object.
 - Việc replicate sẽ sử dụng một mạng chuyên dụng.
 
-	![](../images/ceph_replicate.png)
+	![](../../images/ceph_replicate.png)
 
 <a name=4></a>
 ## 4. Cơ chế phục hồi dữ liệu
@@ -92,4 +92,4 @@ test                       0            0            0            0            0
 - Tất cả các OSD chứa bản sao của PG trên OSD lỗi cùng tham gia vào quá trình phục hồi
 - Hình sau mô tả một osd bị sự cố. Trên osd đó chứa 2 mảnh dữ liệu là `10` và `01`. 2 osd khác chứa replica của 2 mảnh dữ liệu này cũng sẽ tham gia vào quá trình khôi phục.
 
-	![](../images/ceph_recovery.png)
+	![](../../images/ceph_recovery.png)
