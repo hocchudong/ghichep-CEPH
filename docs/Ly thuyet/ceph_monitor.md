@@ -50,12 +50,12 @@ ceph osd pool create {pool-name} pg_num
 ### Placement group được sử dụng như thế nào?
 - Placement group (PG) tập hợp các objects trong một pool
 	
-	![](../images/ceph_pg.png)
+	![](../../images/ceph_pg.png)
 
 - Ceph client sẽ tính PG mà object sẽ thuộc vào. Việc tính toán này được thực hiện bằng cách băm object ID và áp dụng cho một tác vụ dựa trên số lượng PGs được định nghĩa trong pool và Id của pool.
 - Nội dung trên trong một PG được lưu trong một bộ OSDs. Ví dụ, một pool có số replicate là 2, mỗi PG sẽ lưu các object trên 2 OSDs.
 
-	![](../images/ceph_pgstore.png)
+	![](../../images/ceph_pgstore.png)
 	
 - Khi số lượng PG tăng lên, các PG mới sẽ được gán vào các OSDs. CRUSH cũng sẽ thay đổi và một số object từ PGs cũ sẽ được sao chép tới PG mới và xóa từ PG cũ.
 - Sau khi một OSD gặp sự cố, nguy cơ mất dữ liệu tăng lên cho đến khi dữ được chứa trong osd đó được khôi phục lại toàn bộ. Một số kịch bản gây ra mất dữ liệu vĩnh viễn trong một PG:
@@ -73,7 +73,7 @@ ceph osd pool create {pool-name} pg_num
 - PG là rất quan trọng, ảnh hưởng đến hiệu năng cũng như độ an toàn của dữ liệu.
 - Công thức tính số PG cho mỗi pool như sau
 
-	![](../images/ceph_total_pg.png)
+	![](../../images/ceph_total_pg.png)
 	
 - `pool size` là số lượng replicate cho pool hoặc K + M cho erasure coded pools.
 
@@ -86,7 +86,7 @@ ceph osd pool create {pool-name} pg_num
 - Với yêu cầu đọc và ghi, đầu tiên client liên hệ với monitor và tìm một bản copy của cluster map. Cluster map giúp client biết trạng thái và cấu hình của cluster. Data sẽ được biến đổi thành các objects. Sau đó object sẽ được băm với số PG để sinh ra một PG không thay đổi trong ceph pool. Sau khi tính xong PG, CRUSH lookup xác định primary OSD để lưu và tìm kiếm data. ID của OSD primary được gửi cho client, client sẽ làm việc trực tiếp với OSD để lưu dữ liệu. Tất cả các thao tác tính toán đều được thực hiện bởi client, do đó không ảnh hưởng đến hiệu năng của cluster. 
 - Một khi data dược ghi lên primary OSD, trên cùng node đó thực hiện một tác vụ CRUSH lookup và tính vị trí secondary PG và các OSD, nơi mà data sẽ được sao chép.
 
-	![](../images/ceph_crush_lookup.png)
+	![](../../images/ceph_crush_lookup.png)
 
 ### Cấu trúc phân cấp của CRUSH
 - CRUSH là cơ sở để hiểu ceph và hoàn toàn có khả năng cấu hình; nó duy trì một phân cấp lồng nhau cho tất cả các thành phần của cơ sở hạ tầng của bạn. Danh sách các thiết bị CRUSH thường gồm có disk, node, rack, row, switch, dòng điện, room, data center, etc. Những thành phần này được gọi là failure zones hoặc CRUSH buckets.
