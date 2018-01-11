@@ -29,10 +29,27 @@ created 2017-12-22 09:43:45.690505
 0: 10.10.10.11:6789/0 mon.cephaio
 ```
 
-## 2. OSD map
-- <cập nhật sau>
+## 2. MDS map
+<Cập nhật sau>
 
-## 3. PG map
+## 3. OSD map
+-  OSD map: Lưu các thông tin như là ID cluster, epoch tạo OSD map và lần cuối cùng thay đổi; và các thông tin liên quan đến pools như là pool name, pool ID, type, số lượng replication, và PG (placement groups). Các thông tin về osd như là count, state, weight, last clean interval, và osd host.
+- Trạng thái của OSD là `in` hoặc `out` và `up` đang running hoặc `down` không running. Nếu OSD là up, nó có thể là in (có thể đọc ghi dữ liệu) hoặc là out. Nếu osd đã in, sau đó out, ceph sẽ chuyển PG tới các osds khác. Nếu osd là out, crush sẽ không gán PG lên osd đó. Nếu osd là down, nó cũng là out.
+
+```sh
+root@cephaio:~# ceph osd dump
+epoch 46
+fsid fe7cd007-6da4-4ea6-b04b-754b0e3c64de
+created 2017-12-22 09:43:46.279410
+modified 2018-01-11 07:56:09.082962
+flags sortbitwise,require_jewel_osds
+pool 0 'rbd' replicated size 2 min_size 1 crush_ruleset 0 object_hash rjenkins pg_num 64 pgp_num 64 last_change 1 flags hashpspool stripe_width 0
+max_osd 2
+osd.0 up   in  weight 1 up_from 42 up_thru 45 down_at 40 last_clean_interval [37,39) 10.10.10.11:6800/2050 10.10.20.11:6800/2050 10.10.20.11:6801/2050 10.10.10.11:6801/2050 exists,up a53c360b-ca92-4a9b-8105-44621a25c90b
+osd.1 up   in  weight 1 up_from 44 up_thru 45 down_at 40 last_clean_interval [35,39) 10.10.10.11:6802/2298 10.10.20.11:6802/2298 10.10.20.11:6803/2298 10.10.10.11:6803/2298 exists,up 33b4b1ae-be78-4be6-8abd-fad9126cdb13
+```
+
+## 4. PG map
 - Lệnh tạo mới một pool
 
 ```sh
@@ -78,7 +95,8 @@ ceph osd pool create {pool-name} pg_num
 - `pool size` là số lượng replicate cho pool hoặc K + M cho erasure coded pools.
 
 - Link tham khảo: http://docs.ceph.com/docs/master/rados/operations/placement-groups/
-## 4. CRUSH map
+
+## 5. CRUSH map
 - Hệ thống lưu trữ sẽ phải lưu phần data và metadata của nó. Metadata, là dữ liệu của dữ liệu, lưu thông tin như nơi data được lưu trong chuỗi các node storage và các disk. Mỗi lần dữ liệu mới được thêm vào, metadata của nó sẽ được cập nhật trước khi dữ liệu được lưu. Việc quản lý metadata rất phức tạp và khó khăn khi dữ liệu lớn.
 - Ceph sử dụng thuật toán `Controlled Replication Under Scalable Hashing (CRUSH)` để thực hiện lưu trữ và quản lý dữ liệu.
 - Thuật toán CRUSH dùng để tính toán nơi dữ liệu sẽ được lưu hoặc nơi dữ liệu sẽ được đọc. Thay vì lưu trữ metadata, CRUSH tính metadata dự trên yêu cầu.
@@ -94,10 +112,113 @@ ceph osd pool create {pool-name} pg_num
 
 	![](../../images/ceph_crush.png)
 
-<Đang cập nhật>
+- Lấy ra CRUSH  map bằng các lệnh sau
 
+```sh
+ceph osd getcrushmap -o crushmap.bin
+crushtool -d crushmap.bin -o crushmap.txt
+```
 
+- `crushmap.bin` là tên file, file này chứa crush map ở dạng nhị phân. Để đọc được file này, crushtool chuyển từ nhị phân sang dạng file text.
+- Ví dụ nội dung một crush map như sau:
 
+```sh
+# begin crush map
+tunable choose_local_tries 0
+tunable choose_local_fallback_tries 0
+tunable choose_total_tries 50
+tunable chooseleaf_descend_once 1
+tunable chooseleaf_vary_r 1
+tunable straw_calc_version 1
 
+# devices
+device 0 osd.0
+device 1 osd.1
 
+# types
+type 0 osd
+type 1 host
+type 2 chassis
+type 3 rack
+type 4 row
+type 5 pdu
+type 6 pod
+type 7 room
+type 8 datacenter
+type 9 region
+type 10 root
 
+# buckets
+host cephaio {
+        id -2           # do not change unnecessarily
+        # weight 0.039
+        alg straw
+        hash 0  # rjenkins1
+        item osd.0 weight 0.019
+        item osd.1 weight 0.019
+}
+root default {
+        id -1           # do not change unnecessarily
+        # weight 0.039
+        alg straw
+        hash 0  # rjenkins1
+        item cephaio weight 0.039
+}
+
+# rules
+rule replicated_ruleset {
+        ruleset 0
+        type replicated
+        min_size 1
+        max_size 10
+        step take default
+        step choose firstn 0 type osd
+        step emit
+}
+
+# end crush map
+```
+
+- CRUSH map có các section như sau:
+	- `tunables`: Cấu hình thuật toán CRUSH
+	- `Devices`: là các OSD daemon riêng lẻ. Các thiết bị được định danh với ID là số nguyên không âm và tên có định dạng osd.N, N là id của osd. Device cũng có thể chứa một lớp các thiết bị liên quan (ví dụ hdd, ssd) thuận tiện cho đặt các rules.
+	- `type và buckets`: buckets là thuật ngữ trong CRUSH để chỉ hệ thống phân cấp trong các node: hosts, racks, rows, etc. CRUSH map định nghĩa một loạt các `types` được sử dụng để miêu tả các node này. Mặc định có các type: osd (or device), host, chassis, rack, row, pdu, pod, room, datacenter, region, root. Đa số các cluster sử dụng các type này. Type có thể được định nghĩa nếu cần thiết. Hình dung bucket như cấu trúc cây. Các device là các osd ở nút lá, bắt đầu bằng root. ví dụ
+	
+		![](../../images/ceph_bucket.png)
+		
+	Mỗi node (device hoặc bucket) có một trọng số `weight `, chỉ ra tỉ lệ tương đối của tổng dữ liệu mà các device hoặc subtree sẽ lưu. weight được đặt ở lá, chỉ ra kích thước của device, và tự động tổng hợp cây từ đó, sao cho trọng lượng của nút mặc định sẽ là tổng của tất cả các thiết bị chứa bên dưới nó. Thông thường trọng lượng được tính bằng đơn vị terabyte (TB).
+	- `rules`: Định nghĩa chính sách mà dữ liệu được phân tán trên các thiết bị. Trong ví dụ trên có một rule là replicated_ruleset. Các rule có thể xem được bằng CLI 
+	
+	```sh
+	root@cephaio:~# ceph osd crush rule ls
+	[
+			"replicated_ruleset"
+	]
+
+	root@cephaio:~# ceph osd crush rule dump
+	[
+			{
+					"rule_id": 0,
+					"rule_name": "replicated_ruleset",
+					"ruleset": 0,
+					"type": 1,
+					"min_size": 1,
+					"max_size": 10,
+					"steps": [
+							{
+									"op": "take",
+									"item": -1,
+									"item_name": "default"
+							},
+							{
+									"op": "choose_firstn",
+									"num": 0,
+									"type": "osd"
+							},
+							{
+									"op": "emit"
+							}
+					]
+			}
+	]
+	```
