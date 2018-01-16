@@ -190,35 +190,35 @@ rule replicated_ruleset {
 	- `rules`: Định nghĩa chính sách mà dữ liệu được phân tán trên các thiết bị. Trong ví dụ trên có một rule là replicated_ruleset. Các rule có thể xem được bằng CLI 
 	
 	```sh
-	root@cephaio:~# ceph osd crush rule ls
-	[
-			"replicated_ruleset"
-	]
+root@cephaio:~# ceph osd crush rule ls
+[
+		"replicated_ruleset"
+]
 
-	root@cephaio:~# ceph osd crush rule dump
-	[
-			{
-					"rule_id": 0,
-					"rule_name": "replicated_ruleset",
-					"ruleset": 0,
-					"type": 1,
-					"min_size": 1,
-					"max_size": 10,
-					"steps": [
-							{
-									"op": "take",
-									"item": -1,
-									"item_name": "default"
-							},
-							{
-									"op": "choose_firstn",
-									"num": 0,
-									"type": "osd"
-							},
-							{
-									"op": "emit"
-							}
-					]
-			}
-	]
+root@cephaio:~# ceph osd crush rule dump
+[
+		{
+				"rule_id": 0,
+				"rule_name": "replicated_ruleset",
+				"ruleset": 0,
+				"type": 1,
+				"min_size": 1,
+				"max_size": 10,
+				"steps": [
+						{
+								"op": "take",
+								"item": -1,
+								"item_name": "default"
+						},
+						{
+								"op": "choose_firstn",
+								"num": 0,
+								"type": "osd"
+						},
+						{
+								"op": "emit"
+						}
+				]
+		}
+]
 	```
