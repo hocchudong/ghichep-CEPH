@@ -189,36 +189,36 @@ rule replicated_ruleset {
 	Mỗi node (device hoặc bucket) có một trọng số `weight `, chỉ ra tỉ lệ tương đối của tổng dữ liệu mà các device hoặc subtree sẽ lưu. weight được đặt ở lá, chỉ ra kích thước của device, và tự động tổng hợp cây từ đó, sao cho trọng lượng của nút mặc định sẽ là tổng của tất cả các thiết bị chứa bên dưới nó. Thông thường trọng lượng được tính bằng đơn vị terabyte (TB).
 	- `rules`: Định nghĩa chính sách mà dữ liệu được phân tán trên các thiết bị. Trong ví dụ trên có một rule là replicated_ruleset. Các rule có thể xem được bằng CLI 
 	
-	```sh
-root@cephaio:~# ceph osd crush rule ls
-[
-		"replicated_ruleset"
-]
+	```
+	root@cephaio:~# ceph osd crush rule ls
+	[
+			"replicated_ruleset"
+	]
 
-root@cephaio:~# ceph osd crush rule dump
-[
-		{
-				"rule_id": 0,
-				"rule_name": "replicated_ruleset",
-				"ruleset": 0,
-				"type": 1,
-				"min_size": 1,
-				"max_size": 10,
-				"steps": [
-						{
-								"op": "take",
-								"item": -1,
-								"item_name": "default"
-						},
-						{
-								"op": "choose_firstn",
-								"num": 0,
-								"type": "osd"
-						},
-						{
-								"op": "emit"
-						}
-				]
-		}
-]
+	root@cephaio:~# ceph osd crush rule dump
+	[
+			{
+					"rule_id": 0,
+					"rule_name": "replicated_ruleset",
+					"ruleset": 0,
+					"type": 1,
+					"min_size": 1,
+					"max_size": 10,
+					"steps": [
+							{
+									"op": "take",
+									"item": -1,
+									"item_name": "default"
+							},
+							{
+									"op": "choose_firstn",
+									"num": 0,
+									"type": "osd"
+							},
+							{
+									"op": "emit"
+							}
+					]
+			}
+	]
 	```
