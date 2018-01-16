@@ -206,19 +206,19 @@ root@cephaio:~# ceph osd crush rule dump
 		"max_size": 10,
 		"steps": [
 				{
-						"op": "take",
-						"item": -1,
-							"item_name": "default"
+					"op": "take",
+					"item": -1,
+						"item_name": "default"
 				},
 				{
-						"op": "choose_firstn",
-						"num": 0,
-						"type": "osd"
+					"op": "choose_firstn",
+					"num": 0,
+					"type": "osd"
 				},
 				{
-						"op": "emit"
+					"op": "emit"
 				}
 		]
 	}
 ]
-	```
+```
