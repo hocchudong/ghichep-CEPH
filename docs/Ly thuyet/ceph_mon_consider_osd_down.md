@@ -1,9 +1,9 @@
 ## Monitor xác nhận osd down
-- Monitor theo dõi trạng thái của cluster. Khi thực thi lệnh như là `ceph health` hoặc `ceph -s`, monitor sẽ báo cáo trạng thái hiện tại của ceph cluster. Monitor biết các thông tin về cluster bằng cách yêu cầu các báo cáo từ các ceph osd daemon, và nhận các báo cáo từ ceph osd daemon về trạng thái của chúng và của hàng xóm. Nếu monitor không nhận được báo cáo, hoặc nếu nhận được báo cáo thay đổi, nó sẽ cập nhật trạng thái ceph cluster map.
+- Monitor theo dõi trạng thái của cluster. Khi thực thi lệnh như là `ceph health` hoặc `ceph -s`, monitor sẽ báo cáo trạng thái hiện tại của ceph cluster. Monitor biết các thông tin về cluster bằng cách yêu cầu các báo cáo từ các ceph osd daemon, và nhận các báo cáo từ ceph osd daemon về trạng thái của chúng và của OSD khác. Nếu monitor không nhận được báo cáo, hoặc nếu nhận được báo cáo thay đổi, nó sẽ cập nhật trạng thái ceph cluster map.
 - Ceph cung cấp giá trị cấu hình mặc định hợp lý cho sự tương tác giữa Monitor và OSD. Tuy nhiên bạn có thể cấu hình lại các giá trị mặc định này.
 
 - Mỗi OSD sẽ kiểm tra trạng thái của osd khác 6s một lần. Thông số này có thể thay đổi bằng các thên `osd heartbeat interval` ở trong section `[osd]` trong file cấu hình ceph, hoặc đặt giá trị trong quá trình chạy. 
-- Nếu một hàng xóm Ceph OSD daemon không có thông tin sau 20 thì osd đó được coi là down và nó sẽ báo cáo về ceph monitor, monitor sẽ cập nhật vào cluster map. Bạn có thể đặt lại giá trị này bằng cách thêm một `osd hearbeat grace` ở trong section `[mon] và [osd] hoặc [global]`.
+- Nếu một hàng xóm Ceph OSD daemon không có thông tin sau 20s thì osd đó được coi là down và nó sẽ báo cáo về ceph monitor, monitor sẽ cập nhật vào cluster map. Bạn có thể đặt lại giá trị này bằng cách thêm một `osd hearbeat grace` ở trong section `[mon] và [osd] hoặc [global]`.
 
 	![](../../images/ceph_osd_check_heartbeats.png)
 	
