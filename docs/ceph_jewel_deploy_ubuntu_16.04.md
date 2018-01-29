@@ -74,8 +74,8 @@ apt -y install chrony
 	- Trên ceph 1 thực hiện như sau:
 		- commnet dòng sau:
 		
-		```
-		#pool 2.debian.pool.ntp.org offline iburst
+		```sh
+	#pool 2.debian.pool.ntp.org offline iburst
 		```
 		
 		- Thêm các dòng sau:
