@@ -45,26 +45,6 @@ echo deb https://download.ceph.com/debian-jewel/ $(lsb_release -sc) main | sudo 
 apt update
 ```
 
--  Tạo user ceph-deploy để sử dụng cho việc cài đặt cho CEPH.
-- Tạo user
-
-```sh
-sudo useradd -m -s /bin/bash ceph-deploy
-```
-
-- Đặt mật mẩu cho user ceph-deploy
-
-```sh
-sudo passwd ceph-deploy
-```
-
-- Phân quyền cho user ceph-deploy
-
-```sh
-echo "ceph-deploy ALL = (root) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/ceph-deploy
-sudo chmod 0440 /etc/sudoers.d/ceph-deploy
-```
-
 - Cài đặt ceph trên client
 
 ```sh
