@@ -74,32 +74,32 @@ apt -y install chrony
 	- Trên ceph 1 thực hiện như sau:
 		- commnet dòng sau:
 		
-	```sh
-	#pool 2.debian.pool.ntp.org offline iburst
-	```
+		```
+		#pool 2.debian.pool.ntp.org offline iburst
+		```
 		
 		- Thêm các dòng sau:
 
-	```sh
-	server 1.vn.poo.ntp.org iburst
-	server 0.asia.pool.ntp.org iburst 
-	server 3.asia.pool.ntp.org iburst
-	
-	allow 10.10.10.0/24
-	```
+		```sh
+		server 1.vn.poo.ntp.org iburst
+		server 0.asia.pool.ntp.org iburst 
+		server 3.asia.pool.ntp.org iburst
+		
+		allow 10.10.10.0/24
+		```
 	
 	- Trên ceph 2 và ceph 3:
 		- commnet dòng sau:
 		
-	```sh
-	#pool 2.debian.pool.ntp.org offline iburst
-	```
-	
+		```sh
+		#pool 2.debian.pool.ntp.org offline iburst
+		```
+		
 		- Thêm các dòng sau:
 
-	```sh
-	server ceph1 iburst
-	```
+		```sh
+		server ceph1 iburst
+		```
 		
 - Restart dịch vụ NTP
 
@@ -188,8 +188,6 @@ cd ~
 mkdir my-cluster
 cd my-cluster
 ```
-
-
 
 
 
