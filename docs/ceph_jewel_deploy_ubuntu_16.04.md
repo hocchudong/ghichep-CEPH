@@ -180,8 +180,11 @@ and check to make sure that only the key(s) you wanted were added.
 
 - Tiếp tục copy ssh key sang ceph 2 và ceph 3 bằng cách thay tên ceph1 ở trên lần lượt bằng ceph2 và ceph3
 
+---
+- Các bước sau thực hiện trên ceph1
+
 ### 3.4 Tạo các thư mục để công cụ ceph-deploy sử dụng để cài đặt CEPH
-- Tạo thư mục
+- 1. Tạo thư mục
 
 ```sh
 cd ~
@@ -189,42 +192,165 @@ mkdir my-cluster
 cd my-cluster
 ```
 
+- 2. Thiết lập các file cấu hình cho CEPH.
 
+```sh
+ceph-deploy new ceph1
+```
 
+- Sau khi thực hiện lệnh trên xong, sẽ thu được 03 file ở dưới (sử dụng lệnh ll -alh để xem). Trong đó cần cập nhật file ceph.conf để cài đặt CEPH được hoàn chỉnh.
 
+```sh
+ceph-deploy@ceph1:~/my-cluster$ ll -alh
+total 20K
+drwxrwxr-x 2 ceph-deploy ceph-deploy 4.0K Jan 29 10:03 ./
+drwxr-xr-x 5 ceph-deploy ceph-deploy 4.0K Jan 29 10:01 ../
+-rw-rw-r-- 1 ceph-deploy ceph-deploy  194 Jan 29 10:03 ceph.conf
+-rw-rw-r-- 1 ceph-deploy ceph-deploy 3.0K Jan 29 10:03 ceph-deploy-ceph.log
+-rw------- 1 ceph-deploy ceph-deploy   73 Jan 29 10:03 ceph.mon.keyring
+```
 
+- 3. Sửa file ceph.conf có nội dung như sau:
 
+```sh
+[global]
+fsid = ff191f7b-5e50-4a21-b0ee-388b769d13e4
+mon_initial_members = ceph1, ceph2, ceph3
+mon_host = 10.10.10.21, 10.10.10.22, 10.10.10.23
+auth_cluster_required = cephx
+auth_service_required = cephx
+auth_client_required = cephx
 
+osd pool default size = 2
+osd crush chooseleaf type = 0
+osd journal size = 1024
+public network = 10.10.10.0/24
+cluster network = 10.10.20.0/24
 
+[mon]
+mon host = ceph1, ceph2, ceph3
+mon initial members = ceph1, ceph2, ceph3
 
+[mon.ceph1]
+host = ceph1
+mon addr = 10.10.10.21
+[mon.ceph2]
+host = ceph2
+mon addr = 10.10.10.22
+[mon.ceph3]
+host = ceph3
+mon addr = 10.10.10.23
+```
 
+- 3. Cài đặt CEPH
 
+```sh
+ceph-deploy install ceph1 ceph2 ceph3
+```
 
+- 4. Cấu hình `MON` (một thành phần của CEPH)
 
+```sh
+ceph-deploy mon create-initial
+```
 
+- 5. Tạo các OSD cho CEPH
+- Các OSD trên ceph1
 
+```sh
+ceph-deploy osd prepare ceph1:sdc:/dev/sdb
+ceph-deploy osd prepare ceph1:sdd:/dev/sdb
+```
 
+- Active các OSD vừa tạo ở trên
 
+```sh
+ceph-deploy osd activate ceph1:/dev/sdc1:/dev/sdb1
+ceph-deploy osd activate ceph1:/dev/sdd1:/dev/sdb2
+```
 
+- Các OSD trên ceph2
 
+```sh
+ceph-deploy osd prepare ceph2:sdc:/dev/sdb
+ceph-deploy osd prepare ceph2:sdd:/dev/sdb
+```
 
+- Active các OSD vừa tạo ở trên
 
+```sh
+ceph-deploy osd activate ceph2:/dev/sdc1:/dev/sdb1
+ceph-deploy osd activate ceph2:/dev/sdd1:/dev/sdb2
+```
 
+- Các OSD trên ceph3
 
+```sh
+ceph-deploy osd prepare ceph3:sdc:/dev/sdb
+ceph-deploy osd prepare ceph3:sdd:/dev/sdb
+```
 
+- Active các OSD vừa tạo ở trên
 
+```sh
+ceph-deploy osd activate ceph3:/dev/sdc1:/dev/sdb1
+ceph-deploy osd activate ceph3:/dev/sdd1:/dev/sdb2
+```
 
+- Kiểm tra các phân vùng được tạo ra bằng lệnh `sudo lsblk` (nhớ phải có lệnh sudo vì đang dùng user ceph-deploy)
 
+```sh
+ceph-deploy@ceph1:~/my-cluster$ sudo lsblk
+NAME                  MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+sda                     8:0    0   20G  0 disk
+├─sda1                  8:1    0  487M  0 part /boot
+├─sda2                  8:2    0    1K  0 part
+└─sda5                  8:5    0 19.5G  0 part
+  ├─ubuntu--vg-root   252:0    0 18.5G  0 lvm  /
+  └─ubuntu--vg-swap_1 252:1    0    1G  0 lvm  [SWAP]
+sdb                     8:16   0   10G  0 disk
+├─sdb1                  8:17   0    1G  0 part
+└─sdb2                  8:18   0    1G  0 part
+sdc                     8:32   0   10G  0 disk
+└─sdc1                  8:33   0   10G  0 part /var/lib/ceph/osd/ceph-0
+sdd                     8:48   0   10G  0 disk
+└─sdd1                  8:49   0   10G  0 part /var/lib/ceph/osd/ceph-1
+sr0                    11:0    1  825M  0 rom
+```
 
+### 3.5 Tạo admin key
+- Tạo key
 
+```sh
+ceph-deploy admin ceph1
+```
 
+- Phân quyền cho file `/etc/ceph/ceph.client.admin.keyring`
 
+```sh
+sudo chmod +r /etc/ceph/ceph.client.admin.keyring
+```
 
+- Kiểm tra trạng thái của CEPH sau khi cài
 
+```sh
+ceph -s
+```
 
+- Kết quả của lệnh trên như sau:
 
+```sh
+ceph-deploy@ceph1:~/my-cluster$ ceph -s
+    cluster ff191f7b-5e50-4a21-b0ee-388b769d13e4
+     health HEALTH_WARN
+            too few PGs per OSD (21 < min 30)
+     monmap e1: 3 mons at {ceph1=10.10.10.21:6789/0,ceph2=10.10.10.22:6789/0,ceph3=10.10.10.23:6789/0}
+            election epoch 4, quorum 0,1,2 ceph1,ceph2,ceph3
+     osdmap e33: 6 osds: 6 up, 6 in
+            flags sortbitwise,require_jewel_osds
+      pgmap v86: 64 pgs, 1 pools, 0 bytes data, 0 objects
+            202 MB used, 61171 MB / 61373 MB avail
+                  64 active+clean
+```
 
-
-
-
-
+- Có cảnh báo do quá ít PG trên mỗi osd. Như vậy cluster đã được cài đặt thành công.
