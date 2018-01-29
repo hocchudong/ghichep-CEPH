@@ -75,7 +75,7 @@ apt -y install chrony
 		- commnet dòng sau:
 		
 		```sh
-	#pool 2.debian.pool.ntp.org offline iburst
+		#pool 2.debian.pool.ntp.org offline iburst
 		```
 		
 		- Thêm các dòng sau:
