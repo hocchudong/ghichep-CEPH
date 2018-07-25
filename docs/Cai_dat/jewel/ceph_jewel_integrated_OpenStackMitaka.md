@@ -32,6 +32,10 @@
 	- Label của các ổ cứng trong hướng dẫn này là sda, sdb,sdc,sdd. Tùy từng môi trường thực hiện label này có thể thay đổi (vda, vdb)
 ```
 
+### Chú ý
+
+Đã cài đặt Ceph theo hướng dẫn ở link [sau](ceph_jewel_install_manual.md)
+
 <a name="2"> </a> 
 ## 2. Trên Ceph 1
 ### 2.1. Tạo ra các pool cho các dịch vụ của OpenStack

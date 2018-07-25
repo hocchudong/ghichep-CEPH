@@ -29,7 +29,6 @@ apt-get install ceph ceph-mds -y
 	[mds]
 	mds data = /var/lib/ceph/mds/mds.$host
 	keyring = /var/lib/ceph/mds/mds.$host/mds.$host.keyring
-
 	[mds.ceph1]
 	host = ceph1
 	```

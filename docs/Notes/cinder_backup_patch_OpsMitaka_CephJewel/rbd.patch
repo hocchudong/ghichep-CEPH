@@ -1,0 +1,28 @@
+--- /usr/lib/python2.7/dist-packages/cinder/volume/drivers/rbd.py.org	2017-03-17 08:17:41.958069498 +0700
++++ /usr/lib/python2.7/dist-packages/cinder/volume/drivers/rbd.py	2017-03-17 08:19:10.437969619 +0700
+@@ -32,6 +32,7 @@
+ from cinder.image import image_utils
+ from cinder import utils
+ from cinder.volume import driver
++from cinder import objects
+ 
+ try:
+     import rados
+@@ -284,6 +285,17 @@
+             if val is not None:
+                 setattr(self.configuration, attr, utils.convert_str(val))
+ 
++    def get_backup_device(self, context, backup):
++        """
++        Override implementation in the driver.BaseVD class.
++
++        Excludes substitution of 'in-use' source volume by its
++        temporary clone in the ceph's backup workflow.
++        """
++        backup_device = objects.Volume.get_by_id(context, backup.volume_id)
++        is_snapshot = False
++        return (backup_device, is_snapshot)
++
+     def check_for_setup_error(self):
+         """Returns an error if prerequisites aren't met."""
+         if rados is None:

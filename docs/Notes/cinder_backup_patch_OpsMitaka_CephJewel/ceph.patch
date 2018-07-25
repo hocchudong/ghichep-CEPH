@@ -1,0 +1,87 @@
+--- /usr/lib/python2.7/dist-packages/cinder/backup/drivers/ceph.py.org	2017-03-17 08:11:48.514444978 +0700
++++ /usr/lib/python2.7/dist-packages/cinder/backup/drivers/ceph.py	2017-05-12 09:54:00.757993342 +0700
+@@ -719,6 +719,61 @@
+                                     length)
+             finally:
+                 dest_rbd.close()
++    
++    def _full_backup_in_use(self, backup_id, volume_id, src_volume, src_name, length):
++        """Perform a full backup of 'in-use' source volume.
++
++        First creates a clone of the src volume, then invokes the
++        core _full_backup method with clone as source, and deletes
++        this clone in end.
++        """
++        LOG.debug("Fully backing up the 'in-use' src volume: %s", src_name)
++        src_image = src_volume.rbd_image
++        clone_snap = "snap-%s" % backup_id
++        clone_name = "snap-%s-clone" % backup_id
++
++        LOG.debug("Creating a temp snap of the src image: %s", clone_snap)
++        src_image.create_snap(clone_snap)
++        src_image.protect_snap(clone_snap)
++
++        try:
++            with rbd_driver.RADOSClient(self, src_volume.rbd_pool) as client:
++                LOG.debug('Cloning the temp snap into a temp image: %s', clone_name)
++                self.rbd.RBD().clone(client.ioctx,
++                                src_name,
++                                clone_snap,
++                                client.ioctx,
++                                clone_name,
++                                client.features)
++
++                LOG.debug('Wrapping the temp image into RBDImageIOWrapper')
++                dest_image = self.rbd.Image(client.ioctx, clone_name)
++                dest_meta = rbd_driver.RBDImageMetadata(dest_image,
++                                        src_volume.rbd_pool,
++                                        src_volume.rbd_user,
++                                        src_volume.rbd_conf)
++
++                dest_volume = rbd_driver.RBDImageIOWrapper(dest_meta)
++
++                try:
++                    LOG.debug('Invoking the core _full_backup method')
++                    self._full_backup(backup_id, volume_id,
++                              dest_volume, src_name, length)
++                finally:
++                    try:
++                        LOG.debug("Deleting the temp image")
++                        dest_image.close()
++                        self.rbd.RBD().remove(client.ioctx, clone_name)
++                    except:
++                        LOG.error(_LE("Can't delete temp image: %s"), clone_name)
++        finally:
++            try:
++                LOG.debug("Deleting the temp snap")
++                src_image.unprotect_snap(clone_snap)
++                src_image.remove_snap(clone_snap)
++            except:
++                LOG.error(_LE("Can't delete temp snapshot: %s"), clone_snap)    
++
+ 
+     @staticmethod
+     def backup_snapshot_name_pattern():
+@@ -848,6 +903,7 @@
+         volume = self.db.volume_get(self.context, backup['volume_id'])
+         volume_id = volume['id']
+         volume_name = volume['name']
++        previous_status = volume['previous_status']
+ 
+         LOG.debug("Starting backup of volume='%s'.", volume_id)
+ 
+@@ -868,9 +924,12 @@
+             do_full_backup = True
+ 
+         if do_full_backup:
+-            self._full_backup(backup_id, volume_id, volume_file,
++            if previous_status == 'in-use':
++                self._full_backup_in_use(backup_id, volume_id, volume_file,
+                               volume_name, length)
+-
++            else:
++                self._full_backup(backup_id, volume_id, volume_file,
++                               volume_name, length)
+         backup.container = self._ceph_backup_pool
+         backup.save()
+ 
