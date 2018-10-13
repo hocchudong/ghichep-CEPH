@@ -1,103 +1,31 @@
-# Hướng dẫn cài đặt CEPH Luminous
+# Hướng dẫn cài đặt CEPH Luminous trên mô hình 03 node
 
-### Mô Hình
+## 1. Môi trường cài đặt
+
+- CentOS 7.4 64bit
+- CEPH Luminous 
+- Phương thức sử dụng `ceph-deploy`
+
+## 2. Mô Hình
 
 ![topo_ceph3node.png](./images/topo_ceph3node.png)
 
 
-### IP Planning
+## 3. IP Planning
 
 ![ip_planning_ceph03node.png](./images/ip_planning_ceph03node.png)
 
+## 4. Các bước cài đặt
 
-#1. Thiết lập IP, hostname
+### 4.1 Thiết lập IP, hostname
 
-##1.1 Thiết lập IP, hostname cho ceph1
+#### 4.1.1 Thiết lập IP, hostname cho ceph1
 
 -  Đăng nhập với tài khoản root
 
-```
-su -
-```
-
-- Khai báo repos nếu có
-
-```sh
-echo "proxy=http://192.168.70.111:3142;" >> /etc/yum.conf
-```
-
-- Update OS
-
-```sh
-yum update -y
-```
-
-- Đặt hostname
-
-```sh
-hostnamectl set-hostname ceph1
-```
-
-- Đặt IP cho máy cài CEPH
-
-```sh
-echo "Setup IP  ens160"
-nmcli c modify ens160 ipv4.addresses 192.168.70.131/24
-nmcli c modify ens160 ipv4.gateway 192.168.70.1
-nmcli c modify ens160 ipv4.dns 8.8.8.8
-nmcli c modify ens160 ipv4.method manual
-nmcli con mod ens160 connection.autoconnect yes
-
-echo "Setup IP  ens192"
-nmcli c modify ens192 ipv4.addresses 192.168.82.131/24
-nmcli c modify ens192 ipv4.method manual
-nmcli con mod ens192 connection.autoconnect yes
-
-echo "Setup IP  ens224"
-nmcli c modify ens224 ipv4.addresses 192.168.83.131/24
-nmcli c modify ens224 ipv4.method manual
-nmcli con mod ens224 connection.autoconnect yes
-```
-
-#### Cấu hình các thành phần cơ bản
-
-```sh
-sudo systemctl disable firewalld
-sudo systemctl stop firewalld
-sudo systemctl disable NetworkManager
-sudo systemctl stop NetworkManager
-sudo systemctl enable network
-sudo systemctl start network
-
-sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/sysconfig/selinux
-sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
-```
-
-- Khai báo file  /etc/hosts
-
-```sh
-echo "192.168.82.131 ceph1" >> /etc/hosts
-echo "192.168.82.132 ceph2" >> /etc/hosts
-echo "192.168.82.133 ceph3" >> /etc/hosts
-
-echo "192.168.70.131 ceph1" >> /etc/hosts
-echo "192.168.70.132 ceph2" >> /etc/hosts
-echo "192.168.70.133 ceph3" >> /etc/hosts
-```
-
-- Khởi động lại
-
-```
-init 6
-```
-
-##1.2 Thiết lập IP, hostname cho ceph2
-
-- Đăng nhập với tài khoản root
-
-```
-su -
-```
+	```
+	su -
+	```
 
 - Khai báo repos nếu có
 
@@ -105,211 +33,288 @@ su -
 	echo "proxy=http://192.168.70.111:3142;" >> /etc/yum.conf
 	```
 
-
 - Update OS
 
-```sh 
-yum update -y
-````
+	```sh
+	yum update -y
+	```
 
 - Đặt hostname
 
-```sh
-hostnamectl set-hostname ceph2
-```
+	```sh
+	hostnamectl set-hostname ceph1
+	```
 
 - Đặt IP cho máy cài CEPH
 
-```sh
-echo "Setup IP  ens160"
-nmcli c modify ens160 ipv4.addresses 192.168.70.132/24
-nmcli c modify ens160 ipv4.gateway 192.168.70.1
-nmcli c modify ens160 ipv4.dns 8.8.8.8
-nmcli c modify ens160 ipv4.method manual
-nmcli con mod ens160 connection.autoconnect yes
+	```sh
+	echo "Setup IP  ens160"
+	nmcli c modify ens160 ipv4.addresses 192.168.70.131/24
+	nmcli c modify ens160 ipv4.gateway 192.168.70.1
+	nmcli c modify ens160 ipv4.dns 8.8.8.8
+	nmcli c modify ens160 ipv4.method manual
+	nmcli con mod ens160 connection.autoconnect yes
 
-echo "Setup IP  ens192"
-nmcli c modify ens192 ipv4.addresses 192.168.82.132/24
-nmcli c modify ens192 ipv4.method manual
-nmcli con mod ens192 connection.autoconnect yes
+	echo "Setup IP  ens192"
+	nmcli c modify ens192 ipv4.addresses 192.168.82.131/24
+	nmcli c modify ens192 ipv4.method manual
+	nmcli con mod ens192 connection.autoconnect yes
 
-echo "Setup IP  ens224"
-nmcli c modify ens224 ipv4.addresses 192.168.83.132/24
-nmcli c modify ens224 ipv4.method manual
-nmcli con mod ens224 connection.autoconnect yes
-```
+	echo "Setup IP  ens224"
+	nmcli c modify ens224 ipv4.addresses 192.168.83.131/24
+	nmcli c modify ens224 ipv4.method manual
+	nmcli con mod ens224 connection.autoconnect yes
+	```
 
-- Cấu hình các thành phần cơ bản
+-  Cấu hình các thành phần cơ bản
 
+	```sh
+	sudo systemctl disable firewalld
+	sudo systemctl stop firewalld
+	sudo systemctl disable NetworkManager
+	sudo systemctl stop NetworkManager
+	sudo systemctl enable network
+	sudo systemctl start network
 
-```sh
-sudo systemctl disable firewalld
-sudo systemctl stop firewalld
-sudo systemctl disable NetworkManager
-sudo systemctl stop NetworkManager
-sudo systemctl enable network
-sudo systemctl start network
-
-sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/sysconfig/selinux
-sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
-```
-
+	sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/sysconfig/selinux
+	sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
+	```
 
 - Khai báo file  /etc/hosts
 
-```sh
-echo "192.168.82.131 ceph1" >> /etc/hosts
-echo "192.168.82.132 ceph2" >> /etc/hosts
-echo "192.168.82.133 ceph3" >> /etc/hosts
+	```sh
+	echo "192.168.82.131 ceph1" >> /etc/hosts
+	echo "192.168.82.132 ceph2" >> /etc/hosts
+	echo "192.168.82.133 ceph3" >> /etc/hosts
 
-echo "192.168.70.131 ceph1" >> /etc/hosts
-echo "192.168.70.132 ceph2" >> /etc/hosts
-echo "192.168.70.133 ceph3" >> /etc/hosts
-```
+	echo "192.168.70.131 ceph1" >> /etc/hosts
+	echo "192.168.70.132 ceph2" >> /etc/hosts
+	echo "192.168.70.133 ceph3" >> /etc/hosts
+	```
 
-#### Khởi động lại
+- Khởi động lại
 
-```sh
-init 6
-```
+	```
+	init 6
+	```
 
-##1.3 Thiết lập IP, hostname cho ceph3
+#### 4.1.2  Thiết lập IP, hostname cho ceph2
 
--  Đăng nhập với tài khoản root
+- Đăng nhập với tài khoản root
 
-```sh
-su -
-```
--  Khai báo repos nếu có
+	```
+	su -
+	```
 
-```sh
-echo "proxy=http://192.168.70.111:3142;" >> /etc/yum.conf
-```
+- Khai báo repos nếu có
 
-#### Update OS
+	```sh
+	echo "proxy=http://192.168.70.111:3142;" >> /etc/yum.conf
+	```
 
-```sh
-yum update -y
-```
+- Update OS
 
+	```sh 
+	yum update -y
+	````
 
 - Đặt hostname
 
-```sh
-hostnamectl set-hostname ceph3
-```
+	```sh
+	hostnamectl set-hostname ceph2
+	```
 
 - Đặt IP cho máy cài CEPH
 
-```sh
-echo "Setup IP  ens160"
-nmcli c modify ens160 ipv4.addresses 192.168.70.133/24
-nmcli c modify ens160 ipv4.gateway 192.168.70.1
-nmcli c modify ens160 ipv4.dns 8.8.8.8
-nmcli c modify ens160 ipv4.method manual
-nmcli con mod ens160 connection.autoconnect yes
+	```sh
+	echo "Setup IP  ens160"
+	nmcli c modify ens160 ipv4.addresses 192.168.70.132/24
+	nmcli c modify ens160 ipv4.gateway 192.168.70.1
+	nmcli c modify ens160 ipv4.dns 8.8.8.8
+	nmcli c modify ens160 ipv4.method manual
+	nmcli con mod ens160 connection.autoconnect yes
 
-echo "Setup IP  ens192"
-nmcli c modify ens192 ipv4.addresses 192.168.82.133/24
-nmcli c modify ens192 ipv4.method manual
-nmcli con mod ens192 connection.autoconnect yes
+	echo "Setup IP  ens192"
+	nmcli c modify ens192 ipv4.addresses 192.168.82.132/24
+	nmcli c modify ens192 ipv4.method manual
+	nmcli con mod ens192 connection.autoconnect yes
 
-echo "Setup IP  ens224"
-nmcli c modify ens224 ipv4.addresses 192.168.83.133/24
-nmcli c modify ens224 ipv4.method manual
-nmcli con mod ens224 connection.autoconnect yes
-```
+	echo "Setup IP  ens224"
+	nmcli c modify ens224 ipv4.addresses 192.168.83.132/24
+	nmcli c modify ens224 ipv4.method manual
+	nmcli con mod ens224 connection.autoconnect yes
+	```
 
 - Cấu hình các thành phần cơ bản
 
-```sh
-sudo systemctl disable firewalld
-sudo systemctl stop firewalld
-sudo systemctl disable NetworkManager
-sudo systemctl stop NetworkManager
-sudo systemctl enable network
-sudo systemctl start network
+	```sh
+	sudo systemctl disable firewalld
+	sudo systemctl stop firewalld
+	sudo systemctl disable NetworkManager
+	sudo systemctl stop NetworkManager
+	sudo systemctl enable network
+	sudo systemctl start network
 
-sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/sysconfig/selinux
-sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
-```
+	sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/sysconfig/selinux
+	sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
+	```
+
+- Khai báo file  /etc/hosts
+
+	```sh
+	echo "192.168.82.131 ceph1" >> /etc/hosts
+	echo "192.168.82.132 ceph2" >> /etc/hosts
+	echo "192.168.82.133 ceph3" >> /etc/hosts
+
+	echo "192.168.70.131 ceph1" >> /etc/hosts
+	echo "192.168.70.132 ceph2" >> /etc/hosts
+	echo "192.168.70.133 ceph3" >> /etc/hosts
+	```
+
+#### Khởi động lại
+
+	```sh
+	init 6
+	```
+
+#### 4.1.3  Thiết lập IP, hostname cho ceph3
+
+-  Đăng nhập với tài khoản root
+
+	```sh
+	su -
+	```
+
+-  Khai báo repos nếu có
+
+	```sh
+	echo "proxy=http://192.168.70.111:3142;" >> /etc/yum.conf
+	```
+
+- Update OS
+
+	```sh
+	yum update -y
+	```
+
+- Đặt hostname
+
+	```sh
+	hostnamectl set-hostname ceph3
+	```
+
+- Đặt IP cho máy cài CEPH
+
+	```sh
+	echo "Setup IP  ens160"
+	nmcli c modify ens160 ipv4.addresses 192.168.70.133/24
+	nmcli c modify ens160 ipv4.gateway 192.168.70.1
+	nmcli c modify ens160 ipv4.dns 8.8.8.8
+	nmcli c modify ens160 ipv4.method manual
+	nmcli con mod ens160 connection.autoconnect yes
+
+	echo "Setup IP  ens192"
+	nmcli c modify ens192 ipv4.addresses 192.168.82.133/24
+	nmcli c modify ens192 ipv4.method manual
+	nmcli con mod ens192 connection.autoconnect yes
+
+	echo "Setup IP  ens224"
+	nmcli c modify ens224 ipv4.addresses 192.168.83.133/24
+	nmcli c modify ens224 ipv4.method manual
+	nmcli con mod ens224 connection.autoconnect yes
+	```
+
+- Cấu hình các thành phần cơ bản
+
+	```sh
+	sudo systemctl disable firewalld
+	sudo systemctl stop firewalld
+	sudo systemctl disable NetworkManager
+	sudo systemctl stop NetworkManager
+	sudo systemctl enable network
+	sudo systemctl start network
+
+	sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/sysconfig/selinux
+	sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
+	```
 
 -  Khai báo file  /etc/hosts
 
-```sh
-echo "192.168.82.131 ceph1" >> /etc/hosts
-echo "192.168.82.132 ceph2" >> /etc/hosts
-echo "192.168.82.133 ceph3" >> /etc/hosts
+	```sh
+	echo "192.168.82.131 ceph1" >> /etc/hosts
+	echo "192.168.82.132 ceph2" >> /etc/hosts
+	echo "192.168.82.133 ceph3" >> /etc/hosts
 
-echo "192.168.70.131 ceph1" >> /etc/hosts
-echo "192.168.70.132 ceph2" >> /etc/hosts
-echo "192.168.70.133 ceph3" >> /etc/hosts
-```
+	echo "192.168.70.131 ceph1" >> /etc/hosts
+	echo "192.168.70.132 ceph2" >> /etc/hosts
+	echo "192.168.70.133 ceph3" >> /etc/hosts
+	```
 
 -  Khởi động lại
 
-```sh
-init 6
-```
+	```sh
+	init 6
+	```
 
-## 2. Cài đặt các gói cơ bản và cấu hình chuẩn bị
-## 2.1. Cài đặt gói cơ bản trên cả 03 node CEPH1, CEPH2 và CEPH3
+### 4.2 Cài gói bổ trợ và tạo tài khoản
 
-```sh
-yum update -y
+#### Lưu ý: Cài đặt gói cơ bản trên cả 03 node CEPH1, CEPH2 và CEPH3
 
-yum install epel-release -y
+- Thực hiện update OS và cài các gói bổ trợ
 
-yum install wget bybo curl git -y
+	```sh
+	yum update -y
 
-yum install python-setuptools -y
+	yum install epel-release -y
 
-yum install python-virtualenv -y
+	yum install wget bybo curl git -y
 
-yum update -y
-```
+	yum install python-setuptools -y
+
+	yum install python-virtualenv -y
+
+	yum update -y
+	```
 
 - Cấu hình NTP
 
-```sh
-yum install -y ntp ntpdate ntp-doc
+	```sh
+	yum install -y ntp ntpdate ntp-doc
 
-ntpdate 0.us.pool.ntp.org
+	ntpdate 0.us.pool.ntp.org
 
-hwclock --systohc
+	hwclock --systohc
 
-systemctl enable ntpd.service
-systemctl start ntpd.service
-```
+	systemctl enable ntpd.service
+	systemctl start ntpd.service
+	```
 
-Lưu ý: trường hợp máy chủ tại Nhân Hòa thì cần khai báo IP về NTP server, liên hệ đội RD để được hướng dẫn.
-
-### 2.2 Tạo user cài đặt ceph
+- Lưu ý: trường hợp máy chủ tại Nhân Hòa thì cần khai báo IP về NTP server, liên hệ đội RD để được hướng dẫn.
 
 - Tạo user `cephuser` trên node `ceph1, ceph2, ceph3`
 
-```sh
-useradd -d /home/cephuser -m cephuser
-```
+	```sh
+	useradd -d /home/cephuser -m cephuser
+	```
 
 - Đặt password cho user `cephuser`
 
-```sh
-passwd cephuser
-```
+	```sh
+	passwd cephuser
+	```
 
 - Cấp quyền sudo cho tài khoản cephuser
 
-```sh
-echo "cephuser ALL = (root) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/cephuser
+	```sh
+	echo "cephuser ALL = (root) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/cephuser
 
-chmod 0440 /etc/sudoers.d/cephuser
-# sed -i s'/Defaults requiretty/#Defaults requiretty'/g /etc/sudoers
-```
+	chmod 0440 /etc/sudoers.d/cephuser
+	# sed -i s'/Defaults requiretty/#Defaults requiretty'/g /etc/sudoers
+	```
 
+### 4.3 Tạo repos để cài đặt CEPH bằng cách tạo file
 
-### 2.3. Tạo repos để cài đặt CEPH bằng cách tạo file
-#### Tạo repos trên tất cả các host  
+- Tạo repos trên tất cả các host  
 
 ```sh
 cat << EOF > /etc/yum.repos.d/ceph.repo
@@ -344,15 +349,15 @@ priority=1
 EOF
 ```
 
-#### Thực hiện update sau khi khai báo repos 
+-  Thực hiện update sau khi khai báo repos 
 
 	```sh
 	yum update -y
 	```
 
-### 3. Cài đặt CEPH
+### 4.3 Cài đặt CEPH
 
-#### 3.1. Thực hiện trên node ceph1
+#### 4.3.1 Cài đặt ceph-deploy trên `ceph1`
 
 - Cài đặt ceph-deploy
 
@@ -395,6 +400,7 @@ EOF
 	ssh-copy-id cephuser@ceph3
 	```
 
+#### 4.3.2 Thực hiện cài đặt CEPH từ node ceph-admin
 
 -  Tạo thư mục để chứa file cài đặt ceph
 
@@ -447,9 +453,10 @@ sudo chmod +r /etc/ceph/ceph.client.admin.keyring
 
 Việc trên có ý nghĩa là để có thể thực hiện lệnh quản trị của CEPH trên các 03 node trong cụm Cluster.
 
-### Tạo OSD cho cụm cluster 
+#### 4.3.3 Add các OSD cho cụm CEPH
 
-Add các OSD 
+- Add các OSD cho cụm ceph cluser
+ 
 
 ```sh
 
@@ -475,27 +482,56 @@ ceph-deploy osd create --data /dev/sdd ceph3
 ```
 
 
-#### Cấu hình dashboad cho CEPH
+#### 4.3.4 Cấu hình dashboad cho CEPH
 
 - Thực hiện trên node ceph1
 
-ceph-deploy mgr create ceph1:ceph-mgr-1
+	```
+	ceph-deploy mgr create ceph1:ceph-mgr-1
+	```
 
-ceph mgr module enable dashboard
+- Kích hoạt dashboad
+	
+	```sh
+	ceph mgr module enable dashboard
+	```
 
-Kiểm tra xem địa chỉ IP của ceph dashboard là bao nhiêu
+- Kiểm tra trạng thái của ceph dashboad và port để truy cập.
 
+```sh
 ceph mgr dump
+```
 
 Kết quả: http://prntscr.com/l58wm7
 
 Truy cập vào địa chỉ IP với port mặc định là 7000 như ảnh: http://ip_address_ceph1:7000
 
 
-##### Kiểm tra lại hoạt động của CEPH
+#### 4.3.5 Kiểm tra lại hoạt động của CEPH
 
-ceph -s 
-hoặc 
-ceph health
+- Thực hiện lệnh dưới để kiểm tra trạng thái hoạt động của ceph
 
+	```sh
+	ceph -s 
+	```
+
+- Kết quả: 
+
+	```sh
+	[root@ceph1 ~]# ceph -s
+	  cluster:
+		id:     cc9656a3-96f2-4f3b-a7f1-441bfffdb7ce
+		health: HEALTH_OK
+
+	  services:
+		mon: 3 daemons, quorum ceph1,ceph2,ceph3
+		mgr: ceph-mgr-1(active)
+		osd: 9 osds: 9 up, 9 in
+
+	  data:
+		pools:   0 pools, 0 pgs
+		objects: 0 objects, 0B
+		usage:   9.04GiB used, 1.75TiB / 1.76TiB avail
+		pgs:
+	```
 
