@@ -4,7 +4,7 @@
 
 - CentOS 7.4 64bit
 - CEPH Luminous 
-- Phương thức sử dụng `ceph-deploy`
+- Phương thức sử dụng để triển khai ceph `ceph-deploy`
 
 ## 2. Mô Hình
 
@@ -17,9 +17,9 @@
 
 ## 4. Các bước cài đặt
 
-### 4.1 Thiết lập IP, hostname
+### 4.1. Thiết lập IP, hostname
 
-#### 4.1.1 Thiết lập IP, hostname cho ceph1
+#### 4.1.1. Thiết lập IP, hostname cho ceph1
 
 -  Đăng nhập với tài khoản root
 
@@ -45,7 +45,7 @@
 	hostnamectl set-hostname ceph1
 	```
 
-- Đặt IP cho máy cài CEPH
+- Đặt IP cho node `ceph1`
 
 	```sh
 	echo "Setup IP  ens160"
@@ -98,7 +98,7 @@
 	init 6
 	```
 
-#### 4.1.2  Thiết lập IP, hostname cho ceph2
+#### 4.1.2  Thiết lập IP, hostname cho `ceph2`
 
 - Đăng nhập với tài khoản root
 
@@ -124,7 +124,7 @@
 	hostnamectl set-hostname ceph2
 	```
 
-- Đặt IP cho máy cài CEPH
+- Đặt IP cho node `ceph2`
 
 	```sh
 	echo "Setup IP  ens160"
@@ -159,7 +159,7 @@
 	sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
 	```
 
-- Khai báo file  /etc/hosts
+- Khai báo file `/etc/hosts`
 
 	```sh
 	echo "192.168.82.131 ceph1" >> /etc/hosts
@@ -171,15 +171,15 @@
 	echo "192.168.70.133 ceph3" >> /etc/hosts
 	```
 
-#### Khởi động lại
+- Khởi động lại
 
 	```sh
 	init 6
 	```
 
-#### 4.1.3  Thiết lập IP, hostname cho ceph3
+#### 4.1.3  Thiết lập IP, hostname cho `ceph3`
 
--  Đăng nhập với tài khoản root
+-  Đăng nhập với tài khoản `root`
 
 	```sh
 	su -
@@ -203,7 +203,7 @@
 	hostnamectl set-hostname ceph3
 	```
 
-- Đặt IP cho máy cài CEPH
+- Đặt IP cho node `ceph3`
 
 	```sh
 	echo "Setup IP  ens160"
@@ -238,7 +238,7 @@
 	sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
 	```
 
--  Khai báo file  /etc/hosts
+-  Khai báo file `/etc/hosts`
 
 	```sh
 	echo "192.168.82.131 ceph1" >> /etc/hosts
@@ -256,7 +256,7 @@
 	init 6
 	```
 
-### 4.2 Cài gói bổ trợ và tạo tài khoản
+### 4.2. Cài gói bổ trợ và tạo tài khoản để cài đặt CEPH
 
 #### Lưu ý: Cài đặt gói cơ bản trên cả 03 node CEPH1, CEPH2 và CEPH3
 
@@ -289,7 +289,7 @@
 	systemctl start ntpd.service
 	```
 
-- Lưu ý: trường hợp máy chủ tại Nhân Hòa thì cần khai báo IP về NTP server, liên hệ đội RD để được hướng dẫn.
+- `Lưu ý:` trường hợp máy chủ tại Nhân Hòa thì cần khai báo IP về NTP server, liên hệ đội RD để được hướng dẫn.
 
 - Tạo user `cephuser` trên node `ceph1, ceph2, ceph3`
 
@@ -303,19 +303,19 @@
 	passwd cephuser
 	```
 
-- Cấp quyền sudo cho tài khoản cephuser
+- Cấp quyền sudo cho tài khoản `cephuser`
 
 	```sh
 	echo "cephuser ALL = (root) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/cephuser
-
 	chmod 0440 /etc/sudoers.d/cephuser
 	# sed -i s'/Defaults requiretty/#Defaults requiretty'/g /etc/sudoers
 	```
 
 ### 4.3 Tạo repos để cài đặt CEPH bằng cách tạo file
 
-- Tạo repos trên tất cả các host  
+- `Lưu ý:` Thực hiện trên tất cả 03 node `ceph1, ceph2 và ceph3`
 
+- Tạo repos
 ```sh
 cat << EOF > /etc/yum.repos.d/ceph.repo
 [Ceph]
@@ -336,7 +336,6 @@ gpgcheck=1
 type=rpm-md
 gpgkey=https://download.ceph.com/keys/release.asc
 priority=1
-
 
 [ceph-source]
 name=Ceph source packages
@@ -359,6 +358,8 @@ EOF
 
 #### 4.3.1 Cài đặt ceph-deploy trên `ceph1`
 
+- `Lưu ý:` Bước này thực hiện trên node `ceph1`
+
 - Cài đặt ceph-deploy
 
 	```sh
@@ -371,12 +372,12 @@ EOF
 	ceph-deploy --version
 	```
 
-- Kết quả: 
+	- Kết quả: 
 
-	```sh
-	[cephuser@ceph1 ~]$ ceph-deploy --version
-	2.0.1
-	```
+		```sh
+		[cephuser@ceph1 ~]$ ceph-deploy --version
+		2.0.1
+		```
 
 - Chuyển sang tài khoản `cephuser`
 
@@ -400,8 +401,9 @@ EOF
 	ssh-copy-id cephuser@ceph3
 	```
 
-#### 4.3.2 Thực hiện cài đặt CEPH từ node ceph-admin
+#### 4.3.2 Thực hiện cài đặt CEPH
 
+- `Lưu ý:` Bước này thực hiện trên node `ceph1`
 -  Tạo thư mục để chứa file cài đặt ceph
 
 	```sh
@@ -418,38 +420,37 @@ EOF
 
 -  Chỉ định các dải mạng cho CEPH
 
-```sh
-echo "public network = 192.168.82.0/24" >> ceph.conf
-echo "cluster network = 192.168.83.0/24" >> ceph.conf
-```
+	```sh
+	echo "public network = 192.168.82.0/24" >> ceph.conf
+	echo "cluster network = 192.168.83.0/24" >> ceph.conf
+	```
 
 -  Cài đặt các gói của CEPH
 
-```sh
-ceph-deploy install --release luminous ceph1 ceph2 ceph3
-```
+	```sh
+	ceph-deploy install --release luminous ceph1 ceph2 ceph3
+	```
 
 -  Cấu hình MON 
 
-```sh
-ceph-deploy mon create-initial
-```
+	```sh
+	ceph-deploy mon create-initial
+	```
 
 -  Phân quyền cho  các node có thể quản trị được Cụm CEPH
 
 - Đứng trên node CEPH 1 thực hiện lệnh dưới.
 
-```sh
-ceph-deploy admin ceph1 ceph2 ceph3
-sudo chmod +r /etc/ceph/ceph.client.admin.keyring
-```
+	```sh
+	ceph-deploy admin ceph1 ceph2 ceph3
+	sudo chmod +r /etc/ceph/ceph.client.admin.keyring
+	```
 
+Lệnh trên sẽ sinh ra file `/etc/ceph/ceph.client.admin.keyring` trên cả 03 node. Tiếp tục ssh vào các node ceph2 và ceph3 còn lại để thực hiện lệnh phân quyền thực thi cho file `/etc/ceph/ceph.client.admin.keyring`
 
-Lệnh trên sẽ sinh ra file /etc/ceph/ceph.client.admin.keyring trên cả 03 node. Tiếp tục ssh vào các node ceph2 và ceph3 còn lại để thực hiện lệnh phân quyền thực thi cho file /etc/ceph/ceph.client.admin.keyring
-
-```sh
-sudo chmod +r /etc/ceph/ceph.client.admin.keyring
-```
+	```sh
+	sudo chmod +r /etc/ceph/ceph.client.admin.keyring
+	```
 
 Việc trên có ý nghĩa là để có thể thực hiện lệnh quản trị của CEPH trên các 03 node trong cụm Cluster.
 
@@ -458,28 +459,27 @@ Việc trên có ý nghĩa là để có thể thực hiện lệnh quản trị
 - Add các OSD cho cụm ceph cluser
  
 
-```sh
+	```sh
+	ceph-deploy osd create --data /dev/sdb ceph1
 
-ceph-deploy osd create --data /dev/sdb ceph1
+	ceph-deploy osd create --data /dev/sdc ceph1
 
-ceph-deploy osd create --data /dev/sdc ceph1
-
-ceph-deploy osd create --data /dev/sdd ceph1
-
-
-ceph-deploy osd create --data /dev/sdb ceph2
-
-ceph-deploy osd create --data /dev/sdc ceph2
-
-ceph-deploy osd create --data /dev/sdd ceph2
+	ceph-deploy osd create --data /dev/sdd ceph1
 
 
-ceph-deploy osd create --data /dev/sdb ceph3
+	ceph-deploy osd create --data /dev/sdb ceph2
 
-ceph-deploy osd create --data /dev/sdc ceph3
+	ceph-deploy osd create --data /dev/sdc ceph2
 
-ceph-deploy osd create --data /dev/sdd ceph3
-```
+	ceph-deploy osd create --data /dev/sdd ceph2
+
+
+	ceph-deploy osd create --data /dev/sdb ceph3
+
+	ceph-deploy osd create --data /dev/sdc ceph3
+
+	ceph-deploy osd create --data /dev/sdd ceph3
+	```
 
 
 #### 4.3.4 Cấu hình dashboad cho CEPH
@@ -498,14 +498,13 @@ ceph-deploy osd create --data /dev/sdd ceph3
 
 - Kiểm tra trạng thái của ceph dashboad và port để truy cập.
 
-```sh
-ceph mgr dump
-```
+	```sh
+	ceph mgr dump
+	```
 
-Kết quả: http://prntscr.com/l58wm7
+- Kết quả: http://prntscr.com/l58wm7
 
-Truy cập vào địa chỉ IP với port mặc định là 7000 như ảnh: http://ip_address_ceph1:7000
-
+Truy cập vào địa chỉ IP với port mặc định là 7000 như ảnh: `http://ip_address_ceph1:7000`. Ta sẽ có giao diện như link: http://prntscr.com/l5k7xj
 
 #### 4.3.5 Kiểm tra lại hoạt động của CEPH
 
