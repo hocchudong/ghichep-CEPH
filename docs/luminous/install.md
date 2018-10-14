@@ -86,10 +86,13 @@
 	echo "192.168.82.131 ceph1" >> /etc/hosts
 	echo "192.168.82.132 ceph2" >> /etc/hosts
 	echo "192.168.82.133 ceph3" >> /etc/hosts
+	echo "192.168.82.139 cephclient1" >> /etc/hosts	
+
 
 	echo "192.168.70.131 ceph1" >> /etc/hosts
 	echo "192.168.70.132 ceph2" >> /etc/hosts
 	echo "192.168.70.133 ceph3" >> /etc/hosts
+	echo "192.168.70.139 cephclient1" >> /etc/hosts
 	```
 
 - Khởi động lại
@@ -165,10 +168,13 @@
 	echo "192.168.82.131 ceph1" >> /etc/hosts
 	echo "192.168.82.132 ceph2" >> /etc/hosts
 	echo "192.168.82.133 ceph3" >> /etc/hosts
+	echo "192.168.82.139 cephclient1" >> /etc/hosts	
+
 
 	echo "192.168.70.131 ceph1" >> /etc/hosts
 	echo "192.168.70.132 ceph2" >> /etc/hosts
 	echo "192.168.70.133 ceph3" >> /etc/hosts
+	echo "192.168.70.139 cephclient1" >> /etc/hosts
 	```
 
 - Khởi động lại
@@ -244,10 +250,13 @@
 	echo "192.168.82.131 ceph1" >> /etc/hosts
 	echo "192.168.82.132 ceph2" >> /etc/hosts
 	echo "192.168.82.133 ceph3" >> /etc/hosts
+	echo "192.168.82.139 cephclient1" >> /etc/hosts	
+
 
 	echo "192.168.70.131 ceph1" >> /etc/hosts
 	echo "192.168.70.132 ceph2" >> /etc/hosts
 	echo "192.168.70.133 ceph3" >> /etc/hosts
+	echo "192.168.70.139 cephclient1" >> /etc/hosts
 	```
 
 -  Khởi động lại
@@ -533,4 +542,120 @@ Truy cập vào địa chỉ IP với port mặc định là 7000 như ảnh: `h
 		usage:   9.04GiB used, 1.75TiB / 1.76TiB avail
 		pgs:
 	```
+
+### 5. Cài đặt RBD cho client sử dụng
+
+#### 5.1. Cài đặt trên node client 
+
+- Thiết lập ip trên node `cephclient1`
+
+-  Đăng nhập với tài khoản root
+
+	```
+	su -
+	```
+
+- Khai báo repos nếu có
+
+	```sh
+	echo "proxy=http://192.168.70.111:3142;" >> /etc/yum.conf
+	```
+
+- Update OS
+
+	```sh
+	yum update -y
+	```
+
+- Đặt hostname
+
+	```sh
+	hostnamectl set-hostname cephclient1
+	```
+
+- Đặt IP cho node `cephclient1`
+
+	```sh
+	echo "Setup IP  eth0"
+	nmcli c modify eth0 ipv4.addresses 192.168.70.139/24
+	nmcli c modify eth0 ipv4.gateway 192.168.70.1
+	nmcli c modify eth0 ipv4.dns 8.8.8.8
+	nmcli c modify eth0 ipv4.method manual
+	nmcli con mod eth0 connection.autoconnect yes
+
+	echo "Setup IP  eth1"
+	nmcli c modify eth1 ipv4.addresses 192.168.82.139/24
+	nmcli c modify eth1 ipv4.method manual
+	nmcli con mod eth1 connection.autoconnect yes
+	```
+
+-  Cấu hình các thành phần cơ bản
+
+	```sh
+	sudo systemctl disable firewalld
+	sudo systemctl stop firewalld
+	sudo systemctl disable NetworkManager
+	sudo systemctl stop NetworkManager
+	sudo systemctl enable network
+	sudo systemctl start network
+
+	sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/sysconfig/selinux
+	sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
+	```
+
+- Khai báo file  /etc/hosts
+
+	```sh
+	echo "192.168.82.131 ceph1" >> /etc/hosts
+	echo "192.168.82.132 ceph2" >> /etc/hosts
+	echo "192.168.82.133 ceph3" >> /etc/hosts
+	echo "192.168.82.139 cephclient1" >> /etc/hosts	
+
+
+	echo "192.168.70.131 ceph1" >> /etc/hosts
+	echo "192.168.70.132 ceph2" >> /etc/hosts
+	echo "192.168.70.133 ceph3" >> /etc/hosts
+	echo "192.168.70.139 cephclient1" >> /etc/hosts
+	```
+	
+- Khởi động lại node client 
+
+	```sh
+	init 6
+	```
+
+
+#### 5.2. Cài đặt ceph client cho node `cephclient1`
+
+- Đứng trên node `ceph1` thực hiện cài đặt 
+
+ ceph-deploy install cephclient1 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
