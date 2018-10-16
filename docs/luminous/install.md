@@ -432,14 +432,26 @@ EOF
 	```
 
 - Thiết lập cluster cho CEPH. Cú pháp của lệnh sẽ là `ceph-deploy new ten_mon_nodes`. 
-- Do trong cấu hình này ta dùng 03 node `ceph1, ceph2, ceph3` làm mon nên ta sẽ thực hiện lệnh bên dưới.
+- Do trong cấu hình này ta dùng 03 node `ceph1, ceph2, ceph3` làm node MON nên ta sẽ thực hiện lệnh bên dưới. Nếu bản chỉ có 01 node thì chỉ cần hostname của node đó.
 
 	```sh
 	ceph-deploy new ceph1 ceph2 ceph3
 	```
 
--  Chỉ định các dải mạng cho CEPH
+Kết quả của lệnh trên sẽ sinh ra các file dưới, kiểm tra bằng lệnh `ls -alh`
 
+	```sh
+	[cephuser@ceph1 my-cluster]$ ls -alh
+	total 172K
+	drwxrwxr-x 2 cephuser cephuser   75 Oct 16 23:16 .
+	drwx------ 4 cephuser cephuser  116 Oct 16 23:16 ..
+	-rw-rw-r-- 1 cephuser cephuser  421 Oct 16 23:31 ceph.conf
+	-rw-rw-r-- 1 cephuser cephuser 163K Oct 16 23:36 ceph-deploy-ceph.log
+	-rw------- 1 cephuser cephuser   73 Oct 16 23:16 ceph.mon.keyring
+	```
+	
+- File `ceph.conf` sinh ra ở trên chứa các cấu hình cho cụm ceph cluster. Ta thực hiện thêm các khai báo dưới cho file `ceph.conf` này trước khi cài đặt các gói cần thiết cho ceph trên các node.
+	
 	```sh
 	echo "public network = 192.168.82.0/24" >> ceph.conf
 	echo "cluster network = 192.168.83.0/24" >> ceph.conf
@@ -449,10 +461,19 @@ EOF
 	echo "osd pool default min size = 1"  >> ceph.conf
 	```
 
--  Cài đặt các gói của CEPH
+-  Cài đặt các gói của CEPH trên các node, trong hướng dẫn này chỉ rõ bản `ceph luminous`. Lệnh dưới sẽ cài các gói lên tất cả các node ceph. Lệnh được thực hiện trên node `ceph1`.
 
 	```sh
 	ceph-deploy install --release luminous ceph1 ceph2 ceph3
+	```
+	
+Kết quả của lệnh trên sẽ hiển thị như bên dưới, trong đó có phiên bản của ceph được cài trên các node.
+
+	```sh
+	[ceph3][DEBUG ]
+	[ceph3][DEBUG ] Complete!
+	[ceph3][INFO  ] Running command: sudo ceph --version
+	[ceph3][DEBUG ] ceph version 12.2.8 (ae699615bac534ea496ee965ac6192cb7e0e07c0) luminous (stable)
 	```
 
 -  Cấu hình MON 
@@ -461,16 +482,36 @@ EOF
 	ceph-deploy mon create-initial
 	```
 
--  Phân quyền cho  các node có thể quản trị được Cụm CEPH
+- Kết quả của lệnh trên sẽ sinh ra các file dưới, kiểm tra bằng lệnh `ls -alh`
 
-- Đứng trên node CEPH 1 thực hiện lệnh dưới.
+	```sh
+	[cephuser@ceph1 my-cluster]$ ls -alh
+	total 412K
+	drwxrwxr-x 2 cephuser cephuser  244 Oct 16 23:47 .
+	drwx------ 4 cephuser cephuser  116 Oct 16 23:16 ..
+	-rw------- 1 cephuser cephuser   71 Oct 16 23:47 ceph.bootstrap-mds.keyring
+	-rw------- 1 cephuser cephuser   71 Oct 16 23:47 ceph.bootstrap-mgr.keyring
+	-rw------- 1 cephuser cephuser   71 Oct 16 23:47 ceph.bootstrap-osd.keyring
+	-rw------- 1 cephuser cephuser   71 Oct 16 23:47 ceph.bootstrap-rgw.keyring
+	-rw------- 1 cephuser cephuser   63 Oct 16 23:47 ceph.client.admin.keyring
+	-rw-rw-r-- 1 cephuser cephuser  421 Oct 16 23:31 ceph.conf
+	-rw-rw-r-- 1 cephuser cephuser 191K Oct 16 23:47 ceph-deploy-ceph.log
+	-rw------- 1 cephuser cephuser   73 Oct 16 23:16 ceph.mon.keyring
+	````
+		
+- Thực hiện copy file `ceph.client.admin.keyring` sang các node trong cụm ceph cluster. File này sẽ được copy vào thư mục `/etc/ceph/`
 
 	```sh
 	ceph-deploy admin ceph1 ceph2 ceph3
+	```
+
+- Đứng trên node `ceph1` phân quyền cho file 	`/etc/ceph/ceph.client.admin.keyring`
+
+	```sh
 	sudo chmod +r /etc/ceph/ceph.client.admin.keyring
 	```
 
-Lệnh trên sẽ sinh ra file `/etc/ceph/ceph.client.admin.keyring` trên cả 03 node. Tiếp tục ssh vào các node ceph2 và ceph3 còn lại để thực hiện lệnh phân quyền thực thi cho file `/etc/ceph/ceph.client.admin.keyring`
+- Tiếp tục ssh vào các node ceph2 và ceph3 còn lại để thực hiện lệnh phân quyền thực thi cho file `/etc/ceph/ceph.client.admin.keyring`
 
 	```sh
 	sudo chmod +r /etc/ceph/ceph.client.admin.keyring
