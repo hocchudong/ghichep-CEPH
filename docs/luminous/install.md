@@ -5,6 +5,16 @@
 - CentOS 7.4 64bit
 - CEPH Luminous 
 - Phương thức sử dụng để triển khai ceph `ceph-deploy`
+- Vai trò các node như sau:
+  - CEPH Admin nodes: ceph1
+	- CEPH MON nodes: ceph1, ceph2, ceph3
+	- CEPH OSD nodes: ceph1, ceph2, ceph3
+	
+- Lưu ý: 	
+  - Tùy vào kiến trúc mà ta có thể khai báo các nodes MON hoặc OSD là các node tách biệt nhau hoặc node MON chỉ cần 01 node duy nhất. 
+  - Số node MON thường là 03 hoặc 05 hoặc số lẻ để đảm bảo cụm cluser theo nguyên tắc mà CEPH khuyến cáo. Chi tiết nguyên tắc này đọc thêm các tài liệu từ docs.ceph.com nhé.
+  - Trong phạm vi bài viết này chúng ta sẽ setup các node có cả vai trò MON và OSD để biết các tham số cấu hình ở phần dưới. ` NÊN TUÂN THỦ ĐÚNG CÁC BƯỚC VÀ CẤU HÌNH KHUYẾN CÁO ĐỂ ĐẢM BẢO CÀI ĐẶT THÀNH CÔNG - SAU ĐÓ HÃY SÁNG TẠO.`  
+
 
 ## 2. Mô Hình
 
@@ -421,7 +431,8 @@ EOF
 	cd my-cluster
 	```
 
-- Thiết lập cấu hình MON cho CEPH
+- Thiết lập cluster cho CEPH. Cú pháp của lệnh sẽ là `ceph-deploy new ten_mon_nodes`. 
+- Do trong cấu hình này ta dùng 03 node `ceph1, ceph2, ceph3` làm mon nên ta sẽ thực hiện lệnh bên dưới.
 
 	```sh
 	ceph-deploy new ceph1 ceph2 ceph3
