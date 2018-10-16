@@ -432,6 +432,10 @@ EOF
 	```sh
 	echo "public network = 192.168.82.0/24" >> ceph.conf
 	echo "cluster network = 192.168.83.0/24" >> ceph.conf
+	echo "osd objectstore = bluestore"  >> ceph.conf
+	echo "mon_allow_pool_delete = true"  >> ceph.conf
+	echo "osd pool default size = 3"  >> ceph.conf
+	echo "osd pool default min size = 1"  >> ceph.conf
 	```
 
 -  Cài đặt các gói của CEPH
