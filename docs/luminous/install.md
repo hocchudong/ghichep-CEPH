@@ -627,9 +627,35 @@ Truy cập vào địa chỉ IP với port mặc định là 7000 như ảnh: `h
 
 #### 5.2. Cài đặt ceph client cho node `cephclient1`
 
+- Thực hiện trên node `ceph1`
+- Di chuyển vào thư mục chứa các file cấu hình của ceph hoặc chuyển sang user `cephuser` để thực hiện các bước tiếp theo
+
+	```sh
+	cd /home/cephuser/my-cluster/
+	```
+
 - Đứng trên node `ceph1` thực hiện cài đặt 
 
- ceph-deploy install cephclient1 
+	```sh
+	ceph-deploy install cephclient1 
+	```
+	
+- Thực hiện deploy ceph cho node `cephclient1`
+	
+	```sh
+	ceph-deploy admin cephclient1 
+	```
+
+#### 5.2. Cài đặt ceph client cho node `cephclient1`
+
+Thực hiện trên node `cephclient1`
+
+- Phân quyền cho file `/etc/ceph/ceph.client.admin.keyring`
+
+```sh
+/etc/ceph/ceph.client.admin.keyring
+```
+
 
 
 
