@@ -438,7 +438,7 @@ EOF
 	ceph-deploy new ceph1 ceph2 ceph3
 	```
 
-Kết quả của lệnh trên sẽ sinh ra các file dưới, kiểm tra bằng lệnh `ls -alh`
+- Kết quả của lệnh trên sẽ sinh ra các file dưới, kiểm tra bằng lệnh `ls -alh`
 
 	```sh
 	[cephuser@ceph1 my-cluster]$ ls -alh
@@ -467,7 +467,7 @@ Kết quả của lệnh trên sẽ sinh ra các file dưới, kiểm tra bằng
 	ceph-deploy install --release luminous ceph1 ceph2 ceph3
 	```
 	
-Kết quả của lệnh trên sẽ hiển thị như bên dưới, trong đó có phiên bản của ceph được cài trên các node.
+- Kết quả của lệnh trên sẽ hiển thị như bên dưới, trong đó có phiên bản của ceph được cài trên các node.
 
 	```sh
 	[ceph3][DEBUG ]
@@ -547,12 +547,13 @@ Việc trên có ý nghĩa là để có thể thực hiện lệnh quản trị
 	```
 
 
-#### 4.3.4 Cấu hình dashboad cho CEPH
+#### 4.3.4 Cấu hình manager và dashboad cho ceph cluster
 
-- Thực hiện trên node ceph1
+
+- Thực hiện trên node ceph1 để khai báo các node có vai trò manager, phục vụ việc quản trị ceph sau này.
 
 	```
-	ceph-deploy mgr create ceph1:ceph-mgr-1
+	ceph-deploy mgr create ceph1 ceph2 ceph3
 	```
 
 - Kích hoạt dashboad
@@ -569,7 +570,12 @@ Việc trên có ý nghĩa là để có thể thực hiện lệnh quản trị
 
 - Kết quả: http://prntscr.com/l58wm7
 
-Truy cập vào địa chỉ IP với port mặc định là 7000 như ảnh: `http://ip_address_ceph1:7000`. Ta sẽ có giao diện như link: http://prntscr.com/l5k7xj
+- Truy cập vào địa chỉ IP với port mặc định là 7000 như ảnh: `http://ip_address_ceph1:7000`. 
+
+- Ta sẽ có giao diện như link: 
+  - http://prntscr.com/l5k7xj
+	- http://prntscr.com/l6ryli
+	- http://prntscr.com/l6ryzp
 
 #### 4.3.5 Kiểm tra lại hoạt động của CEPH
 
@@ -582,21 +588,21 @@ Truy cập vào địa chỉ IP với port mặc định là 7000 như ảnh: `h
 - Kết quả: 
 
 	```sh
-	[root@ceph1 ~]# ceph -s
-	  cluster:
-		id:     cc9656a3-96f2-4f3b-a7f1-441bfffdb7ce
-		health: HEALTH_OK
+	[cephuser@ceph1 my-cluster]$ ceph -s
+		cluster:
+			id:     0789974d-1ebb-43bd-8084-c51dd08d7888
+			health: HEALTH_OK
 
-	  services:
-		mon: 3 daemons, quorum ceph1,ceph2,ceph3
-		mgr: ceph-mgr-1(active)
-		osd: 9 osds: 9 up, 9 in
+		services:
+			mon: 3 daemons, quorum ceph1,ceph2,ceph3
+			mgr: ceph1(active), standbys: ceph2, ceph3
+			osd: 9 osds: 9 up, 9 in
 
-	  data:
-		pools:   0 pools, 0 pgs
-		objects: 0 objects, 0B
-		usage:   9.04GiB used, 1.75TiB / 1.76TiB avail
-		pgs:
+		data:
+			pools:   0 pools, 0 pgs
+			objects: 0 objects, 0B
+			usage:   9.04GiB used, 1.75TiB / 1.76TiB avail
+			pgs:
 	```
 
 ### 5. Cài đặt RBD cho client sử dụng
