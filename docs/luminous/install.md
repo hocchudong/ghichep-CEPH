@@ -9,6 +9,7 @@
   - CEPH Admin nodes: ceph1
 	- CEPH MON nodes: ceph1, ceph2, ceph3
 	- CEPH OSD nodes: ceph1, ceph2, ceph3
+	- Client: cephclient1
 	
 - Lưu ý: 	
   - Tùy vào kiến trúc mà ta có thể khai báo các nodes MON hoặc OSD là các node tách biệt nhau hoặc node MON chỉ cần 01 node duy nhất. 
@@ -575,7 +576,9 @@ Việc trên có ý nghĩa là để có thể thực hiện lệnh quản trị
 - Ta sẽ có giao diện như link: 
 
   - http://prntscr.com/l5k7xj
+	
 	- http://prntscr.com/l6ryli
+	
 	- http://prntscr.com/l6ryzp
 
 #### 4.3.5 Kiểm tra lại hoạt động của CEPH
@@ -722,13 +725,13 @@ Việc trên có ý nghĩa là để có thể thực hiện lệnh quản trị
 
 - `Lưu ý:` trường hợp máy chủ tại Nhân Hòa thì cần khai báo IP về NTP server, liên hệ đội RD để được hướng dẫn.
 
-- Tạo user `cephuser` trên node `ceph1, ceph2, ceph3`
+- Tạo user `cephuser` trên node `cephclient1`
 
 	```sh
 	useradd -d /home/cephuser -m cephuser
 	```
 
-- Đặt password cho user `cephuser`
+- Đặt password cho user `cephuser`. Lưu ý dùng password này ở bước dưới.
 
 	```sh
 	passwd cephuser
@@ -746,6 +749,18 @@ Việc trên có ý nghĩa là để có thể thực hiện lệnh quản trị
 
 ###### Thực hiện trên node `ceph1`
 
+- Chuyển sang user `cephuser`
+
+	```sh
+	su - cephuser
+	```
+
+- Copy sshkey từ node `ceph1` sang node `cephclient`. Nhập password của user `cephuser` vừa tạo trên node `cephclient1` ở bước trên.
+
+	```sh
+	ssh-copy-id cephuser@cephclient1
+	```
+	
 - Di chuyển vào thư mục chứa các file cấu hình của ceph hoặc chuyển sang user `cephuser` để thực hiện các bước tiếp theo
 
 	```sh
@@ -758,7 +773,7 @@ Việc trên có ý nghĩa là để có thể thực hiện lệnh quản trị
 	ceph-deploy install --release luminous cephclient1
 	```
 	
-- Thực hiện deploy ceph cho node `cephclient1`, bước này sẽ copy file `ceph.client.admin.keyring` cho client.
+- Thực hiện deploy ceph cho node `cephclient1`, bước này sẽ copy file `ceph.client.admin.keyring` từ node `ceph1` sang node `cephclient1`.
 	
 	```sh
 	ceph-deploy admin cephclient1 
@@ -788,7 +803,7 @@ Thực hiện trên node `cephclient1`
 - Khai báo pool có tên là `rdb` vừa tạo ở trên được sử dụng bởi RDB của CEPH.
 
 	```sh
-	rbd pool init rdb
+	rbd pool init rbd
 	```
 
 ##### Thực hiện trên node `cephclient1`
@@ -816,7 +831,10 @@ Thực hiện trên node `cephclient1`
 	- Kết quả
 	
 		```sh
-		....
+		[root@cephclient1 ~]#  rbd ls -l
+		NAME    SIZE PARENT FMT PROT LOCK
+		disk01 10GiB          2
+		[root@cephclient1 ~]#
 		```
 		
 - Thực hiện map images đã được tạo tới một disk của máy client
@@ -825,40 +843,110 @@ Thực hiện trên node `cephclient1`
 	rbd map disk01 
 	```
 	
+	- Kết quả của lệnh trên
+	
+	```sh
+	[root@cephclient1 ~]# rbd map disk01
+	/dev/rbd0
+	```
+	
 	- Lệnh trên sẽ thực hiện map images có tên là `disk01` tới một thiết bị trên client, thiết bị này sẽ được đặt tên là `/dev/rdbX`. Trong đó `X` sẽ bắt đầu từ 0 và tăng dần lên. Nếu muốn biết về việc quản lý thiết bị trong linux thì đọc thêm các tài liệu của Linux nhé bạn đọc ơi.
 	
 - Thực hiện kiểm tra xem images RDB có tên là `disk01` đã được map hay chưa.
 
 	```sh
-	rdb showmapped
+	rbd showmapped
 	```
 	
 	- Kết quả: 
 	
 		```sh
-		...
+		[root@cephclient1 ~]# rbd showmapped
+		id pool image  snap device
+		0  rbd  disk01 -    /dev/rbd0
 		```
 
 	- Hoặc bằng các lệnh khác để kiểm tra ổ đĩa trong linux như: `lsblk`
+	
+	- Kết quả:
+			
+		```sh
+		[root@cephclient1 ~]# lsblk
+		NAME                    MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+		fd0                       2:0    1    4K  0 disk
+		sda                       8:0    0   80G  0 disk
+		├─sda1                    8:1    0    4G  0 part /boot
+		├─sda2                    8:2    0   68G  0 part
+		│ └─VolGroup00-LogVol01 253:0    0   68G  0 lvm  /
+		└─sda3                    8:3    0    8G  0 part [SWAP]
+		sr0                      11:0    1 1024M  0 rom
+		rbd0                    252:0    0   10G  0 disk
+		```
 		
-- Tới đây máy client chưa	thể sử dụng ổ được map vì chưa được phân vùng, tiếp tục thực hiện bước phân vùng và mount vào một thư mục nào đó để sử dụng.
+- Tới đây máy client chưa	thể sử dụng ổ được map vì chưa được phân vùng, tiếp tục thực hiện bước phân vùng và mount vào một thư mục nào đó để sử dụng. Thời gian thực hiện lệnh dưới sẽ cần chờ từ 10-30 giây.
 
-
-```sh
-sudo mkfs.xfs /dev/rbd0
-```
+	```sh
+	sudo mkfs.xfs /dev/rbd0
+	```
+	
+	- Kết quả: 
+	
+		```sh
+		[root@cephclient1 ~]# sudo mkfs.xfs /dev/rbd0
+		meta-data=/dev/rbd0              isize=512    agcount=16, agsize=163840 blks
+						 =                       sectsz=512   attr=2, projid32bit=1
+						 =                       crc=1        finobt=0, sparse=0
+		data     =                       bsize=4096   blocks=2621440, imaxpct=25
+						 =                       sunit=1024   swidth=1024 blks
+		naming   =version 2              bsize=4096   ascii-ci=0 ftype=1
+		log      =internal log           bsize=4096   blocks=2560, version=2
+						 =                       sectsz=512   sunit=8 blks, lazy-count=1
+		realtime =none                   extsz=4096   blocks=0, rtextents=0
+		[root@cephclient1 ~]#
+		```
 
 - Thực hiện mount vào thư mục `/mtn`
 
-```sh
-sudo mount /dev/rbd0 /mnt
-```
+	```sh
+	sudo mount /dev/rbd0 /mnt
+	```
 
 - Kiểm tra lại xem đã mount được hay chưa
 
 	```sh
 	df -hT 
 	```	
+	
+	- Kết quả:
+	
+		```sh
+		[root@cephclient1 ~]# df -hT
+		Filesystem                      Type      Size  Used Avail Use% Mounted on
+		/dev/mapper/VolGroup00-LogVol01 xfs        68G  1.6G   67G   3% /
+		devtmpfs                        devtmpfs  989M     0  989M   0% /dev
+		tmpfs                           tmpfs    1000M     0 1000M   0% /dev/shm
+		tmpfs                           tmpfs    1000M  8.9M  992M   1% /run
+		tmpfs                           tmpfs    1000M     0 1000M   0% /sys/fs/cgroup
+		/dev/sda1                       ext4      3.9G  174M  3.5G   5% /boot
+		tmpfs                           tmpfs     200M     0  200M   0% /run/user/0
+		/dev/rbd0                       xfs        10G   33M   10G   1% /mnt
+		```
+
+- Hoặc kiểm tra bằng lệnh `lsblk`, ta sẽ có kết quả như bên dưới. Lúc này ta có thể ghi dữ liệu vào ổ `/mnt` để sử dụng.
+
+	```sh
+	[root@cephclient1 ~]# lsblk
+	NAME                    MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+	fd0                       2:0    1    4K  0 disk
+	sda                       8:0    0   80G  0 disk
+	├─sda1                    8:1    0    4G  0 part /boot
+	├─sda2                    8:2    0   68G  0 part
+	│ └─VolGroup00-LogVol01 253:0    0   68G  0 lvm  /
+	└─sda3                    8:3    0    8G  0 part [SWAP]
+	sr0                      11:0    1 1024M  0 rom
+	rbd0                    252:0    0   10G  0 disk /mnt
+	[root@cephclient1 ~]#
+	```
 
 - Lưu ý: Vì mount  chưa được khai báo trong `fstab` nên khi khởi động lại máy client thì thao tác mount này sẽ bị mất, nếu muốn không bị mất thì cần phải khai báo thêm trong `fstab` nhé. Google thêm để biết cách nha.
 
