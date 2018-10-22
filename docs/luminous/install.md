@@ -577,9 +577,7 @@ Việc trên có ý nghĩa là để có thể thực hiện lệnh quản trị
 - Ta sẽ có giao diện như link: 
 
   - http://prntscr.com/l5k7xj
-	
 	- http://prntscr.com/l6ryli
-	
 	- http://prntscr.com/l6ryzp
 
 #### 4.3.5 Kiểm tra lại hoạt động của CEPH
