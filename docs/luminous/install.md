@@ -573,6 +573,7 @@ Việc trên có ý nghĩa là để có thể thực hiện lệnh quản trị
 - Truy cập vào địa chỉ IP với port mặc định là 7000 như ảnh: `http://ip_address_ceph1:7000`. 
 
 - Ta sẽ có giao diện như link: 
+
   - http://prntscr.com/l5k7xj
 	- http://prntscr.com/l6ryli
 	- http://prntscr.com/l6ryzp
@@ -686,37 +687,186 @@ Việc trên có ý nghĩa là để có thể thực hiện lệnh quản trị
 	init 6
 	```
 
+##### Tạo user `cephuser`, khai báo repos cài đặt CEPH cho node `cephclient1`
+	
+-  Đăng nhập lai node `cephclient1` với IP mới `192.168.70.139`
 
-#### 5.2. Cài đặt ceph client cho node `cephclient1`
+- Thực hiện update OS và cài các gói bổ trợ
 
-- Thực hiện trên node `ceph1`
+	```sh
+	yum update -y
+
+	yum install epel-release -y
+
+	yum install wget bybo curl git -y
+
+	yum install python-setuptools -y
+
+	yum install python-virtualenv -y
+
+	yum update -y
+	```
+
+- Cấu hình NTP
+
+	```sh
+	yum install -y ntp ntpdate ntp-doc
+
+	ntpdate 0.us.pool.ntp.org
+
+	hwclock --systohc
+
+	systemctl enable ntpd.service
+	systemctl start ntpd.service
+	```
+
+- `Lưu ý:` trường hợp máy chủ tại Nhân Hòa thì cần khai báo IP về NTP server, liên hệ đội RD để được hướng dẫn.
+
+- Tạo user `cephuser` trên node `ceph1, ceph2, ceph3`
+
+	```sh
+	useradd -d /home/cephuser -m cephuser
+	```
+
+- Đặt password cho user `cephuser`
+
+	```sh
+	passwd cephuser
+	```
+
+- Cấp quyền sudo cho tài khoản `cephuser`
+
+	```sh
+	echo "cephuser ALL = (root) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/cephuser
+	chmod 0440 /etc/sudoers.d/cephuser
+	# sed -i s'/Defaults requiretty/#Defaults requiretty'/g /etc/sudoers
+	```
+
+#### 5.2. Cài đặt các gói cho `cephclient1`
+
+###### Thực hiện trên node `ceph1`
+
 - Di chuyển vào thư mục chứa các file cấu hình của ceph hoặc chuyển sang user `cephuser` để thực hiện các bước tiếp theo
 
 	```sh
 	cd /home/cephuser/my-cluster/
 	```
 
-- Đứng trên node `ceph1` thực hiện cài đặt 
+- Đứng trên node `ceph1` thực hiện cài đặt các gói cần thiết cho client.
 
 	```sh
-	ceph-deploy install cephclient1 
+	ceph-deploy install --release luminous cephclient1
 	```
 	
-- Thực hiện deploy ceph cho node `cephclient1`
+- Thực hiện deploy ceph cho node `cephclient1`, bước này sẽ copy file `ceph.client.admin.keyring` cho client.
 	
 	```sh
 	ceph-deploy admin cephclient1 
 	```
 
-#### 5.2. Cài đặt ceph client cho node `cephclient1`
+#### 5.3. Cài đặt ceph client cho node `cephclient1`
 
 Thực hiện trên node `cephclient1`
 
 - Phân quyền cho file `/etc/ceph/ceph.client.admin.keyring`
 
+	```sh
+	sudo chmod +r /etc/ceph/ceph.client.admin.keyring
+	```
+
+#### 5.4. Cấu hình RDB cho client sử dụng.
+
+##### Thực hiện trên node `ceph1`
+
+- Khai báo pool tên là `rbd` để client sử dụng. Theo tài liệu gốc thì khuyến cáo nên đặt tên là `rbd` vì mặc định khi ta tạo các `images` trong CEPH thì nó sẽ nằm ở pool có tên là `rdb`. Còn nếu muốn các images nằm ở các pools khác thì trong lệnh tạo RBD images cần có thêm tùy chọn  `-p`.
+
+
+	```sh
+	ceph osd pool create rbd 128
+	```
+
+- Khai báo pool có tên là `rdb` vừa tạo ở trên được sử dụng bởi RDB của CEPH.
+
+	```sh
+	rbd pool init rdb
+	```
+
+##### Thực hiện trên node `cephclient1`
+
+- Đứng trên node `cephclient1` thực hiện tạo một image có tên là `disk01` với dung lượng là 10GB, image này sẽ nằm trong pool có tên là `rdb` vừa tạo ở trên. Nếu bạn muốn images này nằm ở pool có tên khác thì cần thêm tùy chọn `-p ten_pools` trong lệnh dưới.
+
+
+	```sh
+	rbd create disk01 --size 10G --image-feature layering
+	```
+	
+- Hoặc lệnh với tùy chọn chỉ định pools như sau
+
+	
+	```sh
+	rbd create disk01 --size 10G -p ten_pool --image-feature layering
+	```
+
+- Dùng lệnh liệt kê các images để kiểm tra lại xem các images RDB đã được tạo hay chưa
+
+	```sh
+	rbd ls -l
+	```
+	
+	- Kết quả
+	
+		```sh
+		....
+		```
+		
+- Thực hiện map images đã được tạo tới một disk của máy client
+
+	```sh
+	rbd map disk01 
+	```
+	
+	- Lệnh trên sẽ thực hiện map images có tên là `disk01` tới một thiết bị trên client, thiết bị này sẽ được đặt tên là `/dev/rdbX`. Trong đó `X` sẽ bắt đầu từ 0 và tăng dần lên. Nếu muốn biết về việc quản lý thiết bị trong linux thì đọc thêm các tài liệu của Linux nhé bạn đọc ơi.
+	
+- Thực hiện kiểm tra xem images RDB có tên là `disk01` đã được map hay chưa.
+
+	```sh
+	rdb showmapped
+	```
+	
+	- Kết quả: 
+	
+		```sh
+		...
+		```
+
+	- Hoặc bằng các lệnh khác để kiểm tra ổ đĩa trong linux như: `lsblk`
+		
+- Tới đây máy client chưa	thể sử dụng ổ được map vì chưa được phân vùng, tiếp tục thực hiện bước phân vùng và mount vào một thư mục nào đó để sử dụng.
+
+
 ```sh
-/etc/ceph/ceph.client.admin.keyring
+sudo mkfs.xfs /dev/rbd0
 ```
+
+- Thực hiện mount vào thư mục `/mtn`
+
+```sh
+sudo mount /dev/rbd0 /mnt
+```
+
+- Kiểm tra lại xem đã mount được hay chưa
+
+	```sh
+	df -hT 
+	```	
+
+- Lưu ý: Vì mount  chưa được khai báo trong `fstab` nên khi khởi động lại máy client thì thao tác mount này sẽ bị mất, nếu muốn không bị mất thì cần phải khai báo thêm trong `fstab` nhé. Google thêm để biết cách nha.
+
+## HẾT
+
+	
+
+
 
 
 
