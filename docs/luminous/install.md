@@ -6,10 +6,10 @@
 - CEPH Luminous 
 - Phương thức sử dụng để triển khai ceph `ceph-deploy`
 - Vai trò các node như sau:
-  - CEPH Admin nodes: ceph1
-	- CEPH MON nodes: ceph1, ceph2, ceph3
-	- CEPH OSD nodes: ceph1, ceph2, ceph3
-	- Client: cephclient1
+  - CEPH Admin nodes: `ceph1`
+	- CEPH MON nodes: `ceph1, ceph2, ceph3`
+	- CEPH OSD nodes: `ceph1, ceph2, ceph3`
+	- Client: `cephclient1`
 	
 - Lưu ý: 	
   - Tùy vào kiến trúc mà ta có thể khai báo các nodes MON hoặc OSD là các node tách biệt nhau hoặc node MON chỉ cần 01 node duy nhất. 
@@ -278,7 +278,7 @@
 
 ### 4.2. Cài gói bổ trợ và tạo tài khoản để cài đặt CEPH
 
-#### Lưu ý: Cài đặt gói cơ bản trên cả 03 node CEPH1, CEPH2 và CEPH3
+#### Lưu ý: Cài đặt gói cơ bản trên cả 03 node `ceph1, ceph2, ceph3`
 
 - Thực hiện update OS và cài các gói bổ trợ
 
@@ -335,38 +335,39 @@
 
 - `Lưu ý:` Thực hiện trên tất cả 03 node `ceph1, ceph2 và ceph3`
 
-- Tạo repos
-```sh
-cat << EOF > /etc/yum.repos.d/ceph.repo
-[Ceph]
-name=Ceph packages for \$basearch
-baseurl=http://download.ceph.com/rpm-luminous/el7/\$basearch
-enabled=1
-gpgcheck=1
-type=rpm-md
-gpgkey=https://download.ceph.com/keys/release.asc
-priority=1
+- Khai báo repos cho CEPH 
+
+	```sh
+	cat << EOF > /etc/yum.repos.d/ceph.repo
+	[Ceph]
+	name=Ceph packages for \$basearch
+	baseurl=http://download.ceph.com/rpm-luminous/el7/\$basearch
+	enabled=1
+	gpgcheck=1
+	type=rpm-md
+	gpgkey=https://download.ceph.com/keys/release.asc
+	priority=1
 
 
-[Ceph-noarch]
-name=Ceph noarch packages
-baseurl=http://download.ceph.com/rpm-luminous/el7/noarch
-enabled=1
-gpgcheck=1
-type=rpm-md
-gpgkey=https://download.ceph.com/keys/release.asc
-priority=1
+	[Ceph-noarch]
+	name=Ceph noarch packages
+	baseurl=http://download.ceph.com/rpm-luminous/el7/noarch
+	enabled=1
+	gpgcheck=1
+	type=rpm-md
+	gpgkey=https://download.ceph.com/keys/release.asc
+	priority=1
 
-[ceph-source]
-name=Ceph source packages
-baseurl=http://download.ceph.com/rpm-luminous/el7/SRPMS
-enabled=1
-gpgcheck=1
-type=rpm-md
-gpgkey=https://download.ceph.com/keys/release.asc
-priority=1
-EOF
-```
+	[ceph-source]
+	name=Ceph source packages
+	baseurl=http://download.ceph.com/rpm-luminous/el7/SRPMS
+	enabled=1
+	gpgcheck=1
+	type=rpm-md
+	gpgkey=https://download.ceph.com/keys/release.asc
+	priority=1
+	EOF
+	```
 
 -  Thực hiện update sau khi khai báo repos 
 
@@ -669,7 +670,7 @@ Việc trên có ý nghĩa là để có thể thực hiện lệnh quản trị
 	sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
 	```
 
-- Khai báo file  /etc/hosts
+- Khai báo file `/etc/hosts`
 
 	```sh
 	echo "192.168.82.131 ceph1" >> /etc/hosts
@@ -789,12 +790,11 @@ Thực hiện trên node `cephclient1`
 	sudo chmod +r /etc/ceph/ceph.client.admin.keyring
 	```
 
-#### 5.4. Cấu hình RDB cho client sử dụng.
+	#### 5.4. Cấu hình RDB cho client sử dụng.
 
 ##### Thực hiện trên node `ceph1`
 
 - Khai báo pool tên là `rbd` để client sử dụng. Theo tài liệu gốc thì khuyến cáo nên đặt tên là `rbd` vì mặc định khi ta tạo các `images` trong CEPH thì nó sẽ nằm ở pool có tên là `rdb`. Còn nếu muốn các images nằm ở các pools khác thì trong lệnh tạo RBD images cần có thêm tùy chọn  `-p`.
-
 
 	```sh
 	ceph osd pool create rbd 128
@@ -810,13 +810,11 @@ Thực hiện trên node `cephclient1`
 
 - Đứng trên node `cephclient1` thực hiện tạo một image có tên là `disk01` với dung lượng là 10GB, image này sẽ nằm trong pool có tên là `rdb` vừa tạo ở trên. Nếu bạn muốn images này nằm ở pool có tên khác thì cần thêm tùy chọn `-p ten_pools` trong lệnh dưới.
 
-
 	```sh
 	rbd create disk01 --size 10G --image-feature layering
 	```
 	
 - Hoặc lệnh với tùy chọn chỉ định pools như sau
-
 	
 	```sh
 	rbd create disk01 --size 10G -p ten_pool --image-feature layering
@@ -845,10 +843,10 @@ Thực hiện trên node `cephclient1`
 	
 	- Kết quả của lệnh trên
 	
-	```sh
-	[root@cephclient1 ~]# rbd map disk01
-	/dev/rbd0
-	```
+		```sh
+		[root@cephclient1 ~]# rbd map disk01
+		/dev/rbd0
+		```
 	
 	- Lệnh trên sẽ thực hiện map images có tên là `disk01` tới một thiết bị trên client, thiết bị này sẽ được đặt tên là `/dev/rdbX`. Trong đó `X` sẽ bắt đầu từ 0 và tăng dần lên. Nếu muốn biết về việc quản lý thiết bị trong linux thì đọc thêm các tài liệu của Linux nhé bạn đọc ơi.
 	
