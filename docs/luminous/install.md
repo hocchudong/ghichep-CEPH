@@ -804,6 +804,25 @@ Thực hiện trên node `cephclient1`
 	rbd pool init rbd
 	```
 
+- Kiểm tra pool vừa tạo xem đã có hay chưa bằng lệnh `rados lspools` hoặc lệnh `ceph osd pool ls`
+
+	``sh
+	rados lspools
+	```
+	
+	hoặc
+	
+	```sh
+	ceph osd pool ls
+	```
+
+ - Kết quả: 
+
+		```sh
+		[root@ceph1 ~]# rados lspools
+		rbd
+		```
+		
 ##### Thực hiện trên node `cephclient1`
 
 - Đứng trên node `cephclient1` thực hiện tạo một image có tên là `disk01` với dung lượng là 10GB, image này sẽ nằm trong pool có tên là `rdb` vừa tạo ở trên. Nếu bạn muốn images này nằm ở pool có tên khác thì cần thêm tùy chọn `-p ten_pools` trong lệnh dưới.
