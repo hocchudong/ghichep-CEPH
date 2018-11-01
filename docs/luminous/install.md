@@ -810,7 +810,7 @@ Thực hiện trên node `cephclient1`
 	ceph osd pool ls
 	```
 
- - Kết quả: 
+  - Kết quả: 
 
 		```sh
 		[root@ceph1 ~]# rados lspools
