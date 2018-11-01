@@ -804,14 +804,8 @@ Thực hiện trên node `cephclient1`
 	rbd pool init rbd
 	```
 
-- Kiểm tra pool vừa tạo xem đã có hay chưa bằng lệnh `rados lspools` hoặc lệnh `ceph osd pool ls`
+- Kiểm tra pool vừa tạo xem đã có hay chưa bằng lệnh `ceph osd pool ls`
 
-	``sh
-	rados lspools
-	```
-	
-	hoặc
-	
 	```sh
 	ceph osd pool ls
 	```
