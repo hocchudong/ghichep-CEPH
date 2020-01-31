@@ -540,7 +540,7 @@ Việc trên có ý nghĩa là để có thể thực hiện lệnh quản trị
 
 #### 4.3.3 Add các OSD cho cụm CEPH
 
-- Add các OSD cho cụm ceph cluser
+- Đứng trên `ceph1` thực hiện add các OSD cho cụm ceph cluser
  
 
 ```sh
@@ -591,39 +591,39 @@ ceph mgr dump
 
 - Truy cập vào địa chỉ IP với port mặc định là 7000 như ảnh: `http://ip_address_ceph1:7000`. 
 
-- Ta sẽ có giao diện như link: 
+Ta sẽ có giao diện như link: 
 
-  - http://prntscr.com/l5k7xj
-	- http://prntscr.com/l6ryli
-	- http://prntscr.com/l6ryzp
+- http://prntscr.com/l5k7xj
+- http://prntscr.com/l6ryli
+- http://prntscr.com/l6ryzp
 
 #### 4.3.5 Kiểm tra lại hoạt động của CEPH
 
 - Thực hiện lệnh dưới để kiểm tra trạng thái hoạt động của ceph
 
-	```sh
-	ceph -s 
-	```
+```sh
+ceph -s 
+```
 
 - Kết quả: 
 
-	```sh
-	[cephuser@ceph1 my-cluster]$ ceph -s
-		cluster:
-			id:     0789974d-1ebb-43bd-8084-c51dd08d7888
-			health: HEALTH_OK
+```sh
+[cephuser@ceph1 my-cluster]$ ceph -s
+	cluster:
+		id:     0789974d-1ebb-43bd-8084-c51dd08d7888
+		health: HEALTH_OK
 
-		services:
-			mon: 3 daemons, quorum ceph1,ceph2,ceph3
-			mgr: ceph1(active), standbys: ceph2, ceph3
-			osd: 9 osds: 9 up, 9 in
+	services:
+		mon: 3 daemons, quorum ceph1,ceph2,ceph3
+		mgr: ceph1(active), standbys: ceph2, ceph3
+		osd: 9 osds: 9 up, 9 in
 
-		data:
-			pools:   0 pools, 0 pgs
-			objects: 0 objects, 0B
-			usage:   9.04GiB used, 1.75TiB / 1.76TiB avail
-			pgs:
-	```
+	data:
+		pools:   0 pools, 0 pgs
+		objects: 0 objects, 0B
+		usage:   9.04GiB used, 1.75TiB / 1.76TiB avail
+		pgs:
+```
 
 ### 5. Cài đặt RBD cho client sử dụng
 
