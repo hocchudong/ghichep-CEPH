@@ -6,9 +6,10 @@
 - CEPH Luminous 
 - Phương thức sử dụng để triển khai ceph `ceph-deploy`
 - Vai trò các node như sau:
-  - CEPH Admin nodes: ceph1
-	- CEPH MON nodes: ceph1, ceph2, ceph3
-	- CEPH OSD nodes: ceph1, ceph2, ceph3
+  - CEPH Admin nodes: `ceph1`
+	- CEPH MON nodes: `ceph1, ceph2, ceph3`
+	- CEPH OSD nodes: `ceph1, ceph2, ceph3`
+	- Client: `cephclient1`
 	
 - Lưu ý: 	
   - Tùy vào kiến trúc mà ta có thể khai báo các nodes MON hoặc OSD là các node tách biệt nhau hoặc node MON chỉ cần 01 node duy nhất. 
@@ -277,7 +278,7 @@
 
 ### 4.2. Cài gói bổ trợ và tạo tài khoản để cài đặt CEPH
 
-#### Lưu ý: Cài đặt gói cơ bản trên cả 03 node CEPH1, CEPH2 và CEPH3
+#### Lưu ý: Cài đặt gói cơ bản trên cả 03 node `ceph1, ceph2, ceph3`
 
 - Thực hiện update OS và cài các gói bổ trợ
 
@@ -334,38 +335,39 @@
 
 - `Lưu ý:` Thực hiện trên tất cả 03 node `ceph1, ceph2 và ceph3`
 
-- Tạo repos
-```sh
-cat << EOF > /etc/yum.repos.d/ceph.repo
-[Ceph]
-name=Ceph packages for \$basearch
-baseurl=http://download.ceph.com/rpm-luminous/el7/\$basearch
-enabled=1
-gpgcheck=1
-type=rpm-md
-gpgkey=https://download.ceph.com/keys/release.asc
-priority=1
+- Khai báo repos cho CEPH 
+
+	```sh
+	cat << EOF > /etc/yum.repos.d/ceph.repo
+	[Ceph]
+	name=Ceph packages for \$basearch
+	baseurl=http://download.ceph.com/rpm-luminous/el7/\$basearch
+	enabled=1
+	gpgcheck=1
+	type=rpm-md
+	gpgkey=https://download.ceph.com/keys/release.asc
+	priority=1
 
 
-[Ceph-noarch]
-name=Ceph noarch packages
-baseurl=http://download.ceph.com/rpm-luminous/el7/noarch
-enabled=1
-gpgcheck=1
-type=rpm-md
-gpgkey=https://download.ceph.com/keys/release.asc
-priority=1
+	[Ceph-noarch]
+	name=Ceph noarch packages
+	baseurl=http://download.ceph.com/rpm-luminous/el7/noarch
+	enabled=1
+	gpgcheck=1
+	type=rpm-md
+	gpgkey=https://download.ceph.com/keys/release.asc
+	priority=1
 
-[ceph-source]
-name=Ceph source packages
-baseurl=http://download.ceph.com/rpm-luminous/el7/SRPMS
-enabled=1
-gpgcheck=1
-type=rpm-md
-gpgkey=https://download.ceph.com/keys/release.asc
-priority=1
-EOF
-```
+	[ceph-source]
+	name=Ceph source packages
+	baseurl=http://download.ceph.com/rpm-luminous/el7/SRPMS
+	enabled=1
+	gpgcheck=1
+	type=rpm-md
+	gpgkey=https://download.ceph.com/keys/release.asc
+	priority=1
+	EOF
+	```
 
 -  Thực hiện update sau khi khai báo repos 
 
@@ -573,6 +575,7 @@ Việc trên có ý nghĩa là để có thể thực hiện lệnh quản trị
 - Truy cập vào địa chỉ IP với port mặc định là 7000 như ảnh: `http://ip_address_ceph1:7000`. 
 
 - Ta sẽ có giao diện như link: 
+
   - http://prntscr.com/l5k7xj
 	- http://prntscr.com/l6ryli
 	- http://prntscr.com/l6ryzp
@@ -665,7 +668,7 @@ Việc trên có ý nghĩa là để có thể thực hiện lệnh quản trị
 	sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
 	```
 
-- Khai báo file  /etc/hosts
+- Khai báo file `/etc/hosts`
 
 	```sh
 	echo "192.168.82.131 ceph1" >> /etc/hosts
@@ -686,37 +689,274 @@ Việc trên có ý nghĩa là để có thể thực hiện lệnh quản trị
 	init 6
 	```
 
+##### Tạo user `cephuser`, khai báo repos cài đặt CEPH cho node `cephclient1`
+	
+-  Đăng nhập lai node `cephclient1` với IP mới `192.168.70.139`
 
-#### 5.2. Cài đặt ceph client cho node `cephclient1`
+- Thực hiện update OS và cài các gói bổ trợ
 
-- Thực hiện trên node `ceph1`
+	```sh
+	yum update -y
+
+	yum install epel-release -y
+
+	yum install wget bybo curl git -y
+
+	yum install python-setuptools -y
+
+	yum install python-virtualenv -y
+
+	yum update -y
+	```
+
+- Cấu hình NTP
+
+	```sh
+	yum install -y ntp ntpdate ntp-doc
+
+	ntpdate 0.us.pool.ntp.org
+
+	hwclock --systohc
+
+	systemctl enable ntpd.service
+	systemctl start ntpd.service
+	```
+
+- `Lưu ý:` trường hợp máy chủ tại Nhân Hòa thì cần khai báo IP về NTP server, liên hệ đội RD để được hướng dẫn.
+
+- Tạo user `cephuser` trên node `cephclient1`
+
+	```sh
+	useradd -d /home/cephuser -m cephuser
+	```
+
+- Đặt password cho user `cephuser`. Lưu ý dùng password này ở bước dưới.
+
+	```sh
+	passwd cephuser
+	```
+
+- Cấp quyền sudo cho tài khoản `cephuser`
+
+	```sh
+	echo "cephuser ALL = (root) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/cephuser
+	chmod 0440 /etc/sudoers.d/cephuser
+	# sed -i s'/Defaults requiretty/#Defaults requiretty'/g /etc/sudoers
+	```
+
+#### 5.2. Cài đặt các gói cho `cephclient1`
+
+###### Thực hiện trên node `ceph1`
+
+- Chuyển sang user `cephuser`
+
+	```sh
+	su - cephuser
+	```
+
+- Copy sshkey từ node `ceph1` sang node `cephclient`. Nhập password của user `cephuser` vừa tạo trên node `cephclient1` ở bước trên.
+
+	```sh
+	ssh-copy-id cephuser@cephclient1
+	```
+	
 - Di chuyển vào thư mục chứa các file cấu hình của ceph hoặc chuyển sang user `cephuser` để thực hiện các bước tiếp theo
 
 	```sh
 	cd /home/cephuser/my-cluster/
 	```
 
-- Đứng trên node `ceph1` thực hiện cài đặt 
+- Đứng trên node `ceph1` thực hiện cài đặt các gói cần thiết cho client.
 
 	```sh
-	ceph-deploy install cephclient1 
+	ceph-deploy install --release luminous cephclient1
 	```
 	
-- Thực hiện deploy ceph cho node `cephclient1`
+- Thực hiện deploy ceph cho node `cephclient1`, bước này sẽ copy file `ceph.client.admin.keyring` từ node `ceph1` sang node `cephclient1`.
 	
 	```sh
 	ceph-deploy admin cephclient1 
 	```
 
-#### 5.2. Cài đặt ceph client cho node `cephclient1`
+#### 5.3. Cài đặt ceph client cho node `cephclient1`
 
 Thực hiện trên node `cephclient1`
 
 - Phân quyền cho file `/etc/ceph/ceph.client.admin.keyring`
 
-```sh
-/etc/ceph/ceph.client.admin.keyring
-```
+	```sh
+	sudo chmod +r /etc/ceph/ceph.client.admin.keyring
+	```
+
+	#### 5.4. Cấu hình RDB cho client sử dụng.
+
+##### Thực hiện trên node `ceph1`
+
+- Khai báo pool tên là `rbd` để client sử dụng. Theo tài liệu gốc thì khuyến cáo nên đặt tên là `rbd` vì mặc định khi ta tạo các `images` trong CEPH thì nó sẽ nằm ở pool có tên là `rdb`. Còn nếu muốn các images nằm ở các pools khác thì trong lệnh tạo RBD images cần có thêm tùy chọn  `-p`.
+
+	```sh
+	ceph osd pool create rbd 128
+	```
+
+- Khai báo pool có tên là `rdb` vừa tạo ở trên được sử dụng bởi RDB của CEPH.
+
+	```sh
+	rbd pool init rbd
+	```
+
+- Kiểm tra pool vừa tạo xem đã có hay chưa bằng lệnh `ceph osd pool ls`
+
+	```sh
+	ceph osd pool ls
+	```
+		
+##### Thực hiện trên node `cephclient1`
+
+- Đứng trên node `cephclient1` thực hiện tạo một image có tên là `disk01` với dung lượng là 10GB, image này sẽ nằm trong pool có tên là `rdb` vừa tạo ở trên. Nếu bạn muốn images này nằm ở pool có tên khác thì cần thêm tùy chọn `-p ten_pools` trong lệnh dưới.
+
+	```sh
+	rbd create disk01 --size 10G --image-feature layering
+	```
+	
+- Hoặc lệnh với tùy chọn chỉ định pools như sau
+	
+	```sh
+	rbd create disk01 --size 10G -p ten_pool --image-feature layering
+	```
+
+- Dùng lệnh liệt kê các images để kiểm tra lại xem các images RDB đã được tạo hay chưa
+
+	```sh
+	rbd ls -l
+	```
+	
+	- Kết quả
+	
+		```sh
+		[root@cephclient1 ~]#  rbd ls -l
+		NAME    SIZE PARENT FMT PROT LOCK
+		disk01 10GiB          2
+		[root@cephclient1 ~]#
+		```
+		
+- Thực hiện map images đã được tạo tới một disk của máy client
+
+	```sh
+	rbd map disk01 
+	```
+	
+	- Kết quả của lệnh trên
+	
+		```sh
+		[root@cephclient1 ~]# rbd map disk01
+		/dev/rbd0
+		```
+	
+	- Lệnh trên sẽ thực hiện map images có tên là `disk01` tới một thiết bị trên client, thiết bị này sẽ được đặt tên là `/dev/rdbX`. Trong đó `X` sẽ bắt đầu từ 0 và tăng dần lên. Nếu muốn biết về việc quản lý thiết bị trong linux thì đọc thêm các tài liệu của Linux nhé bạn đọc ơi.
+	
+- Thực hiện kiểm tra xem images RDB có tên là `disk01` đã được map hay chưa.
+
+	```sh
+	rbd showmapped
+	```
+	
+	- Kết quả: 
+	
+		```sh
+		[root@cephclient1 ~]# rbd showmapped
+		id pool image  snap device
+		0  rbd  disk01 -    /dev/rbd0
+		```
+
+	- Hoặc bằng các lệnh khác để kiểm tra ổ đĩa trong linux như: `lsblk`
+	
+	- Kết quả:
+			
+		```sh
+		[root@cephclient1 ~]# lsblk
+		NAME                    MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+		fd0                       2:0    1    4K  0 disk
+		sda                       8:0    0   80G  0 disk
+		├─sda1                    8:1    0    4G  0 part /boot
+		├─sda2                    8:2    0   68G  0 part
+		│ └─VolGroup00-LogVol01 253:0    0   68G  0 lvm  /
+		└─sda3                    8:3    0    8G  0 part [SWAP]
+		sr0                      11:0    1 1024M  0 rom
+		rbd0                    252:0    0   10G  0 disk
+		```
+		
+- Tới đây máy client chưa	thể sử dụng ổ được map vì chưa được phân vùng, tiếp tục thực hiện bước phân vùng và mount vào một thư mục nào đó để sử dụng. Thời gian thực hiện lệnh dưới sẽ cần chờ từ 10-30 giây.
+
+	```sh
+	sudo mkfs.xfs /dev/rbd0
+	```
+	
+	- Kết quả: 
+	
+		```sh
+		[root@cephclient1 ~]# sudo mkfs.xfs /dev/rbd0
+		meta-data=/dev/rbd0              isize=512    agcount=16, agsize=163840 blks
+						 =                       sectsz=512   attr=2, projid32bit=1
+						 =                       crc=1        finobt=0, sparse=0
+		data     =                       bsize=4096   blocks=2621440, imaxpct=25
+						 =                       sunit=1024   swidth=1024 blks
+		naming   =version 2              bsize=4096   ascii-ci=0 ftype=1
+		log      =internal log           bsize=4096   blocks=2560, version=2
+						 =                       sectsz=512   sunit=8 blks, lazy-count=1
+		realtime =none                   extsz=4096   blocks=0, rtextents=0
+		[root@cephclient1 ~]#
+		```
+
+- Thực hiện mount vào thư mục `/mtn`
+
+	```sh
+	sudo mount /dev/rbd0 /mnt
+	```
+
+- Kiểm tra lại xem đã mount được hay chưa
+
+	```sh
+	df -hT 
+	```	
+	
+	- Kết quả:
+	
+		```sh
+		[root@cephclient1 ~]# df -hT
+		Filesystem                      Type      Size  Used Avail Use% Mounted on
+		/dev/mapper/VolGroup00-LogVol01 xfs        68G  1.6G   67G   3% /
+		devtmpfs                        devtmpfs  989M     0  989M   0% /dev
+		tmpfs                           tmpfs    1000M     0 1000M   0% /dev/shm
+		tmpfs                           tmpfs    1000M  8.9M  992M   1% /run
+		tmpfs                           tmpfs    1000M     0 1000M   0% /sys/fs/cgroup
+		/dev/sda1                       ext4      3.9G  174M  3.5G   5% /boot
+		tmpfs                           tmpfs     200M     0  200M   0% /run/user/0
+		/dev/rbd0                       xfs        10G   33M   10G   1% /mnt
+		```
+
+- Hoặc kiểm tra bằng lệnh `lsblk`, ta sẽ có kết quả như bên dưới. Lúc này ta có thể ghi dữ liệu vào ổ `/mnt` để sử dụng.
+
+	```sh
+	[root@cephclient1 ~]# lsblk
+	NAME                    MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+	fd0                       2:0    1    4K  0 disk
+	sda                       8:0    0   80G  0 disk
+	├─sda1                    8:1    0    4G  0 part /boot
+	├─sda2                    8:2    0   68G  0 part
+	│ └─VolGroup00-LogVol01 253:0    0   68G  0 lvm  /
+	└─sda3                    8:3    0    8G  0 part [SWAP]
+	sr0                      11:0    1 1024M  0 rom
+	rbd0                    252:0    0   10G  0 disk /mnt
+	[root@cephclient1 ~]#
+	```
+
+- Lưu ý: Vì mount  chưa được khai báo trong `fstab` nên khi khởi động lại máy client thì thao tác mount này sẽ bị mất, nếu muốn không bị mất thì cần phải khai báo thêm trong `fstab` nhé. Google thêm để biết cách nha.
+
+## HẾT
+
+	
+
+
 
 
 
