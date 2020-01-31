@@ -59,22 +59,22 @@
 - Đặt IP cho node `ceph1`
 
 	```sh
-	echo "Setup IP  ens160"
-	nmcli c modify ens160 ipv4.addresses 192.168.80.131/24
-	nmcli c modify ens160 ipv4.gateway 192.168.80.1
-	nmcli c modify ens160 ipv4.dns 8.8.8.8
-	nmcli c modify ens160 ipv4.method manual
-	nmcli con mod ens160 connection.autoconnect yes
+	echo "Setup IP  eth0"
+	nmcli con modify eth0 ipv4.addresses 192.168.80.131/24
+	nmcli con modify eth0 ipv4.gateway 192.168.80.1
+	nmcli con modify eth0 ipv4.dns 8.8.8.8
+	nmcli con modify eth0 ipv4.method manual
+	nmcli con modify eth0 connection.autoconnect yes
 
-	echo "Setup IP  ens192"
-	nmcli c modify ens192 ipv4.addresses 192.168.82.131/24
-	nmcli c modify ens192 ipv4.method manual
-	nmcli con mod ens192 connection.autoconnect yes
+	echo "Setup IP  eth1"
+	nmcli con modify eth1 ipv4.addresses 192.168.82.131/24
+	nmcli con modify eth1 ipv4.method manual
+	nmcli con modify eth1 connection.autoconnect yes
 
-	echo "Setup IP  ens224"
-	nmcli c modify ens224 ipv4.addresses 192.168.83.131/24
-	nmcli c modify ens224 ipv4.method manual
-	nmcli con mod ens224 connection.autoconnect yes
+	echo "Setup IP  "eth2
+	nmcli con modify eth2 ipv4.addresses 192.168.83.131/24
+	nmcli con modify eth2 ipv4.method manual
+	nmcli con modify eth2 connection.autoconnect yes
 	```
 
 -  Cấu hình các thành phần cơ bản
@@ -141,22 +141,22 @@
 - Đặt IP cho node `ceph2`
 
 	```sh
-	echo "Setup IP  ens160"
-	nmcli c modify ens160 ipv4.addresses 192.168.80.132/24
-	nmcli c modify ens160 ipv4.gateway 192.168.80.1
-	nmcli c modify ens160 ipv4.dns 8.8.8.8
-	nmcli c modify ens160 ipv4.method manual
-	nmcli con mod ens160 connection.autoconnect yes
+	echo "Setup IP  eth0"
+	nmcli con modify eth0 ipv4.addresses 192.168.80.132/24
+	nmcli con modify eth0 ipv4.gateway 192.168.80.1
+	nmcli con modify eth0 ipv4.dns 8.8.8.8
+	nmcli con modify eth0 ipv4.method manual
+	nmcli con modify eth0 connection.autoconnect yes
 
-	echo "Setup IP  ens192"
-	nmcli c modify ens192 ipv4.addresses 192.168.82.132/24
-	nmcli c modify ens192 ipv4.method manual
-	nmcli con mod ens192 connection.autoconnect yes
+	echo "Setup IP  eth1"
+	nmcli con modify eth1 ipv4.addresses 192.168.82.132/24
+	nmcli con modify eth1 ipv4.method manual
+	nmcli con modify eth1 connection.autoconnect yes
 
-	echo "Setup IP  ens224"
-	nmcli c modify ens224 ipv4.addresses 192.168.83.132/24
-	nmcli c modify ens224 ipv4.method manual
-	nmcli con mod ens224 connection.autoconnect yes
+	echo "Setup IP  eth2"
+	nmcli con modify eth2 ipv4.addresses 192.168.83.132/24
+	nmcli con modify eth2 ipv4.method manual
+	nmcli con modify eth2 connection.autoconnect yes
 	```
 
 - Cấu hình các thành phần cơ bản
@@ -223,22 +223,22 @@
 - Đặt IP cho node `ceph3`
 
 	```sh
-	echo "Setup IP  ens160"
-	nmcli c modify ens160 ipv4.addresses 192.168.80.133/24
-	nmcli c modify ens160 ipv4.gateway 192.168.80.1
-	nmcli c modify ens160 ipv4.dns 8.8.8.8
-	nmcli c modify ens160 ipv4.method manual
-	nmcli con mod ens160 connection.autoconnect yes
+	echo "Setup IP  eth0"
+	nmcli con modify eth0 ipv4.addresses 192.168.80.133/24
+	nmcli con modify eth0 ipv4.gateway 192.168.80.1
+	nmcli con modify eth0 ipv4.dns 8.8.8.8
+	nmcli con modify eth0 ipv4.method manual
+	nmcli con modify eth0 connection.autoconnect yes
 
-	echo "Setup IP  ens192"
-	nmcli c modify ens192 ipv4.addresses 192.168.82.133/24
-	nmcli c modify ens192 ipv4.method manual
-	nmcli con mod ens192 connection.autoconnect yes
+	echo "Setup IP  eth1"
+	nmcli con modify eth1 ipv4.addresses 192.168.82.133/24
+	nmcli con modify eth1 ipv4.method manual
+	nmcli con modify eth1 connection.autoconnect yes
 
-	echo "Setup IP  ens224"
-	nmcli c modify ens224 ipv4.addresses 192.168.83.133/24
-	nmcli c modify ens224 ipv4.method manual
-	nmcli con mod ens224 connection.autoconnect yes
+	echo "Setup IP  eth2"
+	nmcli con modify eth2 ipv4.addresses 192.168.83.133/24
+	nmcli con modify eth2 ipv4.method manual
+	nmcli con modify eth2 connection.autoconnect yes
 	```
 
 - Cấu hình các thành phần cơ bản
@@ -642,15 +642,15 @@ Việc trên có ý nghĩa là để có thể thực hiện lệnh quản trị
 
 	```sh
 	echo "Setup IP  eth0"
-	nmcli c modify eth0 ipv4.addresses 192.168.80.139/24
-	nmcli c modify eth0 ipv4.gateway 192.168.80.1
-	nmcli c modify eth0 ipv4.dns 8.8.8.8
-	nmcli c modify eth0 ipv4.method manual
+	nmcli con modify eth0 ipv4.addresses 192.168.80.139/24
+	nmcli con modify eth0 ipv4.gateway 192.168.80.1
+	nmcli con modify eth0 ipv4.dns 8.8.8.8
+	nmcli con modify eth0 ipv4.method manual
 	nmcli con mod eth0 connection.autoconnect yes
 
 	echo "Setup IP  eth1"
-	nmcli c modify eth1 ipv4.addresses 192.168.82.139/24
-	nmcli c modify eth1 ipv4.method manual
+	nmcli con modify eth1 ipv4.addresses 192.168.82.139/24
+	nmcli con modify eth1 ipv4.method manual
 	nmcli con mod eth1 connection.autoconnect yes
 	```
 
