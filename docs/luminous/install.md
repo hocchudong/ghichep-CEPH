@@ -34,247 +34,247 @@
 
 -  Đăng nhập với tài khoản root
 
-	```
-	su -
-	```
+```
+su -
+```
 
 - Khai báo repos nếu có
 
-	```sh
-	echo "proxy=http://192.168.80.111:3142;" >> /etc/yum.conf
-	```
+```sh
+echo "proxy=http://192.168.80.111:3142;" >> /etc/yum.conf
+```
 
 - Update OS
 
-	```sh
-	yum update -y
-	```
+```sh
+yum update -y
+```
 
 - Đặt hostname
 
-	```sh
-	hostnamectl set-hostname ceph1
-	```
+```sh
+hostnamectl set-hostname ceph1
+```
 
 - Đặt IP cho node `ceph1`
 
-	```sh
-	echo "Setup IP  eth0"
-	nmcli con modify eth0 ipv4.addresses 192.168.80.131/24
-	nmcli con modify eth0 ipv4.gateway 192.168.80.1
-	nmcli con modify eth0 ipv4.dns 8.8.8.8
-	nmcli con modify eth0 ipv4.method manual
-	nmcli con modify eth0 connection.autoconnect yes
+```sh
+echo "Setup IP  eth0"
+nmcli con modify eth0 ipv4.addresses 192.168.80.131/24
+nmcli con modify eth0 ipv4.gateway 192.168.80.1
+nmcli con modify eth0 ipv4.dns 8.8.8.8
+nmcli con modify eth0 ipv4.method manual
+nmcli con modify eth0 connection.autoconnect yes
 
-	echo "Setup IP  eth1"
-	nmcli con modify eth1 ipv4.addresses 192.168.82.131/24
-	nmcli con modify eth1 ipv4.method manual
-	nmcli con modify eth1 connection.autoconnect yes
+echo "Setup IP  eth1"
+nmcli con modify eth1 ipv4.addresses 192.168.82.131/24
+nmcli con modify eth1 ipv4.method manual
+nmcli con modify eth1 connection.autoconnect yes
 
-	echo "Setup IP  "eth2
-	nmcli con modify eth2 ipv4.addresses 192.168.83.131/24
-	nmcli con modify eth2 ipv4.method manual
-	nmcli con modify eth2 connection.autoconnect yes
-	```
+echo "Setup IP  "eth2
+nmcli con modify eth2 ipv4.addresses 192.168.83.131/24
+nmcli con modify eth2 ipv4.method manual
+nmcli con modify eth2 connection.autoconnect yes
+```
 
 -  Cấu hình các thành phần cơ bản
 
-	```sh
-	sudo systemctl disable firewalld
-	sudo systemctl stop firewalld
-	sudo systemctl disable NetworkManager
-	sudo systemctl stop NetworkManager
-	sudo systemctl enable network
-	sudo systemctl start network
+```sh
+sudo systemctl disable firewalld
+sudo systemctl stop firewalld
+sudo systemctl disable NetworkManager
+sudo systemctl stop NetworkManager
+sudo systemctl enable network
+sudo systemctl start network
 
-	sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/sysconfig/selinux
-	sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
-	```
+sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/sysconfig/selinux
+sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
+```
 
 - Khai báo file  /etc/hosts
 
-	```sh
-	echo "192.168.82.131 ceph1" >> /etc/hosts
-	echo "192.168.82.132 ceph2" >> /etc/hosts
-	echo "192.168.82.133 ceph3" >> /etc/hosts
-	echo "192.168.82.139 cephclient1" >> /etc/hosts	
+```sh
+echo "192.168.82.131 ceph1" >> /etc/hosts
+echo "192.168.82.132 ceph2" >> /etc/hosts
+echo "192.168.82.133 ceph3" >> /etc/hosts
+echo "192.168.82.139 cephclient1" >> /etc/hosts	
 
 
-	echo "192.168.80.131 ceph1" >> /etc/hosts
-	echo "192.168.80.132 ceph2" >> /etc/hosts
-	echo "192.168.80.133 ceph3" >> /etc/hosts
-	echo "192.168.80.139 cephclient1" >> /etc/hosts
-	```
+echo "192.168.80.131 ceph1" >> /etc/hosts
+echo "192.168.80.132 ceph2" >> /etc/hosts
+echo "192.168.80.133 ceph3" >> /etc/hosts
+echo "192.168.80.139 cephclient1" >> /etc/hosts
+```
 
 - Khởi động lại
 
-	```
-	init 6
-	```
+```
+init 6
+```
 
 #### 4.1.2  Thiết lập IP, hostname cho `ceph2`
 
 - Đăng nhập với tài khoản root
 
-	```
-	su -
-	```
+```
+su -
+```
 
 - Khai báo repos nếu có
 
-	```sh
-	echo "proxy=http://192.168.80.111:3142;" >> /etc/yum.conf
-	```
+```sh
+echo "proxy=http://192.168.80.111:3142;" >> /etc/yum.conf
+```
 
 - Update OS
 
-	```sh 
-	yum update -y
-	````
+```sh 
+yum update -y
+````
 
 - Đặt hostname
 
-	```sh
-	hostnamectl set-hostname ceph2
-	```
+```sh
+hostnamectl set-hostname ceph2
+```
 
 - Đặt IP cho node `ceph2`
 
-	```sh
-	echo "Setup IP  eth0"
-	nmcli con modify eth0 ipv4.addresses 192.168.80.132/24
-	nmcli con modify eth0 ipv4.gateway 192.168.80.1
-	nmcli con modify eth0 ipv4.dns 8.8.8.8
-	nmcli con modify eth0 ipv4.method manual
-	nmcli con modify eth0 connection.autoconnect yes
+```sh
+echo "Setup IP  eth0"
+nmcli con modify eth0 ipv4.addresses 192.168.80.132/24
+nmcli con modify eth0 ipv4.gateway 192.168.80.1
+nmcli con modify eth0 ipv4.dns 8.8.8.8
+nmcli con modify eth0 ipv4.method manual
+nmcli con modify eth0 connection.autoconnect yes
 
-	echo "Setup IP  eth1"
-	nmcli con modify eth1 ipv4.addresses 192.168.82.132/24
-	nmcli con modify eth1 ipv4.method manual
-	nmcli con modify eth1 connection.autoconnect yes
+echo "Setup IP  eth1"
+nmcli con modify eth1 ipv4.addresses 192.168.82.132/24
+nmcli con modify eth1 ipv4.method manual
+nmcli con modify eth1 connection.autoconnect yes
 
-	echo "Setup IP  eth2"
-	nmcli con modify eth2 ipv4.addresses 192.168.83.132/24
-	nmcli con modify eth2 ipv4.method manual
-	nmcli con modify eth2 connection.autoconnect yes
-	```
+echo "Setup IP  eth2"
+nmcli con modify eth2 ipv4.addresses 192.168.83.132/24
+nmcli con modify eth2 ipv4.method manual
+nmcli con modify eth2 connection.autoconnect yes
+```
 
 - Cấu hình các thành phần cơ bản
 
-	```sh
-	sudo systemctl disable firewalld
-	sudo systemctl stop firewalld
-	sudo systemctl disable NetworkManager
-	sudo systemctl stop NetworkManager
-	sudo systemctl enable network
-	sudo systemctl start network
+```sh
+sudo systemctl disable firewalld
+sudo systemctl stop firewalld
+sudo systemctl disable NetworkManager
+sudo systemctl stop NetworkManager
+sudo systemctl enable network
+sudo systemctl start network
 
-	sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/sysconfig/selinux
-	sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
-	```
+sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/sysconfig/selinux
+sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
+```
 
 - Khai báo file `/etc/hosts`
 
-	```sh
-	echo "192.168.82.131 ceph1" >> /etc/hosts
-	echo "192.168.82.132 ceph2" >> /etc/hosts
-	echo "192.168.82.133 ceph3" >> /etc/hosts
-	echo "192.168.82.139 cephclient1" >> /etc/hosts	
+```sh
+echo "192.168.82.131 ceph1" >> /etc/hosts
+echo "192.168.82.132 ceph2" >> /etc/hosts
+echo "192.168.82.133 ceph3" >> /etc/hosts
+echo "192.168.82.139 cephclient1" >> /etc/hosts	
 
 
-	echo "192.168.80.131 ceph1" >> /etc/hosts
-	echo "192.168.80.132 ceph2" >> /etc/hosts
-	echo "192.168.80.133 ceph3" >> /etc/hosts
-	echo "192.168.80.139 cephclient1" >> /etc/hosts
-	```
+echo "192.168.80.131 ceph1" >> /etc/hosts
+echo "192.168.80.132 ceph2" >> /etc/hosts
+echo "192.168.80.133 ceph3" >> /etc/hosts
+echo "192.168.80.139 cephclient1" >> /etc/hosts
+```
 
 - Khởi động lại
 
-	```sh
-	init 6
-	```
+```sh
+init 6
+```
 
 #### 4.1.3  Thiết lập IP, hostname cho `ceph3`
 
 -  Đăng nhập với tài khoản `root`
 
-	```sh
-	su -
-	```
+```sh
+su -
+```
 
 -  Khai báo repos nếu có
 
-	```sh
-	echo "proxy=http://192.168.80.111:3142;" >> /etc/yum.conf
-	```
+```sh
+echo "proxy=http://192.168.80.111:3142;" >> /etc/yum.conf
+```
 
 - Update OS
 
-	```sh
-	yum update -y
-	```
+```sh
+yum update -y
+```
 
 - Đặt hostname
 
-	```sh
-	hostnamectl set-hostname ceph3
-	```
+```sh
+hostnamectl set-hostname ceph3
+```
 
 - Đặt IP cho node `ceph3`
 
-	```sh
-	echo "Setup IP  eth0"
-	nmcli con modify eth0 ipv4.addresses 192.168.80.133/24
-	nmcli con modify eth0 ipv4.gateway 192.168.80.1
-	nmcli con modify eth0 ipv4.dns 8.8.8.8
-	nmcli con modify eth0 ipv4.method manual
-	nmcli con modify eth0 connection.autoconnect yes
+```sh
+echo "Setup IP  eth0"
+nmcli con modify eth0 ipv4.addresses 192.168.80.133/24
+nmcli con modify eth0 ipv4.gateway 192.168.80.1
+nmcli con modify eth0 ipv4.dns 8.8.8.8
+nmcli con modify eth0 ipv4.method manual
+nmcli con modify eth0 connection.autoconnect yes
 
-	echo "Setup IP  eth1"
-	nmcli con modify eth1 ipv4.addresses 192.168.82.133/24
-	nmcli con modify eth1 ipv4.method manual
-	nmcli con modify eth1 connection.autoconnect yes
+echo "Setup IP  eth1"
+nmcli con modify eth1 ipv4.addresses 192.168.82.133/24
+nmcli con modify eth1 ipv4.method manual
+nmcli con modify eth1 connection.autoconnect yes
 
-	echo "Setup IP  eth2"
-	nmcli con modify eth2 ipv4.addresses 192.168.83.133/24
-	nmcli con modify eth2 ipv4.method manual
-	nmcli con modify eth2 connection.autoconnect yes
-	```
+echo "Setup IP  eth2"
+nmcli con modify eth2 ipv4.addresses 192.168.83.133/24
+nmcli con modify eth2 ipv4.method manual
+nmcli con modify eth2 connection.autoconnect yes
+```
 
 - Cấu hình các thành phần cơ bản
 
-	```sh
-	sudo systemctl disable firewalld
-	sudo systemctl stop firewalld
-	sudo systemctl disable NetworkManager
-	sudo systemctl stop NetworkManager
-	sudo systemctl enable network
-	sudo systemctl start network
+```sh
+sudo systemctl disable firewalld
+sudo systemctl stop firewalld
+sudo systemctl disable NetworkManager
+sudo systemctl stop NetworkManager
+sudo systemctl enable network
+sudo systemctl start network
 
-	sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/sysconfig/selinux
-	sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
-	```
+sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/sysconfig/selinux
+sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
+```
 
 -  Khai báo file `/etc/hosts`
 
-	```sh
-	echo "192.168.82.131 ceph1" >> /etc/hosts
-	echo "192.168.82.132 ceph2" >> /etc/hosts
-	echo "192.168.82.133 ceph3" >> /etc/hosts
-	echo "192.168.82.139 cephclient1" >> /etc/hosts	
+```sh
+echo "192.168.82.131 ceph1" >> /etc/hosts
+echo "192.168.82.132 ceph2" >> /etc/hosts
+echo "192.168.82.133 ceph3" >> /etc/hosts
+echo "192.168.82.139 cephclient1" >> /etc/hosts	
 
 
-	echo "192.168.80.131 ceph1" >> /etc/hosts
-	echo "192.168.80.132 ceph2" >> /etc/hosts
-	echo "192.168.80.133 ceph3" >> /etc/hosts
-	echo "192.168.80.139 cephclient1" >> /etc/hosts
-	```
+echo "192.168.80.131 ceph1" >> /etc/hosts
+echo "192.168.80.132 ceph2" >> /etc/hosts
+echo "192.168.80.133 ceph3" >> /etc/hosts
+echo "192.168.80.139 cephclient1" >> /etc/hosts
+```
 
 -  Khởi động lại
 
-	```sh
-	init 6
-	```
+```sh
+init 6
+```
 
 ### 4.2. Cài gói bổ trợ và tạo tài khoản để cài đặt CEPH
 
@@ -282,32 +282,32 @@
 
 - Thực hiện update OS và cài các gói bổ trợ
 
-	```sh
-	yum update -y
+```sh
+yum update -y
 
-	yum install epel-release -y
+yum install epel-release -y
 
-	yum install wget bybo curl git -y
+yum install wget bybo curl git -y
 
-	yum install python-setuptools -y
+yum install python-setuptools -y
 
-	yum install python-virtualenv -y
+yum install python-virtualenv -y
 
-	yum update -y
-	```
+yum update -y
+```
 
 - Cấu hình NTP
 
-	```sh
-	yum install -y ntp ntpdate ntp-doc
+```sh
+yum install -y ntp ntpdate ntp-doc
 
-	ntpdate 0.us.pool.ntp.org
+ntpdate 0.us.pool.ntp.org
 
-	hwclock --systohc
+hwclock --systohc
 
-	systemctl enable ntpd.service
-	systemctl start ntpd.service
-	```
+systemctl enable ntpd.service
+systemctl start ntpd.service
+```
 
 - `Lưu ý:` trường hợp máy chủ tại Nhân Hòa thì cần khai báo IP về NTP server, liên hệ đội RD để được hướng dẫn.
 
