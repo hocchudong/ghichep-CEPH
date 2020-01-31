@@ -41,7 +41,7 @@
 - Khai báo repos nếu có
 
 	```sh
-	echo "proxy=http://192.168.70.111:3142;" >> /etc/yum.conf
+	echo "proxy=http://192.168.80.111:3142;" >> /etc/yum.conf
 	```
 
 - Update OS
@@ -60,8 +60,8 @@
 
 	```sh
 	echo "Setup IP  ens160"
-	nmcli c modify ens160 ipv4.addresses 192.168.70.131/24
-	nmcli c modify ens160 ipv4.gateway 192.168.70.1
+	nmcli c modify ens160 ipv4.addresses 192.168.80.131/24
+	nmcli c modify ens160 ipv4.gateway 192.168.80.1
 	nmcli c modify ens160 ipv4.dns 8.8.8.8
 	nmcli c modify ens160 ipv4.method manual
 	nmcli con mod ens160 connection.autoconnect yes
@@ -100,10 +100,10 @@
 	echo "192.168.82.139 cephclient1" >> /etc/hosts	
 
 
-	echo "192.168.70.131 ceph1" >> /etc/hosts
-	echo "192.168.70.132 ceph2" >> /etc/hosts
-	echo "192.168.70.133 ceph3" >> /etc/hosts
-	echo "192.168.70.139 cephclient1" >> /etc/hosts
+	echo "192.168.80.131 ceph1" >> /etc/hosts
+	echo "192.168.80.132 ceph2" >> /etc/hosts
+	echo "192.168.80.133 ceph3" >> /etc/hosts
+	echo "192.168.80.139 cephclient1" >> /etc/hosts
 	```
 
 - Khởi động lại
@@ -123,7 +123,7 @@
 - Khai báo repos nếu có
 
 	```sh
-	echo "proxy=http://192.168.70.111:3142;" >> /etc/yum.conf
+	echo "proxy=http://192.168.80.111:3142;" >> /etc/yum.conf
 	```
 
 - Update OS
@@ -142,8 +142,8 @@
 
 	```sh
 	echo "Setup IP  ens160"
-	nmcli c modify ens160 ipv4.addresses 192.168.70.132/24
-	nmcli c modify ens160 ipv4.gateway 192.168.70.1
+	nmcli c modify ens160 ipv4.addresses 192.168.80.132/24
+	nmcli c modify ens160 ipv4.gateway 192.168.80.1
 	nmcli c modify ens160 ipv4.dns 8.8.8.8
 	nmcli c modify ens160 ipv4.method manual
 	nmcli con mod ens160 connection.autoconnect yes
@@ -182,10 +182,10 @@
 	echo "192.168.82.139 cephclient1" >> /etc/hosts	
 
 
-	echo "192.168.70.131 ceph1" >> /etc/hosts
-	echo "192.168.70.132 ceph2" >> /etc/hosts
-	echo "192.168.70.133 ceph3" >> /etc/hosts
-	echo "192.168.70.139 cephclient1" >> /etc/hosts
+	echo "192.168.80.131 ceph1" >> /etc/hosts
+	echo "192.168.80.132 ceph2" >> /etc/hosts
+	echo "192.168.80.133 ceph3" >> /etc/hosts
+	echo "192.168.80.139 cephclient1" >> /etc/hosts
 	```
 
 - Khởi động lại
@@ -205,7 +205,7 @@
 -  Khai báo repos nếu có
 
 	```sh
-	echo "proxy=http://192.168.70.111:3142;" >> /etc/yum.conf
+	echo "proxy=http://192.168.80.111:3142;" >> /etc/yum.conf
 	```
 
 - Update OS
@@ -224,8 +224,8 @@
 
 	```sh
 	echo "Setup IP  ens160"
-	nmcli c modify ens160 ipv4.addresses 192.168.70.133/24
-	nmcli c modify ens160 ipv4.gateway 192.168.70.1
+	nmcli c modify ens160 ipv4.addresses 192.168.80.133/24
+	nmcli c modify ens160 ipv4.gateway 192.168.80.1
 	nmcli c modify ens160 ipv4.dns 8.8.8.8
 	nmcli c modify ens160 ipv4.method manual
 	nmcli con mod ens160 connection.autoconnect yes
@@ -264,10 +264,10 @@
 	echo "192.168.82.139 cephclient1" >> /etc/hosts	
 
 
-	echo "192.168.70.131 ceph1" >> /etc/hosts
-	echo "192.168.70.132 ceph2" >> /etc/hosts
-	echo "192.168.70.133 ceph3" >> /etc/hosts
-	echo "192.168.70.139 cephclient1" >> /etc/hosts
+	echo "192.168.80.131 ceph1" >> /etc/hosts
+	echo "192.168.80.132 ceph2" >> /etc/hosts
+	echo "192.168.80.133 ceph3" >> /etc/hosts
+	echo "192.168.80.139 cephclient1" >> /etc/hosts
 	```
 
 -  Khởi động lại
@@ -623,7 +623,7 @@ Việc trên có ý nghĩa là để có thể thực hiện lệnh quản trị
 - Khai báo repos nếu có
 
 	```sh
-	echo "proxy=http://192.168.70.111:3142;" >> /etc/yum.conf
+	echo "proxy=http://192.168.80.111:3142;" >> /etc/yum.conf
 	```
 
 - Update OS
@@ -642,8 +642,8 @@ Việc trên có ý nghĩa là để có thể thực hiện lệnh quản trị
 
 	```sh
 	echo "Setup IP  eth0"
-	nmcli c modify eth0 ipv4.addresses 192.168.70.139/24
-	nmcli c modify eth0 ipv4.gateway 192.168.70.1
+	nmcli c modify eth0 ipv4.addresses 192.168.80.139/24
+	nmcli c modify eth0 ipv4.gateway 192.168.80.1
 	nmcli c modify eth0 ipv4.dns 8.8.8.8
 	nmcli c modify eth0 ipv4.method manual
 	nmcli con mod eth0 connection.autoconnect yes
@@ -677,10 +677,10 @@ Việc trên có ý nghĩa là để có thể thực hiện lệnh quản trị
 	echo "192.168.82.139 cephclient1" >> /etc/hosts	
 
 
-	echo "192.168.70.131 ceph1" >> /etc/hosts
-	echo "192.168.70.132 ceph2" >> /etc/hosts
-	echo "192.168.70.133 ceph3" >> /etc/hosts
-	echo "192.168.70.139 cephclient1" >> /etc/hosts
+	echo "192.168.80.131 ceph1" >> /etc/hosts
+	echo "192.168.80.132 ceph2" >> /etc/hosts
+	echo "192.168.80.133 ceph3" >> /etc/hosts
+	echo "192.168.80.139 cephclient1" >> /etc/hosts
 	```
 	
 - Khởi động lại node client 
@@ -691,7 +691,7 @@ Việc trên có ý nghĩa là để có thể thực hiện lệnh quản trị
 
 ##### Tạo user `cephuser`, khai báo repos cài đặt CEPH cho node `cephclient1`
 	
--  Đăng nhập lai node `cephclient1` với IP mới `192.168.70.139`
+-  Đăng nhập lai node `cephclient1` với IP mới `192.168.80.139`
 
 - Thực hiện update OS và cài các gói bổ trợ
 
@@ -955,35 +955,5 @@ Thực hiện trên node `cephclient1`
 ## HẾT
 
 	
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
