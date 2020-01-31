@@ -91,9 +91,16 @@ sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/sysconfig/selinux
 sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
 ```
 
+- Có thể cần disable IPv6
+
+```
+echo "net.ipv6.conf.all.disable_ipv6 = 1" >> /etc/sysctl.conf
+```
+
 - Khai báo file  /etc/hosts
 
 ```sh
+echo "127.0.0.1 localhost ceph1" > /etc/hosts
 echo "192.168.82.131 ceph1" >> /etc/hosts
 echo "192.168.82.132 ceph2" >> /etc/hosts
 echo "192.168.82.133 ceph3" >> /etc/hosts
@@ -173,9 +180,16 @@ sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/sysconfig/selinux
 sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
 ```
 
+- Có thể cần disable IPv6
+
+```
+echo "net.ipv6.conf.all.disable_ipv6 = 1" >> /etc/sysctl.conf
+```
+
 - Khai báo file `/etc/hosts`
 
 ```sh
+echo "127.0.0.1 localhost ceph2" > /etc/hosts
 echo "192.168.82.131 ceph1" >> /etc/hosts
 echo "192.168.82.132 ceph2" >> /etc/hosts
 echo "192.168.82.133 ceph3" >> /etc/hosts
@@ -255,9 +269,16 @@ sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/sysconfig/selinux
 sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
 ```
 
+- Có thể cần disable IPv6
+
+```
+echo "net.ipv6.conf.all.disable_ipv6 = 1" >> /etc/sysctl.conf
+```
+
 -  Khai báo file `/etc/hosts`
 
 ```sh
+echo "127.0.0.1 localhost ceph3" > /etc/hosts
 echo "192.168.82.131 ceph1" >> /etc/hosts
 echo "192.168.82.132 ceph2" >> /etc/hosts
 echo "192.168.82.133 ceph3" >> /etc/hosts
