@@ -320,37 +320,39 @@ yum update -y
 - Cấu hình NTP
 
 ```sh
-yum install -y ntp ntpdate ntp-doc
+yum install chrony -y
+```
 
-ntpdate 0.us.pool.ntp.org
+- Khởi động chrony
 
-hwclock --systohc
-
-systemctl enable ntpd.service
-systemctl start ntpd.service
+```
+systemctl enable chronyd.service
+systemctl start chronyd.service
+systemctl restart chronyd.service
+chronyc sources
 ```
 
 - `Lưu ý:` trường hợp máy chủ tại Nhân Hòa thì cần khai báo IP về NTP server, liên hệ đội RD để được hướng dẫn.
 
 - Tạo user `cephuser` trên node `ceph1, ceph2, ceph3`
 
-	```sh
-	useradd -d /home/cephuser -m cephuser
-	```
+```sh
+useradd -d /home/cephuser -m cephuser
+```
 
 - Đặt password cho user `cephuser`
 
-	```sh
-	passwd cephuser
-	```
+```sh
+passwd cephuser
+```
 
 - Cấp quyền sudo cho tài khoản `cephuser`
 
-	```sh
-	echo "cephuser ALL = (root) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/cephuser
-	chmod 0440 /etc/sudoers.d/cephuser
-	# sed -i s'/Defaults requiretty/#Defaults requiretty'/g /etc/sudoers
-	```
+```sh
+echo "cephuser ALL = (root) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/cephuser
+chmod 0440 /etc/sudoers.d/cephuser
+# sed -i s'/Defaults requiretty/#Defaults requiretty'/g /etc/sudoers
+```
 
 ### 4.3 Tạo repos để cài đặt CEPH bằng cách tạo file
 
@@ -358,43 +360,43 @@ systemctl start ntpd.service
 
 - Khai báo repos cho CEPH 
 
-	```sh
-	cat << EOF > /etc/yum.repos.d/ceph.repo
-	[Ceph]
-	name=Ceph packages for \$basearch
-	baseurl=http://download.ceph.com/rpm-luminous/el7/\$basearch
-	enabled=1
-	gpgcheck=1
-	type=rpm-md
-	gpgkey=https://download.ceph.com/keys/release.asc
-	priority=1
+```sh
+cat << EOF > /etc/yum.repos.d/ceph.repo
+[Ceph]
+name=Ceph packages for \$basearch
+baseurl=http://download.ceph.com/rpm-luminous/el7/\$basearch
+enabled=1
+gpgcheck=1
+type=rpm-md
+gpgkey=https://download.ceph.com/keys/release.asc
+priority=1
 
 
-	[Ceph-noarch]
-	name=Ceph noarch packages
-	baseurl=http://download.ceph.com/rpm-luminous/el7/noarch
-	enabled=1
-	gpgcheck=1
-	type=rpm-md
-	gpgkey=https://download.ceph.com/keys/release.asc
-	priority=1
+[Ceph-noarch]
+name=Ceph noarch packages
+baseurl=http://download.ceph.com/rpm-luminous/el7/noarch
+enabled=1
+gpgcheck=1
+type=rpm-md
+gpgkey=https://download.ceph.com/keys/release.asc
+priority=1
 
-	[ceph-source]
-	name=Ceph source packages
-	baseurl=http://download.ceph.com/rpm-luminous/el7/SRPMS
-	enabled=1
-	gpgcheck=1
-	type=rpm-md
-	gpgkey=https://download.ceph.com/keys/release.asc
-	priority=1
-	EOF
-	```
+[ceph-source]
+name=Ceph source packages
+baseurl=http://download.ceph.com/rpm-luminous/el7/SRPMS
+enabled=1
+gpgcheck=1
+type=rpm-md
+gpgkey=https://download.ceph.com/keys/release.asc
+priority=1
+EOF
+```
 
 -  Thực hiện update sau khi khai báo repos 
 
-	```sh
-	yum update -y
-	```
+```sh
+yum update -y
+```
 
 ### 4.3 Cài đặt CEPH
 
