@@ -400,141 +400,141 @@ yum update -y
 
 - Cài đặt ceph-deploy
 
-	```sh
-	yum install -y ceph-deploy
-	```
+```sh
+yum install -y ceph-deploy
+```
 
 - Kiểm tra lại phiên bản của ceph-deploy, chính xác là phiên bản 2.0.1
 
-	```sh
-	ceph-deploy --version
-	```
+```sh
+ceph-deploy --version
+```
 
-	- Kết quả: 
+- Kết quả: 
 
-		```sh
-		[cephuser@ceph1 ~]$ ceph-deploy --version
-		2.0.1
-		```
+```sh
+[cephuser@ceph1 ~]$ ceph-deploy --version
+2.0.1
+```
 
 - Chuyển sang tài khoản `cephuser`
 
-	```sh
-	su - cephuser
-	```
+```sh
+su - cephuser
+```
 
 - Tạo keypair trên node ceph1
 
-	```sh
-	ssh-keygen
-	```
+```sh
+ssh-keygen
+```
 
 -  Copy keypair sang các node để ceph-deploy sử dụng. Nhập yes và mật khẩu của từng node khi được hỏi.
 
-	```sh
-	ssh-copy-id cephuser@ceph1
+```sh
+ssh-copy-id cephuser@ceph1
 
-	ssh-copy-id cephuser@ceph2
+ssh-copy-id cephuser@ceph2
 
-	ssh-copy-id cephuser@ceph3
-	```
+ssh-copy-id cephuser@ceph3
+```
 
 #### 4.3.2 Thực hiện cài đặt CEPH
 
 - `Lưu ý:` Bước này thực hiện trên node `ceph1`
 -  Tạo thư mục để chứa file cài đặt ceph
 
-	```sh
-	cd ~
-	mkdir my-cluster
-	cd my-cluster
-	```
+```sh
+cd ~
+mkdir my-cluster
+cd my-cluster
+```
 
 - Thiết lập cluster cho CEPH. Cú pháp của lệnh sẽ là `ceph-deploy new ten_mon_nodes`. 
 - Do trong cấu hình này ta dùng 03 node `ceph1, ceph2, ceph3` làm node MON nên ta sẽ thực hiện lệnh bên dưới. Nếu bản chỉ có 01 node thì chỉ cần hostname của node đó.
 
-	```sh
-	ceph-deploy new ceph1 ceph2 ceph3
-	```
+```sh
+ceph-deploy new ceph1 ceph2 ceph3
+```
 
 - Kết quả của lệnh trên sẽ sinh ra các file dưới, kiểm tra bằng lệnh `ls -alh`
 
-	```sh
-	[cephuser@ceph1 my-cluster]$ ls -alh
-	total 172K
-	drwxrwxr-x 2 cephuser cephuser   75 Oct 16 23:16 .
-	drwx------ 4 cephuser cephuser  116 Oct 16 23:16 ..
-	-rw-rw-r-- 1 cephuser cephuser  421 Oct 16 23:31 ceph.conf
-	-rw-rw-r-- 1 cephuser cephuser 163K Oct 16 23:36 ceph-deploy-ceph.log
-	-rw------- 1 cephuser cephuser   73 Oct 16 23:16 ceph.mon.keyring
-	```
+```sh
+[cephuser@ceph1 my-cluster]$ ls -alh
+total 172K
+drwxrwxr-x 2 cephuser cephuser   75 Oct 16 23:16 .
+drwx------ 4 cephuser cephuser  116 Oct 16 23:16 ..
+-rw-rw-r-- 1 cephuser cephuser  421 Oct 16 23:31 ceph.conf
+-rw-rw-r-- 1 cephuser cephuser 163K Oct 16 23:36 ceph-deploy-ceph.log
+-rw------- 1 cephuser cephuser   73 Oct 16 23:16 ceph.mon.keyring
+```
 	
 - File `ceph.conf` sinh ra ở trên chứa các cấu hình cho cụm ceph cluster. Ta thực hiện thêm các khai báo dưới cho file `ceph.conf` này trước khi cài đặt các gói cần thiết cho ceph trên các node.
 	
-	```sh
-	echo "public network = 192.168.82.0/24" >> ceph.conf
-	echo "cluster network = 192.168.83.0/24" >> ceph.conf
-	echo "osd objectstore = bluestore"  >> ceph.conf
-	echo "mon_allow_pool_delete = true"  >> ceph.conf
-	echo "osd pool default size = 3"  >> ceph.conf
-	echo "osd pool default min size = 1"  >> ceph.conf
-	```
+```sh
+echo "public network = 192.168.82.0/24" >> ceph.conf
+echo "cluster network = 192.168.83.0/24" >> ceph.conf
+echo "osd objectstore = bluestore"  >> ceph.conf
+echo "mon_allow_pool_delete = true"  >> ceph.conf
+echo "osd pool default size = 3"  >> ceph.conf
+echo "osd pool default min size = 1"  >> ceph.conf
+```
 
 -  Cài đặt các gói của CEPH trên các node, trong hướng dẫn này chỉ rõ bản `ceph luminous`. Lệnh dưới sẽ cài các gói lên tất cả các node ceph. Lệnh được thực hiện trên node `ceph1`.
 
-	```sh
-	ceph-deploy install --release luminous ceph1 ceph2 ceph3
-	```
+```sh
+ceph-deploy install --release luminous ceph1 ceph2 ceph3
+```
 	
 - Kết quả của lệnh trên sẽ hiển thị như bên dưới, trong đó có phiên bản của ceph được cài trên các node.
 
-	```sh
-	[ceph3][DEBUG ]
-	[ceph3][DEBUG ] Complete!
-	[ceph3][INFO  ] Running command: sudo ceph --version
-	[ceph3][DEBUG ] ceph version 12.2.8 (ae699615bac534ea496ee965ac6192cb7e0e07c0) luminous (stable)
-	```
+```sh
+[ceph3][DEBUG ]
+[ceph3][DEBUG ] Complete!
+[ceph3][INFO  ] Running command: sudo ceph --version
+[ceph3][DEBUG ] ceph version 12.2.8 (ae699615bac534ea496ee965ac6192cb7e0e07c0) luminous (stable)
+```
 
 -  Cấu hình MON 
 
-	```sh
-	ceph-deploy mon create-initial
-	```
+```sh
+ceph-deploy mon create-initial
+```
 
 - Kết quả của lệnh trên sẽ sinh ra các file dưới, kiểm tra bằng lệnh `ls -alh`
 
-	```sh
-	[cephuser@ceph1 my-cluster]$ ls -alh
-	total 412K
-	drwxrwxr-x 2 cephuser cephuser  244 Oct 16 23:47 .
-	drwx------ 4 cephuser cephuser  116 Oct 16 23:16 ..
-	-rw------- 1 cephuser cephuser   71 Oct 16 23:47 ceph.bootstrap-mds.keyring
-	-rw------- 1 cephuser cephuser   71 Oct 16 23:47 ceph.bootstrap-mgr.keyring
-	-rw------- 1 cephuser cephuser   71 Oct 16 23:47 ceph.bootstrap-osd.keyring
-	-rw------- 1 cephuser cephuser   71 Oct 16 23:47 ceph.bootstrap-rgw.keyring
-	-rw------- 1 cephuser cephuser   63 Oct 16 23:47 ceph.client.admin.keyring
-	-rw-rw-r-- 1 cephuser cephuser  421 Oct 16 23:31 ceph.conf
-	-rw-rw-r-- 1 cephuser cephuser 191K Oct 16 23:47 ceph-deploy-ceph.log
-	-rw------- 1 cephuser cephuser   73 Oct 16 23:16 ceph.mon.keyring
-	````
-		
+```sh
+[cephuser@ceph1 my-cluster]$ ls -alh
+total 412K
+drwxrwxr-x 2 cephuser cephuser  244 Oct 16 23:47 .
+drwx------ 4 cephuser cephuser  116 Oct 16 23:16 ..
+-rw------- 1 cephuser cephuser   71 Oct 16 23:47 ceph.bootstrap-mds.keyring
+-rw------- 1 cephuser cephuser   71 Oct 16 23:47 ceph.bootstrap-mgr.keyring
+-rw------- 1 cephuser cephuser   71 Oct 16 23:47 ceph.bootstrap-osd.keyring
+-rw------- 1 cephuser cephuser   71 Oct 16 23:47 ceph.bootstrap-rgw.keyring
+-rw------- 1 cephuser cephuser   63 Oct 16 23:47 ceph.client.admin.keyring
+-rw-rw-r-- 1 cephuser cephuser  421 Oct 16 23:31 ceph.conf
+-rw-rw-r-- 1 cephuser cephuser 191K Oct 16 23:47 ceph-deploy-ceph.log
+-rw------- 1 cephuser cephuser   73 Oct 16 23:16 ceph.mon.keyring
+````
+	
 - Thực hiện copy file `ceph.client.admin.keyring` sang các node trong cụm ceph cluster. File này sẽ được copy vào thư mục `/etc/ceph/`
 
-	```sh
-	ceph-deploy admin ceph1 ceph2 ceph3
-	```
+```sh
+ceph-deploy admin ceph1 ceph2 ceph3
+```
 
 - Đứng trên node `ceph1` phân quyền cho file 	`/etc/ceph/ceph.client.admin.keyring`
 
-	```sh
-	sudo chmod +r /etc/ceph/ceph.client.admin.keyring
-	```
+```sh
+sudo chmod +r /etc/ceph/ceph.client.admin.keyring
+```
 
 - Tiếp tục ssh vào các node ceph2 và ceph3 còn lại để thực hiện lệnh phân quyền thực thi cho file `/etc/ceph/ceph.client.admin.keyring`
 
-	```sh
-	sudo chmod +r /etc/ceph/ceph.client.admin.keyring
-	```
+```sh
+sudo chmod +r /etc/ceph/ceph.client.admin.keyring
+```
 
 Việc trên có ý nghĩa là để có thể thực hiện lệnh quản trị của CEPH trên các 03 node trong cụm Cluster.
 
@@ -543,27 +543,27 @@ Việc trên có ý nghĩa là để có thể thực hiện lệnh quản trị
 - Add các OSD cho cụm ceph cluser
  
 
-	```sh
-	ceph-deploy osd create --data /dev/sdb ceph1
+```sh
+ceph-deploy osd create --data /dev/sdb ceph1
 
-	ceph-deploy osd create --data /dev/sdc ceph1
+ceph-deploy osd create --data /dev/sdc ceph1
 
-	ceph-deploy osd create --data /dev/sdd ceph1
-
-
-	ceph-deploy osd create --data /dev/sdb ceph2
-
-	ceph-deploy osd create --data /dev/sdc ceph2
-
-	ceph-deploy osd create --data /dev/sdd ceph2
+ceph-deploy osd create --data /dev/sdd ceph1
 
 
-	ceph-deploy osd create --data /dev/sdb ceph3
+ceph-deploy osd create --data /dev/sdb ceph2
 
-	ceph-deploy osd create --data /dev/sdc ceph3
+ceph-deploy osd create --data /dev/sdc ceph2
 
-	ceph-deploy osd create --data /dev/sdd ceph3
-	```
+ceph-deploy osd create --data /dev/sdd ceph2
+
+
+ceph-deploy osd create --data /dev/sdb ceph3
+
+ceph-deploy osd create --data /dev/sdc ceph3
+
+ceph-deploy osd create --data /dev/sdd ceph3
+```
 
 
 #### 4.3.4 Cấu hình manager và dashboad cho ceph cluster
@@ -571,21 +571,21 @@ Việc trên có ý nghĩa là để có thể thực hiện lệnh quản trị
 
 - Thực hiện trên node ceph1 để khai báo các node có vai trò manager, phục vụ việc quản trị ceph sau này.
 
-	```
-	ceph-deploy mgr create ceph1 ceph2 ceph3
-	```
+```
+ceph-deploy mgr create ceph1 ceph2 ceph3
+```
 
 - Kích hoạt dashboad
 	
-	```sh
-	ceph mgr module enable dashboard
-	```
+```sh
+ceph mgr module enable dashboard
+```
 
 - Kiểm tra trạng thái của ceph dashboad và port để truy cập.
 
-	```sh
-	ceph mgr dump
-	```
+```sh
+ceph mgr dump
+```
 
 - Kết quả: http://prntscr.com/l58wm7
 
