@@ -334,16 +334,10 @@ chronyc sources
 
 - `Lưu ý:` trường hợp máy chủ tại Nhân Hòa thì cần khai báo IP về NTP server, liên hệ đội RD để được hướng dẫn.
 
-- Tạo user `cephuser` trên node `ceph1, ceph2, ceph3`
+- Tạo user `cephuser` trên node `ceph1, ceph2, ceph3`. Mật khẩu của `cephuser` là `matkhau2019@`
 
-```sh
-useradd -d /home/cephuser -m cephuser
 ```
-
-- Đặt password cho user `cephuser`
-
-```sh
-passwd cephuser
+useradd cephuser; echo 'matkhau2019@' | passwd cephuser --stdin
 ```
 
 - Cấp quyền sudo cho tài khoản `cephuser`
