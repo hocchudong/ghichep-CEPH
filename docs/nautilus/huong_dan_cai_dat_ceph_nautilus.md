@@ -2,8 +2,8 @@
 
 ## 1. Môi trường cài đặt
 
-- CentOS 7.4 64bit
-- CEPH Luminous 
+- CentOS 7.x 64bit
+- CEPH Nautilus 
 - Phương thức sử dụng để triển khai ceph `ceph-deploy`
 - Vai trò các node như sau:
   - CEPH Admin nodes: `ceph1`
@@ -37,16 +37,12 @@
 su -
 ```
 
-- Khai báo repos nếu có
+- Cài đặt các gói phần mềm bổ trợ
 
 ```sh
-echo "proxy=http://192.168.80.111:3142;" >> /etc/yum.conf
-```
-
-- Update OS
-
-```sh
+yum install epel-release -y
 yum update -y
+yum install wget byobu curl git byobu python-setuptools python-virtualenv -y
 ```
 
 - Đặt hostname
@@ -59,19 +55,19 @@ hostnamectl set-hostname ceph1
 
 ```sh
 echo "Setup IP  eth0"
-nmcli con modify eth0 ipv4.addresses 192.168.80.131/24
-nmcli con modify eth0 ipv4.gateway 192.168.80.1
+nmcli con modify eth0 ipv4.addresses 192.168.98.85/24
+nmcli con modify eth0 ipv4.gateway 192.168.98.1
 nmcli con modify eth0 ipv4.dns 8.8.8.8
 nmcli con modify eth0 ipv4.method manual
 nmcli con modify eth0 connection.autoconnect yes
 
 echo "Setup IP  eth1"
-nmcli con modify eth1 ipv4.addresses 192.168.82.131/24
+nmcli con modify eth1 ipv4.addresses 192.168.62.85/24
 nmcli con modify eth1 ipv4.method manual
 nmcli con modify eth1 connection.autoconnect yes
 
-echo "Setup IP  "eth2
-nmcli con modify eth2 ipv4.addresses 192.168.83.131/24
+echo "Setup IP  eth2"
+nmcli con modify eth2 ipv4.addresses 192.168.63.85/24
 nmcli con modify eth2 ipv4.method manual
 nmcli con modify eth2 connection.autoconnect yes
 ```
@@ -88,6 +84,8 @@ sudo systemctl start network
 
 sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/sysconfig/selinux
 sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
+
+# echo "net.ipv6.conf.all.disable_ipv6 = 1" >> /etc/sysctl.conf
 ```
 
 - Có thể cần disable IPv6
@@ -99,17 +97,29 @@ echo "net.ipv6.conf.all.disable_ipv6 = 1" >> /etc/sysctl.conf
 - Khai báo file  /etc/hosts
 
 ```sh
-echo "127.0.0.1 localhost ceph1" > /etc/hosts
-echo "192.168.82.131 ceph1" >> /etc/hosts
-echo "192.168.82.132 ceph2" >> /etc/hosts
-echo "192.168.82.133 ceph3" >> /etc/hosts
-echo "192.168.82.139 cephclient1" >> /etc/hosts	
+cat << EOF > /etc/hosts
+127.0.0.1 `hostname` localhost
+192.168.62.84 client1
+192.168.62.85 ceph1
+192.168.62.86 ceph2
+192.168.62.87 ceph3
 
+192.168.98.84 client1
+192.168.98.85 ceph1
+192.168.98.86 ceph2
+192.168.98.87 ceph3
+EOF
+```
 
-echo "192.168.80.131 ceph1" >> /etc/hosts
-echo "192.168.80.132 ceph2" >> /etc/hosts
-echo "192.168.80.133 ceph3" >> /etc/hosts
-echo "192.168.80.139 cephclient1" >> /etc/hosts
+- Cài đặt NTP
+
+```
+yum install -y chrony
+
+systemctl enable chronyd.service
+systemctl start chronyd.service
+systemctl restart chronyd.service
+chronyc sources
 ```
 
 - Khởi động lại
@@ -117,6 +127,7 @@ echo "192.168.80.139 cephclient1" >> /etc/hosts
 ```
 init 6
 ```
+
 
 #### 4.1.2  Thiết lập IP, hostname cho `ceph2`
 
@@ -126,16 +137,12 @@ init 6
 su -
 ```
 
-- Khai báo repos nếu có
-
-```sh
-echo "proxy=http://192.168.80.111:3142;" >> /etc/yum.conf
-```
-
 - Update OS
 
 ```sh 
+yum install epel-release -y
 yum update -y
+yum install wget byobu curl git byobu python-setuptools python-virtualenv -y
 ````
 
 - Đặt hostname
@@ -148,19 +155,19 @@ hostnamectl set-hostname ceph2
 
 ```sh
 echo "Setup IP  eth0"
-nmcli con modify eth0 ipv4.addresses 192.168.80.132/24
-nmcli con modify eth0 ipv4.gateway 192.168.80.1
+nmcli con modify eth0 ipv4.addresses 192.168.98.86/24
+nmcli con modify eth0 ipv4.gateway 192.168.98.1
 nmcli con modify eth0 ipv4.dns 8.8.8.8
 nmcli con modify eth0 ipv4.method manual
 nmcli con modify eth0 connection.autoconnect yes
 
 echo "Setup IP  eth1"
-nmcli con modify eth1 ipv4.addresses 192.168.82.132/24
+nmcli con modify eth1 ipv4.addresses 192.168.62.86/24
 nmcli con modify eth1 ipv4.method manual
 nmcli con modify eth1 connection.autoconnect yes
 
 echo "Setup IP  eth2"
-nmcli con modify eth2 ipv4.addresses 192.168.83.132/24
+nmcli con modify eth2 ipv4.addresses 192.168.63.86/24
 nmcli con modify eth2 ipv4.method manual
 nmcli con modify eth2 connection.autoconnect yes
 ```
@@ -188,17 +195,29 @@ echo "net.ipv6.conf.all.disable_ipv6 = 1" >> /etc/sysctl.conf
 - Khai báo file `/etc/hosts`
 
 ```sh
-echo "127.0.0.1 localhost ceph2" > /etc/hosts
-echo "192.168.82.131 ceph1" >> /etc/hosts
-echo "192.168.82.132 ceph2" >> /etc/hosts
-echo "192.168.82.133 ceph3" >> /etc/hosts
-echo "192.168.82.139 cephclient1" >> /etc/hosts	
+cat << EOF > /etc/hosts
+127.0.0.1 `hostname` localhost
+192.168.62.84 client1
+192.168.62.85 ceph1
+192.168.62.86 ceph2
+192.168.62.87 ceph3
 
+192.168.98.84 client1
+192.168.98.85 ceph1
+192.168.98.86 ceph2
+192.168.98.87 ceph3
+EOF
+```
 
-echo "192.168.80.131 ceph1" >> /etc/hosts
-echo "192.168.80.132 ceph2" >> /etc/hosts
-echo "192.168.80.133 ceph3" >> /etc/hosts
-echo "192.168.80.139 cephclient1" >> /etc/hosts
+- Cài đặt NTP
+
+```
+yum install -y chronyd
+
+systemctl enable chronyd.service
+systemctl start chronyd.service
+systemctl restart chronyd.service
+chronyc sources
 ```
 
 - Khởi động lại
@@ -217,14 +236,12 @@ su -
 
 -  Khai báo repos nếu có
 
-```sh
-echo "proxy=http://192.168.80.111:3142;" >> /etc/yum.conf
-```
-
 - Update OS
 
 ```sh
+yum install epel-release -y
 yum update -y
+yum install wget byobu curl git byobu python-setuptools python-virtualenv -y
 ```
 
 - Đặt hostname
@@ -237,19 +254,19 @@ hostnamectl set-hostname ceph3
 
 ```sh
 echo "Setup IP  eth0"
-nmcli con modify eth0 ipv4.addresses 192.168.80.133/24
-nmcli con modify eth0 ipv4.gateway 192.168.80.1
+nmcli con modify eth0 ipv4.addresses 192.168.98.87/24
+nmcli con modify eth0 ipv4.gateway 192.168.98.1
 nmcli con modify eth0 ipv4.dns 8.8.8.8
 nmcli con modify eth0 ipv4.method manual
 nmcli con modify eth0 connection.autoconnect yes
 
 echo "Setup IP  eth1"
-nmcli con modify eth1 ipv4.addresses 192.168.82.133/24
+nmcli con modify eth1 ipv4.addresses 192.168.62.87/24
 nmcli con modify eth1 ipv4.method manual
-nmcli con modify eth1 connection.autoconnect yes
+nmcli con mod eth1 connection.autoconnect yes
 
 echo "Setup IP  eth2"
-nmcli con modify eth2 ipv4.addresses 192.168.83.133/24
+nmcli con modify eth2 ipv4.addresses 192.168.63.87/24
 nmcli con modify eth2 ipv4.method manual
 nmcli con modify eth2 connection.autoconnect yes
 ```
@@ -277,17 +294,29 @@ echo "net.ipv6.conf.all.disable_ipv6 = 1" >> /etc/sysctl.conf
 -  Khai báo file `/etc/hosts`
 
 ```sh
-echo "127.0.0.1 localhost ceph3" > /etc/hosts
-echo "192.168.82.131 ceph1" >> /etc/hosts
-echo "192.168.82.132 ceph2" >> /etc/hosts
-echo "192.168.82.133 ceph3" >> /etc/hosts
-echo "192.168.82.139 cephclient1" >> /etc/hosts	
+cat << EOF > /etc/hosts
+127.0.0.1 `hostname` localhost
+192.168.62.84 client1
+192.168.62.85 ceph1
+192.168.62.86 ceph2
+192.168.62.87 ceph3
 
+192.168.98.84 client1
+192.168.98.85 ceph1
+192.168.98.86 ceph2
+192.168.98.87 ceph3
+EOF
+```
 
-echo "192.168.80.131 ceph1" >> /etc/hosts
-echo "192.168.80.132 ceph2" >> /etc/hosts
-echo "192.168.80.133 ceph3" >> /etc/hosts
-echo "192.168.80.139 cephclient1" >> /etc/hosts
+- Cài đặt NTP
+
+```
+yum install -y chronyd
+
+systemctl enable chronyd.service
+systemctl start chronyd.service
+systemctl restart chronyd.service
+chronyc sources
 ```
 
 -  Khởi động lại
@@ -299,39 +328,6 @@ init 6
 ### 4.2. Cài gói bổ trợ và tạo tài khoản để cài đặt CEPH
 
 #### Lưu ý: Cài đặt gói cơ bản trên cả 03 node `ceph1, ceph2, ceph3`
-
-- Thực hiện update OS và cài các gói bổ trợ
-
-```sh
-yum update -y
-
-yum install epel-release -y
-
-yum install wget bybo curl git -y
-
-yum install python-setuptools -y
-
-yum install python-virtualenv -y
-
-yum update -y
-```
-
-- Cấu hình NTP
-
-```sh
-yum install chrony -y
-```
-
-- Khởi động chrony
-
-```
-systemctl enable chronyd.service
-systemctl start chronyd.service
-systemctl restart chronyd.service
-chronyc sources
-```
-
-- `Lưu ý:` trường hợp máy chủ tại Nhân Hòa thì cần khai báo IP về NTP server, liên hệ đội RD để được hướng dẫn.
 
 - Tạo user `cephuser` trên node `ceph1, ceph2, ceph3`. Mật khẩu của `cephuser` là `matkhau2019@`
 
@@ -354,34 +350,30 @@ chmod 0440 /etc/sudoers.d/cephuser
 - Khai báo repos cho CEPH 
 
 ```sh
-cat << EOF > /etc/yum.repos.d/ceph.repo
-[Ceph]
-name=Ceph packages for \$basearch
-baseurl=http://download.ceph.com/rpm-luminous/el7/\$basearch
+cat <<EOF> /etc/yum.repos.d/ceph.repo
+[ceph]
+name=Ceph packages for $basearch
+baseurl=https://download.ceph.com/rpm-nautilus/el7/x86_64/
 enabled=1
+priority=2
 gpgcheck=1
-type=rpm-md
 gpgkey=https://download.ceph.com/keys/release.asc
-priority=1
 
-
-[Ceph-noarch]
+[ceph-noarch]
 name=Ceph noarch packages
-baseurl=http://download.ceph.com/rpm-luminous/el7/noarch
+baseurl=https://download.ceph.com/rpm-nautilus/el7/noarch
 enabled=1
+priority=2
 gpgcheck=1
-type=rpm-md
 gpgkey=https://download.ceph.com/keys/release.asc
-priority=1
 
 [ceph-source]
 name=Ceph source packages
-baseurl=http://download.ceph.com/rpm-luminous/el7/SRPMS
-enabled=1
+baseurl=https://download.ceph.com/rpm-nautilus/el7/SRPMS
+enabled=0
+priority=2
 gpgcheck=1
-type=rpm-md
 gpgkey=https://download.ceph.com/keys/release.asc
-priority=1
 EOF
 ```
 
@@ -471,8 +463,8 @@ drwx------ 4 cephuser cephuser  116 Oct 16 23:16 ..
 - File `ceph.conf` sinh ra ở trên chứa các cấu hình cho cụm ceph cluster. Ta thực hiện thêm các khai báo dưới cho file `ceph.conf` này trước khi cài đặt các gói cần thiết cho ceph trên các node.
 	
 ```sh
-echo "public network = 192.168.82.0/24" >> ceph.conf
-echo "cluster network = 192.168.83.0/24" >> ceph.conf
+echo "public network = 192.168.62.0/24" >> ceph.conf
+echo "cluster network = 192.168.63.0/24" >> ceph.conf
 echo "osd objectstore = bluestore"  >> ceph.conf
 echo "mon_allow_pool_delete = true"  >> ceph.conf
 echo "osd pool default size = 3"  >> ceph.conf
@@ -491,7 +483,7 @@ ceph-deploy install --release luminous ceph1 ceph2 ceph3
 [ceph3][DEBUG ]
 [ceph3][DEBUG ] Complete!
 [ceph3][INFO  ] Running command: sudo ceph --version
-[ceph3][DEBUG ] ceph version 12.2.8 (ae699615bac534ea496ee965ac6192cb7e0e07c0) luminous (stable)
+[ceph3][DEBUG ] ceph version 14.2.7 (3d58626ebeec02d8385a4cefb92c6cbc3a45bfe8) nautilus (stable)
 ```
 
 -  Cấu hình MON 
@@ -503,18 +495,18 @@ ceph-deploy mon create-initial
 - Kết quả của lệnh trên sẽ sinh ra các file dưới, kiểm tra bằng lệnh `ls -alh`
 
 ```sh
-[cephuser@ceph1 my-cluster]$ ls -alh
-total 412K
-drwxrwxr-x 2 cephuser cephuser  244 Oct 16 23:47 .
-drwx------ 4 cephuser cephuser  116 Oct 16 23:16 ..
--rw------- 1 cephuser cephuser   71 Oct 16 23:47 ceph.bootstrap-mds.keyring
--rw------- 1 cephuser cephuser   71 Oct 16 23:47 ceph.bootstrap-mgr.keyring
--rw------- 1 cephuser cephuser   71 Oct 16 23:47 ceph.bootstrap-osd.keyring
--rw------- 1 cephuser cephuser   71 Oct 16 23:47 ceph.bootstrap-rgw.keyring
--rw------- 1 cephuser cephuser   63 Oct 16 23:47 ceph.client.admin.keyring
--rw-rw-r-- 1 cephuser cephuser  421 Oct 16 23:31 ceph.conf
--rw-rw-r-- 1 cephuser cephuser 191K Oct 16 23:47 ceph-deploy-ceph.log
--rw------- 1 cephuser cephuser   73 Oct 16 23:16 ceph.mon.keyring
+cephuser@ceph1:~/my-cluster$ ls -alh
+total 348K
+drwxrwxr-x 2 cephuser cephuser  244 Sep  6 23:26 .
+drwx------ 5 cephuser cephuser  151 Sep  6 23:14 ..
+-rw------- 1 cephuser cephuser  113 Sep  6 23:26 ceph.bootstrap-mds.keyring
+-rw------- 1 cephuser cephuser  113 Sep  6 23:26 ceph.bootstrap-mgr.keyring
+-rw------- 1 cephuser cephuser  113 Sep  6 23:26 ceph.bootstrap-osd.keyring
+-rw------- 1 cephuser cephuser  113 Sep  6 23:26 ceph.bootstrap-rgw.keyring
+-rw------- 1 cephuser cephuser  151 Sep  6 23:26 ceph.client.admin.keyring
+-rw-rw-r-- 1 cephuser cephuser  418 Sep  6 23:15 ceph.conf
+-rw-rw-r-- 1 cephuser cephuser 214K Sep  6 23:26 ceph-deploy-ceph.log
+-rw------- 1 cephuser cephuser   73 Sep  6 23:14 ceph.mon.keyring
 ````
 	
 - Thực hiện copy file `ceph.client.admin.keyring` sang các node trong cụm ceph cluster. File này sẽ được copy vào thư mục `/etc/ceph/`
@@ -569,32 +561,94 @@ ceph-deploy osd create --data /dev/sdd ceph3
 
 
 - Thực hiện trên node ceph1 để khai báo các node có vai trò manager, phục vụ việc quản trị ceph sau này.
+- Cài gói bổ trợ trước khi kích hoạt ceph dashboad
+
+```
+sudo yum install -y python-jwt python-routes
+```
+
+- Tải đúng bộ cài của ceph dashboard sao cho tương ứng với verison ceph (trong ví dụ này là Ceph nautilus 14.2.7)
+
+```
+sudo rpm -Uvh http://download.ceph.com/rpm-nautilus/el7/noarch/ceph-grafana-dashboards-14.2.7-0.el7.noarch.rpm
+
+sudo rpm -Uvh http://download.ceph.com/rpm-nautilus/el7/noarch/ceph-mgr-dashboard-14.2.7-0.el7.noarch.rpm
+```
+
+- Thực hiện kích hoạt ceph dashboard
 
 ```
 ceph-deploy mgr create ceph1 ceph2 ceph3
+
+ceph mgr module enable dashboard --force
+
+ceph mgr module ls 
 ```
 
-- Kích hoạt dashboad
-	
-```sh
-ceph mgr module enable dashboard
+- Kết quả ta sẽ thu được đoạn thông báo về các module được enable, trong đó có ceph dashboard
+
+```
+{
+    "enabled_modules": [
+        "dashboard",
+        "iostat",
+        "restful"
+    ],
+    "disabled_modules": []
+}
 ```
 
-- Kiểm tra trạng thái của ceph dashboad và port để truy cập.
+- Tạo cert cho ceph-dashboad
 
-```sh
-ceph mgr dump
+```
+sudo ceph dashboard create-self-signed-cert 
 ```
 
-- Kết quả: http://prntscr.com/l58wm7
+Kết quả trả về dòng Self-signed certificate created là thành công.
 
-- Truy cập vào địa chỉ IP với port mặc định là 7000 như ảnh: `http://ip_address_ceph1:7000`. 
+- Tạo tài khoản cho ceph-dashboard, trong hướng dẫn này tạo tài khoản tên là cephadmin và mật khẩu là `matkhau2019@`
 
-Ta sẽ có giao diện như link: 
+```
+ceph dashboard ac-user-create cephadmin matkhau2019@ administrator 
+```
 
-- http://prntscr.com/l5k7xj
-- http://prntscr.com/l6ryli
-- http://prntscr.com/l6ryzp
+- Kết quả trả về là
+
+```
+{"username": "cephadmin", "lastUpdate": 1567415960, "name": null, "roles": ["administrator"], "password": "$2b$12$QhFs2Yo9KTICIqT8v5xLC.kRCjzuLyXqyzBQVQ4MwQhDbSLKni6pC", "email": null}
+```
+
+- Kiểm tra xem ceph-dashboard đã được cài đặt thành công hay chưa
+
+```
+ceph mgr services 
+```
+
+- Kết quả trả về sẽ là dòng bên dưới.
+
+```
+{
+    "dashboard": "https://0.0.0.0:8443/"
+}
+```
+
+Trước khi tiến hành đăng nhập vào web, có thể kiểm tra trạng thái cluser bằng lệnh ceph -s . Ta sẽ có kết quả trạng thái là OK.
+
+Kết quả sẽ là địa chỉ truy cập ceph-dashboad, ta có thể vào bằng địa chỉ IP thay vì hostname, https://Dia_Chi_IP_CEPH1:8443
+
+Ta có một số màn hình đăng nhập
+
+![login](https://news.cloud365.vn/wp-content/uploads/2019/09/4-1024x730.png)
+
+![dashboard1](https://news.cloud365.vn/wp-content/uploads/2019/09/5-1024x513.png)
+
+![dashboard2](https://news.cloud365.vn/wp-content/uploads/2019/09/6-1024x542.png)
+
+![dashboard3](https://news.cloud365.vn/wp-content/uploads/2019/09/7-1024x469.png)
+
+![dashboard4](https://news.cloud365.vn/wp-content/uploads/2019/09/8-1024x334.png)
+
+![dashboard5](https://news.cloud365.vn/wp-content/uploads/2019/09/9-1024x541.png)
 
 #### 4.3.5 Kiểm tra lại hoạt động của CEPH
 
