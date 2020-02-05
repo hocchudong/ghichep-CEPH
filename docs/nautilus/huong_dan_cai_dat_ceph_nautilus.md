@@ -19,11 +19,11 @@
 
 ## 2. Mô Hình
 
-![topo_ceph3node.png](../images/ceph_nautilus_topo.png)
+![topo_ceph3node.png](.././images/ceph_nautilus_topo.png)
 
 ## 3. IP Planning
 
-![ip_planning_ceph03node.png](../images/ceph_nautilus_ip_planning.png)
+![ip_planning_ceph03node.png](.././images/ceph_nautilus_ip_planning.png)
 
 ## 4. Các bước cài đặt
 
